@@ -9,6 +9,7 @@ import { getStore } from "@/lib/store"
 export const revalidate = 3600
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/servicos/orcamento" },
   title: "Pedir orçamento de conserto",
   description:
     "Conte o aparelho e o problema. O pedido abre no WhatsApp com tudo preenchido e a gente responde com preço e prazo.",

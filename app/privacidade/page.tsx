@@ -7,6 +7,7 @@ import { getStore } from "@/lib/store"
 export const revalidate = 86400
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/privacidade" },
   title: "Privacidade",
   description: "Como a SmartPoint trata os dados de quem usa o site.",
 }

@@ -123,15 +123,17 @@ componente sem uso.)
 
 ## Etapa 7 — SEO, performance e analytics
 
-- [ ] `metadata` por rota, canonical, Open Graph e Twitter Card (ícone e og:image vindos da marca)
-- [ ] JSON-LD: `LocalBusiness`, `Product` + `Offer`, `Service`, `BreadcrumbList`
-- [ ] `sitemap.xml` e `robots.txt` gerados do catálogo publicado
-- [ ] Imagens otimizadas (`next/image`, `sizes`, `priority` só no LCP)
-- [ ] Vercel Analytics ligado
-- [ ] Lighthouse ≥ 95 em Performance, SEO e Acessibilidade (mobile)
-- [ ] Orçamento de peso respeitado (< 250 KB de JS na home)
+- [x] `metadata` por rota com canonical, Open Graph e Twitter Card; ícone e og:image da marca
+- [x] JSON-LD: `MobilePhoneStore` (home e contato), `Product` + `Offer`, `Service`, `BreadcrumbList`
+- [x] `sitemap.xml` (inclui cada produto publicado) e `robots.txt` (bloqueia `/styleguide`)
+- [x] Imagens pelo `next/image` com `sizes`; `priority` só na foto do produto (LCP)
+- [x] Vercel Analytics + evento `orcamento_whatsapp`
+- [x] Orçamento de peso: **182–184 KB de JS (gzip)** em todas as páginas
+- [x] Zod saiu do cliente: a validação do orçamento virou função própria testada (−89 KB)
+- [ ] Lighthouse ≥ 95 (mobile) — falta rodar em navegador
 
 **Pronto quando:** as metas de Lighthouse e de peso passam em `/`, `/produtos` e `/produtos/[slug]`.
+Peso ✅ · Lighthouse pendente (precisa de navegador).
 
 ---
 

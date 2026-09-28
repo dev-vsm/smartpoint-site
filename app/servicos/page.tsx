@@ -3,16 +3,19 @@ import Link from "next/link"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
+import { JsonLd } from "@/components/seo/json-ld"
 import { ButtonLink } from "@/components/ui/button"
 import { Container, SectionHeading } from "@/components/ui/section"
 import { ServiceRow } from "@/components/ui/service-row"
+import { serviceJsonLd } from "@/lib/seo"
 import { listServices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: "Consertos de celular em Uberlândia — tela, bateria e mais",
+  title: "Consertos de celular em Uberlândia",
+  alternates: { canonical: "/servicos" },
   description:
     "Troca de tela, bateria, dock de carga, tampa traseira e botões. Orçamento pelo WhatsApp, no quiosque da Av. João Pinheiro.",
 }
@@ -22,6 +25,7 @@ export default async function ServicesPage() {
 
   return (
     <>
+      <JsonLd data={serviceJsonLd(services, store)} />
       <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
       <main className="py-8">
         <Container>

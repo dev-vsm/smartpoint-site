@@ -227,8 +227,10 @@ na página de produto a mensagem já vem com nome e link do produto; em serviço
 escolhido. Sem biblioteca: é só uma URL.
 
 **Orçamento** — não há envio pelo servidor. O formulário coleta aparelho, problema e
-observações, valida com Zod **no cliente** e monta a mensagem que abre no WhatsApp Business
-já preenchida. Sem route handler, sem e-mail, sem chave de API.
+observações, valida **no cliente** (`lib/quote-validation.ts`) e monta a mensagem que abre no
+WhatsApp Business já preenchida. Sem route handler, sem e-mail, sem chave de API. A validação
+é função própria, não biblioteca de schema: o Zod custava 89 KB no navegador para checar
+quatro campos e estourava o orçamento de peso da página.
 
 **Mapa** — iframe do Google Maps carregado de forma preguiçosa (`loading="lazy"`), sem SDK.
 
@@ -277,6 +279,7 @@ O que já está definido:
 - Nenhuma escrita pública no Firestore; regras de segurança permanecem como estão.
 - Formulário validado no cliente; como nada é enviado ao servidor, não há superfície de
   abuso (sem spam, sem rate limit a manter).
+- JSON-LD escapa `<` como `\u003c`: texto vindo do banco não pode fechar o `<script>`.
 - Sem cookies de rastreamento na v1 (Vercel Analytics não usa) → sem banner de consentimento.
 - Política de privacidade simples no rodapé, explicando o uso dos dados do formulário.
 

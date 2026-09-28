@@ -8,6 +8,7 @@ import { getStore } from "@/lib/store"
 export const revalidate = 3600
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/sobre" },
   title: "A loja — SmartPoint em Uberlândia",
   description:
     "Quiosque de acessórios e assistência para celular na Av. João Pinheiro, em Uberlândia. Atendimento rápido, no balcão e pelo WhatsApp.",

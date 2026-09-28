@@ -2,18 +2,11 @@
 
 import { track } from "@vercel/analytics"
 import { useState } from "react"
-import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Field, Input, Select, Textarea } from "@/components/ui/field"
 import { quoteMessage } from "@/lib/messages"
+import { type QuoteErrors, validateQuote } from "@/lib/quote-validation"
 import { buildWhatsAppUrl } from "@/lib/whatsapp"
-
-const schema = z.object({
-  device: z.string().trim().min(2, "Diga a marca e o modelo do aparelho."),
-  service: z.string().trim().min(2, "Escolha o que precisa."),
-  problem: z.string().trim().max(600).optional(),
-  name: z.string().trim().max(80).optional(),
-})
 
 /**
  * Orçamento sem backend (decisão D7): o formulário organiza o que o atendimento
@@ -21,31 +14,23 @@ const schema = z.object({
  * gravado — o histórico é a conversa.
  */
 export function QuoteForm({ services, whatsapp }: { services: string[]; whatsapp: string }) {
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<QuoteErrors>({})
 
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
-    const parsed = schema.safeParse({
+    const { data, errors: found } = validateQuote({
       device: form.get("device"),
       service: form.get("service"),
       problem: form.get("problem"),
       name: form.get("name"),
     })
 
-    if (!parsed.success) {
-      const found: Record<string, string> = {}
-      for (const issue of parsed.error.issues) {
-        const field = String(issue.path[0])
-        found[field] ??= issue.message
-      }
-      setErrors(found)
-      return
-    }
+    setErrors(found)
+    if (!data) return
 
-    setErrors({})
-    track("orcamento_whatsapp", { servico: parsed.data.service })
-    window.open(buildWhatsAppUrl(whatsapp, quoteMessage(parsed.data)), "_blank", "noopener")
+    track("orcamento_whatsapp", { servico: data.service })
+    window.open(buildWhatsAppUrl(whatsapp, quoteMessage(data)), "_blank", "noopener")
   }
 
   return (

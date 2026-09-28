@@ -2,13 +2,16 @@ import type { Metadata } from "next"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
+import { JsonLd } from "@/components/seo/json-ld"
 import { Container, SectionHeading } from "@/components/ui/section"
+import { localBusinessJsonLd } from "@/lib/seo"
 import { getStore } from "@/lib/store"
 
 export const revalidate = 3600
 
 export const metadata: Metadata = {
-  title: "Onde estamos — SmartPoint",
+  title: "Onde estamos",
+  alternates: { canonical: "/contato" },
   description:
     "Endereço, horário e contato do quiosque SmartPoint, na Av. João Pinheiro, em Uberlândia.",
 }
@@ -18,6 +21,7 @@ export default async function ContactPage() {
 
   return (
     <>
+      <JsonLd data={localBusinessJsonLd(store)} />
       <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
       <main className="py-8">
         <Container>

@@ -5,9 +5,11 @@ import { ProductDetail } from "@/components/catalog/product-detail"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
+import { JsonLd } from "@/components/seo/json-ld"
 import { ProductCard } from "@/components/ui/product-card"
 import { Container, SectionHeading } from "@/components/ui/section"
 import { getProductBySlug, listProducts, listRelated, listVariants } from "@/lib/catalog"
+import { absolute, breadcrumbJsonLd, productJsonLd } from "@/lib/seo"
 import { getStore } from "@/lib/store"
 
 export const revalidate = 300
@@ -44,10 +46,15 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
     listVariants(product.id),
     listRelated(product),
   ])
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? ""
-
   return (
     <>
+      <JsonLd data={productJsonLd(product, store)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Produtos", path: "/produtos" },
+          { name: product.name, path: `/produtos/${product.slug}` },
+        ])}
+      />
       <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
       <main className="py-8">
         <Container>
@@ -62,7 +69,7 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
             product={product}
             variants={variants}
             whatsapp={store.whatsapp}
-            url={`${siteUrl}/produtos/${product.slug}`}
+            url={absolute(`/produtos/${product.slug}`)}
           />
 
           {related.length > 0 && (

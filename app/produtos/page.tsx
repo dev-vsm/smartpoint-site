@@ -10,6 +10,7 @@ import { getStore } from "@/lib/store"
 export const revalidate = 300
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/produtos" },
   title: "Produtos — capinhas, películas, fones e carregadores",
   description:
     "O que tem no quiosque hoje, com preço na etiqueta. Escolha e fale com a gente pelo WhatsApp.",
