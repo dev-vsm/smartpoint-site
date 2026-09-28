@@ -97,26 +97,27 @@ componente sem uso.)
 
 ## Etapa 5 — Serviços e orçamento (WhatsApp)
 
-- [ ] `/servicos` — os cinco reparos, cada um com CTA de WhatsApp e "preço a combinar"
-- [ ] `/servicos/orcamento` — formulário: aparelho, reparo, descrição do problema, nome
-- [ ] Validação com Zod **no cliente** (nada é enviado ao servidor)
-- [ ] `buildQuoteMessage` — monta a mensagem formatada e testada
-- [ ] Botão abre `wa.me` em nova aba com a mensagem pronta
-- [ ] Evento de clique no analytics (é a única métrica de orçamento que teremos)
-- [ ] Testes do montador de mensagem (acentos, quebras de linha, campos vazios)
+- [x] `/servicos` — os cinco reparos, cada um com CTA e "preço na conversa"
+- [x] `/servicos/orcamento` — formulário: aparelho, reparo, problema e nome
+- [x] Validação com Zod **no cliente** (nada é enviado ao servidor)
+- [x] `quoteMessage` / `productMessage` — mensagens formatadas e testadas
+- [x] Botão abre `wa.me` em nova aba com a mensagem pronta
+- [x] Evento `orcamento_whatsapp` no Vercel Analytics
+- [x] Testes das mensagens (acentos, quebras de linha, campos vazios)
+- [x] Serviços vindos de `siteContent/services`, com a lista da loja como padrão
 
-**Pronto quando:** preencher o formulário abre o WhatsApp Business com a mensagem completa.
+**Pronto quando:** preencher o formulário abre o WhatsApp Business com a mensagem completa. ✅
 
 ---
 
 ## Etapa 6 — Institucional
 
-- [ ] `/sobre` — história, diferenciais, equipe
-- [ ] `/contato` — endereço, mapa preguiçoso, horário e canais, tudo vindo de `settings/store`
-- [ ] Política de privacidade no rodapé
-- [ ] Páginas 404 e 500 com identidade do site
+- [x] `/sobre` — usa `store.about`, com texto padrão enquanto não for cadastrado
+- [x] `/contato` — endereço, horário, mapa preguiçoso e canais, tudo de `settings/store`
+- [x] `/privacidade` — sem cookie, sem envio, sem armazenamento (é o que o site faz)
+- [x] 404 e boundary de erro com a identidade do site
 
-**Pronto quando:** todo link do cabeçalho e do rodapé leva a uma página pronta.
+**Pronto quando:** todo link do cabeçalho e do rodapé leva a uma página pronta. ✅
 
 ---
 
