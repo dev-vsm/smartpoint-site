@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/*
+ * Tokens do tema (Tailwind 4 lê daqui).
+ * A cor da marca tem um padrão aqui e é sobrescrita em tempo de execução pelo
+ * valor de `settings/store.brand.color` (ver app/layout.tsx) — trocar a marca
+ * não exige deploy.
+ */
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-border: #e2e8f0;
+
+  --color-brand: #2563eb;
+  --color-brand-foreground: #ffffff;
+  --color-brand-soft: #eff6ff;
+
+  /* Verde reservado aos CTAs de conversão (falar com a loja). */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-foreground: #052e16;
+
+  --color-price: #0f172a;
+  --color-danger: #dc2626;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  /* Foco sempre visível: acessibilidade é requisito, não enfeite. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
