@@ -6,7 +6,7 @@ import { WhatsAppCta, WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ButtonLink } from "@/components/ui/button"
 import { Container } from "@/components/ui/section"
-import { ServiceRow } from "@/components/ui/service-row"
+import { ServiceCard } from "@/components/ui/service-card"
 import { serviceJsonLd } from "@/lib/seo"
 import { listServices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
@@ -116,9 +116,9 @@ export default async function ServicesPage() {
               Os reparos do dia a dia. Se o seu não está na lista, pergunte — a maioria a gente
               resolve.
             </p>
-            <ul className="mt-5 rounded-md bg-paper px-5 ring-1 ring-line">
+            <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {services.map((service) => (
-                <ServiceRow key={service.title} service={service} whatsapp={store.whatsapp} />
+                <ServiceCard key={service.title} service={service} whatsapp={store.whatsapp} />
               ))}
             </ul>
           </Container>

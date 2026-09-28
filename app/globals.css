@@ -71,6 +71,17 @@
     font-variant-numeric: tabular-nums;
     padding: 0.25rem 0.5rem 0.25rem 0.625rem;
     clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0.5rem 50%);
+    border-start-end-radius: var(--radius-sm);
+    border-end-end-radius: var(--radius-sm);
+  }
+
+  /* Etiqueta presa na borda direita: o chanfro aponta para dentro da foto. */
+  .price-tag--right {
+    padding: 0.25rem 0.625rem 0.25rem 0.5rem;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 0.5rem) 50%, 100% 100%, 0 100%);
+    border-radius: 0;
+    border-start-start-radius: var(--radius-sm);
+    border-end-start-radius: var(--radius-sm);
   }
 }
 

@@ -32,7 +32,7 @@ export function Header({
           <Brand name={storeName} logoUrl={logoUrl} />
         </Link>
 
-        <nav aria-label="Principal" className="hidden gap-6 md:flex">
+        <nav aria-label="Principal" className="hidden shrink-0 gap-5 lg:flex">
           {LINKS.map((link) => (
             <Link
               key={link.href}
@@ -44,8 +44,13 @@ export function Header({
           ))}
         </nav>
 
-        <div className="hidden md:block">
-          <WhatsAppCta number={whatsapp} label="Chamar no WhatsApp" />
+        {/* A busca mora no cabeçalho: funciona de qualquer página. */}
+        <Suspense fallback={null}>
+          <SearchField className="hidden w-full max-w-sm md:block" />
+        </Suspense>
+
+        <div className="hidden shrink-0 md:block">
+          <WhatsAppCta number={whatsapp} label="WhatsApp" />
         </div>
 
         <button

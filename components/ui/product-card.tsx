@@ -40,7 +40,8 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           cents={product.priceFromCents}
           from={product.hasVariants}
           size="sm"
-          className="absolute bottom-2 left-0"
+          align="right"
+          className="absolute bottom-2 right-0"
         />
       </div>
       <div className="p-3">

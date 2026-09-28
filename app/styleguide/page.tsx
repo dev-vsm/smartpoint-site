@@ -7,7 +7,7 @@ import { Field, Input, Select, Textarea } from "@/components/ui/field"
 import { PriceTag } from "@/components/ui/price-tag"
 import { ProductCard } from "@/components/ui/product-card"
 import { Container, SectionHeading } from "@/components/ui/section"
-import { ServiceRow } from "@/components/ui/service-row"
+import { ServiceCard } from "@/components/ui/service-card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // Página de referência do design system. Fora do índice: é ferramenta de trabalho.
@@ -111,6 +111,7 @@ export default function Styleguide() {
               <PriceTag cents={3500} size="sm" />
               <PriceTag cents={7990} />
               <PriceTag cents={12900} from size="lg" />
+              <PriceTag cents={4990} align="right" />
             </div>
           </section>
 
@@ -139,10 +140,10 @@ export default function Styleguide() {
           </section>
 
           <section>
-            <SectionHeading title="Consertos" description="Lista de quadro, não card." />
-            <ul className="rounded-md bg-paper px-5 ring-1 ring-line">
+            <SectionHeading title="Consertos" description="Um card por reparo." />
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {SERVICES.map((service) => (
-                <ServiceRow key={service.title} service={service} whatsapp={WHATSAPP} />
+                <ServiceCard key={service.title} service={service} whatsapp={WHATSAPP} />
               ))}
             </ul>
           </section>
