@@ -1,8 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { Brand } from "@/components/layout/brand"
+import { SearchField } from "@/components/layout/search-field"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { cn } from "@/lib/utils"
 
@@ -69,6 +70,12 @@ export function Header({
             ))}
           </span>
         </button>
+      </div>
+
+      <div className="border-t border-line px-4 py-2 md:hidden">
+        <Suspense fallback={null}>
+          <SearchField />
+        </Suspense>
       </div>
 
       {open && (

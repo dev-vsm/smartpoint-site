@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { CatalogBrowser } from "@/components/catalog/catalog-browser"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
@@ -37,7 +38,9 @@ export default async function ProductsPage() {
               A vitrine está sendo montada. Enquanto isso, fale com a gente pelo WhatsApp.
             </p>
           ) : (
-            <CatalogBrowser products={products} categories={categories} />
+            <Suspense fallback={null}>
+              <CatalogBrowser products={products} categories={categories} />
+            </Suspense>
           )}
         </Container>
       </main>

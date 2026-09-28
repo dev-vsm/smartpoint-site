@@ -1,8 +1,8 @@
 "use client"
 
+import { useRouter, useSearchParams } from "next/navigation"
 import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/field"
 import { ProductCard } from "@/components/ui/product-card"
 import type { SiteProduct } from "@/lib/catalog-rules"
 import { cn } from "@/lib/utils"
@@ -18,7 +18,10 @@ export function CatalogBrowser({
   products: SiteProduct[]
   categories: Array<{ name: string; count: number }>
 }) {
-  const [query, setQuery] = useState("")
+  const router = useRouter()
+  const params = useSearchParams()
+  // A busca vem do cabeçalho pela URL; a categoria é filtro local da vitrine.
+  const query = params.get("q") ?? ""
   const [category, setCategory] = useState<string | null>(null)
 
   const visible = useMemo(() => {
@@ -36,13 +39,11 @@ export function CatalogBrowser({
   return (
     <div>
       <div className="mb-5 space-y-3">
-        <Input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Buscar capinha, película, fone…"
-          aria-label="Buscar no catálogo"
-        />
+        {query && (
+          <p className="text-sm text-ink-soft">
+            Resultados para <strong className="text-ink">{query}</strong>
+          </p>
+        )}
 
         {categories.length > 0 && (
           <div className="flex flex-wrap gap-2">
@@ -70,8 +71,8 @@ export function CatalogBrowser({
             variant="outline"
             className="mt-3"
             onClick={() => {
-              setQuery("")
               setCategory(null)
+              router.push("/produtos")
             }}
           >
             Limpar busca
