@@ -50,6 +50,14 @@ export function isPublished(product: RawProduct): boolean {
   return product.isActive !== false && product.site?.published === true
 }
 
+/**
+ * Sem preço positivo não há vitrine: o site mostra preço (decisão D5), e
+ * "R$ 0,00" quebra a confiança mais do que a ausência do produto.
+ */
+export function hasPrice(product: SiteProduct): boolean {
+  return product.priceFromCents > 0
+}
+
 export function slugify(value: string): string {
   return value
     .normalize("NFD")
@@ -73,8 +81,12 @@ export function productSlug(product: RawProduct): string {
 
 export function toSiteProduct(product: RawProduct): SiteProduct {
   const images = (product.images ?? []).filter(Boolean)
-  const min = product.priceRange?.min ?? 0
-  const max = product.priceRange?.max ?? min
+  // Preço zero é lixo de cadastro, não promoção: a vitrine ignora e usa o maior
+  // preço válido. Produto sem nenhum preço positivo não entra (ver `hasPrice`).
+  const rawMin = product.priceRange?.min ?? 0
+  const rawMax = product.priceRange?.max ?? rawMin
+  const min = rawMin > 0 ? rawMin : rawMax
+  const max = rawMax > 0 ? rawMax : min
   return {
     id: product.id,
     slug: productSlug(product),

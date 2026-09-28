@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   collectCategories,
+  hasPrice,
   isPublished,
   productSlug,
   slugify,
@@ -47,6 +48,17 @@ describe("produto da vitrine", () => {
   it("marca 'a partir de' só quando o preço varia", () => {
     expect(toSiteProduct(raw()).hasVariants).toBe(true)
     expect(toSiteProduct(raw({ priceRange: { min: 3500, max: 3500 } })).hasVariants).toBe(false)
+  })
+
+  it("ignora preço zero e usa o maior preço válido", () => {
+    const product = toSiteProduct(raw({ priceRange: { min: 0, max: 3490 } }))
+    expect(product.priceFromCents).toBe(3490)
+    expect(product.hasVariants).toBe(false)
+    expect(hasPrice(product)).toBe(true)
+  })
+
+  it("produto sem preço nenhum fica fora da vitrine", () => {
+    expect(hasPrice(toSiteProduct(raw({ priceRange: { min: 0, max: 0 } })))).toBe(false)
   })
 
   it("sem estoque continua visível, mas marcado como indisponível", () => {

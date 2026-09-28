@@ -82,14 +82,16 @@ componente sem uso.)
 
 ## Etapa 4 — Páginas da vitrine
 
-- [ ] `/` — hero, destaques, categorias, resumo de serviços, prova social, CTA
-- [ ] `/produtos` — listagem, busca e filtros (categoria, marca, faixa de preço)
-- [ ] `/produtos/[slug]` — galeria, preço, variações, descrição, relacionados
-- [ ] Botão "Chamar no WhatsApp" com mensagem contextual em produto e serviço
-- [ ] Estados vazios e de erro (sem produto, busca sem resultado)
-- [ ] `generateStaticParams` para os produtos publicados
+- [x] `/produtos` — listagem com busca e filtro por categoria (client-side, catálogo já no HTML)
+- [x] `/produtos/[slug]` — galeria com miniaturas, etiqueta, variações, descrição e relacionados
+- [x] Mensagem contextual no WhatsApp (nome, variação, preço e link) — `lib/messages.ts` com testes
+- [x] Estados vazios: vitrine sendo montada, busca sem resultado, produto sem foto/estoque
+- [x] `generateStaticParams` — cada produto publicado vira página estática
+- [x] Regra nova descoberta no dado real: preço zero não entra na vitrine
+- [ ] `/` — hero, categorias e resumo de serviços (hoje só os destaques)
 
-**Pronto quando:** dá para navegar da home ao WhatsApp passando por um produto real.
+**Pronto quando:** dá para navegar da home ao WhatsApp passando por um produto real. ✅
+(a home ganha hero e seções quando o `siteContent` existir — Etapa 8 no admin)
 
 ---
 

@@ -1,6 +1,7 @@
 import "server-only"
 import {
   collectCategories,
+  hasPrice,
   isPublished,
   type RawProduct,
   type SiteProduct,
@@ -32,6 +33,7 @@ export async function listProducts(): Promise<SiteProduct[]> {
     .map((doc) => ({ id: doc.id, ...doc.data() }) as RawProduct)
     .filter(isPublished)
     .map(toSiteProduct)
+    .filter(hasPrice)
 
   return sortForShowcase(products)
 }
@@ -58,18 +60,21 @@ export async function listVariants(productId: string): Promise<ProductVariant[]>
   if (!db) return []
 
   const snapshot = await db.collection("productVariants").where("productId", "==", productId).get()
-  return snapshot.docs
-    .map((doc) => ({ id: doc.id, ...doc.data() }) as Record<string, unknown> & { id: string })
-    .filter((variant) => variant.isActive !== false)
-    .map((variant) => ({
-      id: variant.id,
-      sku: variant.sku as string | undefined,
-      attributes: (variant.attributes as Record<string, string>) ?? {},
-      priceCents: Number(variant.price ?? 0),
-      stock: Number(variant.stock ?? 0),
-      images: ((variant.images as string[]) ?? []).filter(Boolean),
-    }))
-    .sort((a, b) => a.priceCents - b.priceCents)
+  return (
+    snapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }) as Record<string, unknown> & { id: string })
+      // Variação sem preço não é oferecida: não dá para vender "R$ 0,00".
+      .filter((variant) => variant.isActive !== false && Number(variant.price ?? 0) > 0)
+      .map((variant) => ({
+        id: variant.id,
+        sku: variant.sku as string | undefined,
+        attributes: (variant.attributes as Record<string, string>) ?? {},
+        priceCents: Number(variant.price ?? 0),
+        stock: Number(variant.stock ?? 0),
+        images: ((variant.images as string[]) ?? []).filter(Boolean),
+      }))
+      .sort((a, b) => a.priceCents - b.priceCents)
+  )
 }
 
 /** Relacionados: mesma categoria, sem repetir o próprio produto. */
