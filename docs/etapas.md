@@ -47,16 +47,20 @@ desenvolvimento (há fallback em texto), mas travam o lançamento.
 
 ## Etapa 2 — Design system
 
-- [ ] Paleta, tipografia e escala de espaçamento definidas a partir das referências
-- [ ] Tokens no `globals.css` e mapeados no `tailwind.config.ts`
-- [ ] Fontes via `next/font` (self-hosted)
-- [ ] Componentes base: botão, card, badge, input, select, dialog, accordion, breadcrumb, skeleton
-- [ ] Componente `Brand` — logo do banco com fallback em texto (usado no cabeçalho e rodapé)
-- [ ] Cabeçalho (com menu mobile) e rodapé
-- [ ] Página de referência `/styleguide` (não indexada) com todos os componentes
-- [ ] Checagem de contraste AA e foco visível
+- [x] Paleta definida: `ink`, `ink-soft`, `shelf`, `line`, `tag`, `zap` — conceito "quiosque"
+- [x] Tokens no `@theme` do `app/globals.css` (Tailwind 4 é CSS-first, sem `tailwind.config.ts`)
+- [x] Tipografia: **Archivo** variável via `next/font`, uma família em dois extremos de largura
+- [x] Componentes base: botão/link, etiqueta de preço, card de produto, campos, skeleton, seção
+- [x] `Brand` — logo do banco com fallback em texto
+- [x] Cabeçalho com menu mobile e rodapé (endereço, horário, Instagram, CNPJ)
+- [x] CTA de WhatsApp (inline e flutuante) com mensagem contextual
+- [x] `/styleguide` com tudo junto, fora do índice (`robots: noindex`)
+- [x] Foco visível, `prefers-reduced-motion` respeitado, alvos de toque ≥ 44px
+- [ ] Conferir contraste AA no navegador (falta rodar)
 
-**Pronto quando:** o styleguide cobre todo componente usado nas páginas da v1.
+**Pronto quando:** o styleguide cobre todo componente usado nas páginas da v1. ✅
+(dialog, accordion e breadcrumb entram quando uma página precisar — não se inventa
+componente sem uso.)
 
 ---
 

@@ -1,59 +1,84 @@
 @import "tailwindcss";
 
 /*
- * Tokens do tema (Tailwind 4 lê daqui).
- * A cor da marca tem um padrão aqui e é sobrescrita em tempo de execução pelo
- * valor de `settings/store.brand.color` (ver app/layout.tsx) — trocar a marca
- * não exige deploy.
+ * Tokens do tema — ver docs/design-doc.md §10.
+ * Conceito: o quiosque. Azul-noite do vidro do celular, cinza-alumínio do balcão,
+ * laranja de etiqueta para preço e o verde do WhatsApp reservado a UMA coisa:
+ * falar com a loja agora.
+ * A cor da marca é sobrescrita em runtime por `settings/store.brand.color`.
  */
 @theme {
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-border: #e2e8f0;
+  --color-ink: #0e1b2a;
+  --color-ink-soft: #46566a;
+  --color-paper: #ffffff;
+  --color-shelf: #eef1f4;
+  --color-line: #d7dde3;
 
-  --color-brand: #2563eb;
-  --color-brand-foreground: #ffffff;
-  --color-brand-soft: #eff6ff;
+  --color-tag: #ff5a1f;
+  --color-tag-ink: #ffffff;
+  --color-tag-soft: #fff1ea;
 
-  /* Verde reservado aos CTAs de conversão (falar com a loja). */
-  --color-whatsapp: #25d366;
-  --color-whatsapp-foreground: #052e16;
+  --color-zap: #25d366;
+  --color-zap-ink: #04301a;
 
-  --color-price: #0f172a;
-  --color-danger: #dc2626;
+  --color-brand: var(--color-ink);
 
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-outfit), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--color-shelf);
+    color: var(--color-ink);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
-  h1,
-  h2,
-  h3 {
-    font-family: var(--font-display);
-    text-wrap: balance;
+  :focus-visible {
+    outline: 2px solid var(--color-tag);
+    outline-offset: 2px;
   }
 
-  /* Foco sempre visível: acessibilidade é requisito, não enfeite. */
-  :focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: 2px;
+  /* Uma família só, usada nos dois extremos do eixo de largura. */
+  h1,
+  h2,
+  h3,
+  .display {
+    font-stretch: 112%;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  /*
+   * A etiqueta de preço é o elemento mais gráfico do site: chanfro no canto,
+   * como as de papel presas no produto. É aqui que gastamos a ousadia.
+   */
+  .price-tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.125rem;
+    background-color: var(--color-tag);
+    color: var(--color-tag-ink);
+    font-stretch: 112%;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 0.25rem 0.5rem 0.25rem 0.625rem;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0.5rem 50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -1,22 +1,26 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
-import { Inter, Outfit } from "next/font/google"
+import { Archivo } from "next/font/google"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" })
+// Uma família, eixo de largura variável: 400 no texto, 700 expandido nos títulos
+// e nos preços — o letreiro da vitrine e a etiqueta saem da mesma fonte.
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+})
 
-// Metadata definitiva (título, ícone e og:image vindos da marca no banco) entra
-// na Etapa 7; aqui fica o mínimo para o site não subir sem identificação.
 export const metadata: Metadata = {
-  title: "SmartPoint — Acessórios e assistência técnica em Uberlândia",
+  title: "SmartPoint — Acessórios e assistência para celular em Uberlândia",
   description:
-    "Capinhas, películas e acessórios para celular, e assistência técnica com troca de tela, bateria e mais. Atendimento pelo WhatsApp.",
+    "Capinhas, películas, fones e carregadores com preço na etiqueta. Troca de tela, bateria e mais, no quiosque da Av. João Pinheiro. Fale pelo WhatsApp.",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${outfit.variable}`}>
+    <html lang="pt-BR" className={archivo.variable}>
       <body>
         {children}
         <Analytics />
