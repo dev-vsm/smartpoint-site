@@ -41,7 +41,7 @@ export default async function ProductsPage() {
             </p>
           ) : (
             <Suspense fallback={null}>
-              <CatalogBrowser products={products} />
+              <CatalogBrowser products={products} whatsapp={store.whatsapp} />
             </Suspense>
           )}
         </Container>

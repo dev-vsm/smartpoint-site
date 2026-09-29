@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
               <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {related.map((item) => (
                   <li key={item.id}>
-                    <ProductCard product={item} />
+                    <ProductCard product={item} whatsapp={store.whatsapp} />
                   </li>
                 ))}
               </ul>

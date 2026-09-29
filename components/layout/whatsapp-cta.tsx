@@ -10,11 +10,14 @@ export function WhatsAppCta({
   number,
   message,
   label = "Falar no WhatsApp",
+  ariaLabel,
   className,
 }: {
   number: string
   message?: string
   label?: string
+  /** Quando o rótulo se repete na página (um por card), diga de qual produto é. */
+  ariaLabel?: string
   className?: string
 }) {
   return (
@@ -23,6 +26,7 @@ export function WhatsAppCta({
       href={buildWhatsAppUrl(number, message)}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={ariaLabel}
       className={cn("w-full sm:w-auto", className)}
     >
       <WhatsAppIcon />

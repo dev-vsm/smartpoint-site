@@ -10,7 +10,13 @@ import type { SiteProduct } from "@/lib/catalog-rules"
  * Vitrine com busca e filtro. O catálogo inteiro já vem renderizado do servidor
  * (é pequeno), então filtrar é instantâneo e não gera requisição nenhuma.
  */
-export function CatalogBrowser({ products }: { products: SiteProduct[] }) {
+export function CatalogBrowser({
+  products,
+  whatsapp,
+}: {
+  products: SiteProduct[]
+  whatsapp: string
+}) {
   const router = useRouter()
   const params = useSearchParams()
   // Busca e categoria vêm do cabeçalho e vivem na URL compartilhável.
@@ -51,7 +57,7 @@ export function CatalogBrowser({ products }: { products: SiteProduct[] }) {
         <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {visible.map((product) => (
             <li key={product.id}>
-              <ProductCard product={product} />
+              <ProductCard product={product} whatsapp={whatsapp} />
             </li>
           ))}
         </ul>

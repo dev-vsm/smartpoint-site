@@ -33,7 +33,7 @@ export default async function Home() {
             <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               {highlights.map((product) => (
                 <li key={product.id}>
-                  <ProductCard product={product} />
+                  <ProductCard product={product} whatsapp={store.whatsapp} />
                 </li>
               ))}
             </ul>

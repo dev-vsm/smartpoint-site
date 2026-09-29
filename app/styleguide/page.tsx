@@ -128,7 +128,7 @@ export default function Styleguide() {
             <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               {PRODUCTS.map((product) => (
                 <li key={product.slug}>
-                  <ProductCard product={product} />
+                  <ProductCard product={product} whatsapp={WHATSAPP} />
                 </li>
               ))}
             </ul>
