@@ -107,25 +107,3 @@ export function breadcrumbJsonLd(items: Array<{ name: string; path: string }>) {
     })),
   }
 }
-
-export function serviceJsonLd(
-  services: Array<{ title: string; description?: string }>,
-  store: SiteStore,
-) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: `Consertos de celular — ${store.name}`,
-    itemListElement: services.map((service, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      item: {
-        "@type": "Service",
-        name: service.title,
-        ...(service.description ? { description: service.description } : {}),
-        areaServed: store.cityLine || "Uberlândia, MG",
-        provider: { "@type": "Organization", name: store.name },
-      },
-    })),
-  }
-}

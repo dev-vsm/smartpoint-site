@@ -20,7 +20,7 @@ const archivo = Archivo({
  */
 export async function generateMetadata(): Promise<Metadata> {
   const store = await getStore()
-  const title = `${store.name} — Acessórios e assistência para celular em Uberlândia`
+  const title = `${store.name} — Acessórios para celular em Uberlândia`
   const description =
     "Capinhas, películas, fones e carregadores com preço na etiqueta. Troca de tela, bateria e mais, no quiosque da Av. João Pinheiro. Fale pelo WhatsApp."
 

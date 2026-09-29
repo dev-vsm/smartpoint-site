@@ -27,7 +27,7 @@ export function Brand({
     )
   }
   return (
-    <span className={cn("display text-xl", className)}>
+    <span className={cn("display text-xl text-brand-strong", className)}>
       {name}
       <span className="text-tag">.</span>
     </span>

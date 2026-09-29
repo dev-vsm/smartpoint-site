@@ -1,7 +1,10 @@
 # SmartPoint — Site institucional e vitrine
 
-**Documento de design** · v1 · 28/09/2026
+**Documento de design** · v1.1 · 29/09/2026
 Status: **aprovado nas decisões, pendente de dados** (ver §14)
+
+> **v1.1 — os consertos saíram deste site** (D14). A assistência técnica ganha um site
+> próprio; aqui fica só a vitrine de acessórios. Os trechos afetados estão marcados.
 
 ---
 
@@ -16,15 +19,15 @@ cliente, nem para ser encontrado por quem procura "película iPhone 15" ou "troc
 na cidade.
 
 **Objetivo do site:** ser a vitrine e o cartão de visitas da loja — mostrar o que se vende e
-o que se conserta, e levar o visitante ao WhatsApp ou ao pedido de orçamento com o mínimo de
-atrito. **Não é uma loja online**: não há carrinho nem pagamento nesta versão.
+levar o visitante ao WhatsApp com o mínimo de atrito. **Não é uma loja online**: não há
+carrinho nem pagamento nesta versão. **A assistência técnica não vive aqui** (D14): ela terá
+site próprio, com o SEO e a conversa de venda dela.
 
 ## 2. Métricas de sucesso
 
 | Métrica | Alvo na v1 |
 |---|---|
 | Cliques em "Chamar no WhatsApp" | principal indicador de conversão |
-| Cliques em "Pedir orçamento" (abre o WhatsApp) | volume semanal |
 | Páginas de produto indexadas no Google | > 80% do catálogo publicado |
 | Core Web Vitals (campo) | LCP < 2,5s · INP < 200ms · CLS < 0,1 |
 | Peso da home | < 250 KB de JS |
@@ -35,12 +38,11 @@ atrito. **Não é uma loja online**: não há carrinho nem pagamento nesta vers�
 - **Home** com destaques, categorias e prova social.
 - **Catálogo** com busca e filtro por categoria/marca.
 - **Página de produto** com fotos, preço, variações e CTA de WhatsApp.
-- **Serviços** (reparos) com preço e prazo combinados pelo WhatsApp.
-- **Orçamento de reparo** — formulário que monta a mensagem e abre o WhatsApp.
 - **Sobre** e **Contato** (endereço, horário, mapa, canais).
 - SEO técnico, sitemap, dados estruturados e analytics.
 
 ### Fora da v1 (não-objetivos)
+- **Consertos e orçamento de reparo** — saíram para um site separado (D14).
 - Carrinho, checkout e pagamento online.
 - Consulta pública do status da OS.
 - Blog e FAQ (previstos para a v2, já com o SEO preparado).
@@ -56,21 +58,21 @@ atrito. **Não é uma loja online**: não há carrinho nem pagamento nesta vers�
 | D3 | Leitura do Firestore | **Servidor (Admin SDK) + ISR** | Não expõe o banco, não gasta leitura por visitante, HTML pronto para o Google | SDK no cliente (exigiria abrir as regras), geração só no build (produto novo só aparece no próximo deploy) |
 | D4 | Publicação de produto | **Campo `site.published` por produto** | Curadoria explícita; produto interno/teste nunca vaza para a vitrine | "Tudo ativo com estoque" (sem curadoria), lista de exceções (fácil esquecer) |
 | D5 | Preço na vitrine | **Visível** | Gera confiança, filtra curioso e o cliente chega ao WhatsApp decidido | "Consulte o preço" (perde conversão) |
-| D6 | Conversão | **WhatsApp + orçamento de reparo** | Caminho mais curto até a venda no varejo de acessórios e assistência | Checkout online (escopo de e-commerce), status público de OS (v2) |
-| D7 | Destino do orçamento | **Só WhatsApp, sem gravar** | Decisão do cliente: o atendimento já acontece no WhatsApp; zero backend e zero e-mail para manter | E-mail (Resend), lead no Firestore, OS automática no kanban |
+| D6 | Conversão | **WhatsApp** | Caminho mais curto até a venda no varejo de acessórios | Checkout online (escopo de e-commerce), status público de OS (v2) |
+| ~~D7~~ | ~~Destino do orçamento~~ | — | Sem formulário de orçamento neste site depois de D14 | — |
 | D8 | Conteúdo editorial | **`siteContent` no Firestore + tela no admin** | Banner, destaques e textos mudam sem deploy, na ferramenta que já é usada diariamente | Console do Firebase (desconfortável), hardcoded (exige deploy) |
 | D12 | Dados da loja | **`settings/store`, o documento que o admin já mantém** | Fonte única: endereço, telefone, CNPJ e horário já existem e alimentam o recibo; duplicar no código geraria divergência | Repetir no `siteContent`, escrever no código do site |
 | D13 | Logo e marca | **Upload no admin → Storage, URL em `settings/store.brand`** | Trocar a marca não exige deploy nem mexer no repositório; a mesma fonte serve cabeçalho, favicon e og:image | Arquivo `public/logo.svg` versionado no site |
 | D9 | Identidade visual | **Nova, a partir de referências** | O site fala com o cliente final, não com o operador do admin | Reaproveitar a identidade do admin |
 | D10 | Analytics | **Vercel Analytics** | Uma linha de código, sem cookies e sem banner de consentimento | GA4 e Meta Pixel (entram se houver campanha paga) |
 | D11 | Deploy | **Vercel** + domínio próprio | Padrão do ecossistema Next; preview por branch | — |
+| D14 | Consertos | **Site separado** | Público, vocabulário e SEO diferentes: quem procura "troca de tela" não é quem procura "capinha iPhone 15". Cada site converte na sua linguagem e a vitrine fica de um assunto só | Manter serviços aqui (dilui o foco da vitrine e do domínio `capinhasudi.com.br`) |
 
-> **Risco aceito em D7:** o "formulário de orçamento" deixa de enviar qualquer coisa pelo
-> servidor — ele apenas **monta a mensagem e abre o WhatsApp**. Consequências: não há
-> histórico no sistema (o histórico é a conversa), não dá para medir quantos pedidos foram
-> enviados (só cliques no CTA) e fotos do aparelho só chegam se o cliente anexar no próprio
-> WhatsApp. A montagem da mensagem fica isolada em `buildQuoteMessage`, para que ligar
-> e-mail ou persistência depois seja uma mudança pequena.
+> **Consequência de D14:** saíram do repositório as rotas `/servicos` e
+> `/servicos/orcamento`, o card de conserto, o formulário de orçamento (e a validação que
+> ele usava), o `Service` no JSON-LD e o `siteContent/services`. O que sobrou é vitrine:
+> catálogo, institucional e WhatsApp. A decisão D7 (orçamento só pelo WhatsApp, sem gravar)
+> continua valendo — mas agora é assunto do outro site.
 
 ## 5. Arquitetura
 
@@ -94,7 +96,7 @@ atrito. **Não é uma loja online**: não há carrinho nem pagamento nesta vers�
                     │  (cadastro + siteContent)  │
                     └───────────────────────────┘
 
-  formulário de orçamento ──▶ monta a mensagem ──▶ WhatsApp Business (wa.me)
+  CTA do produto ──▶ monta a mensagem ──▶ WhatsApp Business (wa.me)
 ```
 
 **Princípios**
@@ -154,9 +156,6 @@ atrito. **Não é uma loja online**: não há carrinho nem pagamento nesta vers�
   testimonials: Array<{ name, text, rating }>
 }
 
-// siteContent/services
-{ intro, items: Array<{ title, description, icon, note? }> }   // preço/prazo: "a combinar"
-
 ```
 
 ### 6.3 Dados da loja (documento já existente)
@@ -211,26 +210,18 @@ aqui só para fixar o contrato.
 
 | Rota | Conteúdo | Render | Revalidação |
 |---|---|---|---|
-| `/` | Hero, destaques, categorias, serviços em resumo, prova social, CTA | Estática | 5 min |
+| `/` | Hero, destaques, categorias, prova social, CTA | Estática | 5 min |
 | `/produtos` | Listagem com busca e filtros (categoria, marca, faixa de preço) | Estática + filtro no cliente | 5 min |
 | `/produtos/[slug]` | Galeria, preço, variações, descrição, relacionados, CTA WhatsApp | Estática (`generateStaticParams`) | 5 min |
-| `/servicos` | Lista de reparos, cada um com CTA de WhatsApp | Estática | 1 h |
-| `/servicos/orcamento` | Formulário que monta a mensagem e abre o WhatsApp | Estática (form no cliente) | 1 h |
 | `/sobre` | História, equipe, diferenciais | Estática | 1 h |
 | `/contato` | Endereço, mapa, horário, canais | Estática | 1 h |
 | `/sitemap.xml`, `/robots.txt` | Gerados a partir do catálogo publicado | Estáticos | 1 h |
 
 ## 8. Integrações
 
-**WhatsApp** — link `https://wa.me/<número>?text=<mensagem>` montado por contexto:
-na página de produto a mensagem já vem com nome e link do produto; em serviços, com o reparo
-escolhido. Sem biblioteca: é só uma URL.
-
-**Orçamento** — não há envio pelo servidor. O formulário coleta aparelho, problema e
-observações, valida **no cliente** (`lib/quote-validation.ts`) e monta a mensagem que abre no
-WhatsApp Business já preenchida. Sem route handler, sem e-mail, sem chave de API. A validação
-é função própria, não biblioteca de schema: o Zod custava 89 KB no navegador para checar
-quatro campos e estourava o orçamento de peso da página.
+**WhatsApp** — link `https://wa.me/<número>?text=<mensagem>` montado por contexto: na
+página de produto a mensagem já vem com nome, variação, preço e link. Sem biblioteca: é só
+uma URL.
 
 **Mapa** — iframe do Google Maps carregado de forma preguiçosa (`loading="lazy"`), sem SDK.
 
@@ -238,13 +229,13 @@ quatro campos e estourava o orçamento de peso da página.
 
 - `metadata` por rota, `canonical` no domínio próprio, Open Graph e Twitter Card.
 - **JSON-LD**: `LocalBusiness` (home e contato), `Product` + `Offer` (produto),
-  `Service` (serviços), `BreadcrumbList` (catálogo).
+  `BreadcrumbList` (catálogo).
 - `sitemap.xml` gerado do catálogo publicado; `robots.txt` liberando tudo menos `/api`.
 - Imagens pelo `next/image` (AVIF/WebP, `sizes` correto, `priority` só no LCP).
 - Fontes via `next/font` (self-hosted, sem layout shift); logo e og:image vindos do Storage,
   servidos pelo `next/image` com `remotePatterns`.
 - Sem JS desnecessário: componentes de servidor por padrão; `'use client'` só em busca,
-  filtros, galeria e formulário.
+  filtros e galeria.
 - Orçamento de peso: **< 250 KB de JS na home**.
 
 ## 10. Design
@@ -277,11 +268,11 @@ O que já está definido:
 
 - Service account apenas em variável de ambiente do servidor; nunca no cliente nem no git.
 - Nenhuma escrita pública no Firestore; regras de segurança permanecem como estão.
-- Formulário validado no cliente; como nada é enviado ao servidor, não há superfície de
-  abuso (sem spam, sem rate limit a manter).
+- O site não recebe nada: sem formulário, sem route handler, sem superfície de abuso
+  (sem spam, sem rate limit a manter).
 - JSON-LD escapa `<` como `\u003c`: texto vindo do banco não pode fechar o `<script>`.
 - Sem cookies de rastreamento na v1 (Vercel Analytics não usa) → sem banner de consentimento.
-- Política de privacidade simples no rodapé, explicando o uso dos dados do formulário.
+- Política de privacidade simples no rodapé: o site não coleta nem envia dado nenhum.
 
 ## 12. Operação
 
@@ -297,7 +288,6 @@ O que já está definido:
 
 | Risco | Impacto | Mitigação |
 |---|---|---|
-| Orçamento só no WhatsApp (D7) | Sem histórico no sistema e sem métrica de envio | `buildQuoteMessage` isolado; evento de clique no analytics |
 | Catálogo do admin sem foto/descrição boa | Vitrine pobre e SEO fraco | Checklist de publicação; produto sem foto não é publicável |
 | Preço divergente entre site e loja | Frustração do cliente | Fonte única (variantes) + revalidação de 5 min |
 | Custo de leitura do Firestore | Conta inesperada | Leitura no servidor com ISR: uma leitura por revalidação, não por visitante |
@@ -313,7 +303,7 @@ O que já está definido:
 | Endereço | Quiosque na Avenida João Pinheiro, 337 — Uberlândia/MG ⟨CEP a confirmar⟩ |
 | WhatsApp | **+55 34 99834-9528** (Business) → `wa.me/5534998349528` |
 | E-mail público | não haverá; o contato é pelo WhatsApp |
-| Serviços | troca de tela · bateria · dock de carga · tampa traseira · botões — **preço e prazo a combinar pelo WhatsApp** |
+| Serviços | fora deste site (D14) — irão para um site próprio da assistência |
 | Firebase (produção) | projeto `acesso-rpido` — service account `firebase-adminsdk-fbsvc@acesso-rpido.iam.gserviceaccount.com` |
 | Firebase (preview/dev) | projeto `smartpoint-admin-staging` |
 | Instagram | [@udiasmartpoint](https://www.instagram.com/udiasmartpoint/) |

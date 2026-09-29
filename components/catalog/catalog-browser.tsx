@@ -1,28 +1,21 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/ui/product-card"
 import type { SiteProduct } from "@/lib/catalog-rules"
-import { cn } from "@/lib/utils"
 
 /**
  * Vitrine com busca e filtro. O catálogo inteiro já vem renderizado do servidor
  * (é pequeno), então filtrar é instantâneo e não gera requisição nenhuma.
  */
-export function CatalogBrowser({
-  products,
-  categories,
-}: {
-  products: SiteProduct[]
-  categories: Array<{ name: string; count: number }>
-}) {
+export function CatalogBrowser({ products }: { products: SiteProduct[] }) {
   const router = useRouter()
   const params = useSearchParams()
-  // A busca vem do cabeçalho pela URL; a categoria é filtro local da vitrine.
+  // Busca e categoria vêm do cabeçalho e vivem na URL compartilhável.
   const query = params.get("q") ?? ""
-  const [category, setCategory] = useState<string | null>(null)
+  const category = params.get("categoria")
 
   const visible = useMemo(() => {
     const terms = normalize(query).split(/\s+/).filter(Boolean)
@@ -38,43 +31,19 @@ export function CatalogBrowser({
 
   return (
     <div>
-      <div className="mb-5 space-y-3">
+      <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="text-2xl">{category || "Todos os produtos"}</h1>
         {query && (
           <p className="text-sm text-ink-soft">
             Resultados para <strong className="text-ink">{query}</strong>
           </p>
-        )}
-
-        {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <FilterChip active={category === null} onClick={() => setCategory(null)}>
-              Tudo
-            </FilterChip>
-            {categories.map((item) => (
-              <FilterChip
-                key={item.name}
-                active={category === item.name}
-                onClick={() => setCategory(category === item.name ? null : item.name)}
-              >
-                {item.name}
-                <span className="opacity-60"> {item.count}</span>
-              </FilterChip>
-            ))}
-          </div>
         )}
       </div>
 
       {visible.length === 0 ? (
         <div className="rounded-md bg-paper p-6 ring-1 ring-line">
           <p className="text-sm">Nada encontrado com esse filtro.</p>
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => {
-              setCategory(null)
-              router.push("/produtos")
-            }}
-          >
+          <Button variant="outline" className="mt-3" onClick={() => router.push("/produtos")}>
             Limpar busca
           </Button>
         </div>
@@ -93,30 +62,6 @@ export function CatalogBrowser({
         </>
       )}
     </div>
-  )
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        "min-h-11 rounded-sm border px-3 text-sm font-semibold transition-colors",
-        active ? "border-ink bg-ink text-paper" : "border-line bg-paper hover:border-ink",
-      )}
-    >
-      {children}
-    </button>
   )
 }
 

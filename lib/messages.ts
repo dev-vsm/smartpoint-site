@@ -18,18 +18,3 @@ export function productMessage(input: {
   if (input.url) lines.push(input.url)
   return lines.join("\n")
 }
-
-export function quoteMessage(input: {
-  device: string
-  service: string
-  problem?: string
-  name?: string
-}): string {
-  const lines = [
-    `Olá! Quero um orçamento de ${input.service.toLowerCase()}.`,
-    `Aparelho: ${input.device}.`,
-  ]
-  if (input.problem?.trim()) lines.push(`O que está acontecendo: ${input.problem.trim()}`)
-  if (input.name?.trim()) lines.push(`Meu nome é ${input.name.trim()}.`)
-  return lines.join("\n")
-}

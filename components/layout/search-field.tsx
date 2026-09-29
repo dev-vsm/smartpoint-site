@@ -39,7 +39,7 @@ export function SearchField({ className }: { className?: string }) {
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder="Buscar capinha, película, fone…"
-          className="min-h-11 w-full rounded-sm border border-line bg-shelf pl-9 pr-3 text-sm outline-none transition-colors focus:border-ink focus:bg-paper"
+          className="min-h-11 w-full rounded-sm border border-line bg-brand-soft/60 pl-9 pr-3 text-sm outline-none transition-colors focus:border-brand-strong focus:bg-paper focus:ring-2 focus:ring-brand/20"
         />
       </form>
     </search>

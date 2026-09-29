@@ -1,27 +1,30 @@
 @import "tailwindcss";
 
 /*
- * Tokens do tema — ver docs/design-doc.md §10.
- * Conceito: o quiosque. Azul-noite do vidro do celular, cinza-alumínio do balcão,
- * laranja de etiqueta para preço e o verde do WhatsApp reservado a UMA coisa:
- * falar com a loja agora.
- * A cor da marca é sobrescrita em runtime por `settings/store.brand.color`.
+ * Paleta SmartPoint: ciano para navegação e ações, laranja para preços e
+ * destaques. Tons profundos garantem leitura sobre as cores vivas; fundos
+ * claros deixam os produtos em evidência. Verde é reservado ao WhatsApp.
  */
 @theme {
-  --color-ink: #0e1b2a;
-  --color-ink-soft: #46566a;
+  --color-ink: #083344;
+  --color-ink-soft: #476573;
   --color-paper: #ffffff;
-  --color-shelf: #eef1f4;
-  --color-line: #d7dde3;
+  --color-shelf: #f2f9fb;
+  --color-line: #cce3e9;
 
-  --color-tag: #ff5a1f;
-  --color-tag-ink: #ffffff;
-  --color-tag-soft: #fff1ea;
+  --color-brand: #06b6d4;
+  --color-brand-ink: #083344;
+  --color-brand-strong: #0e7490;
+  --color-brand-deep: #155e75;
+  --color-brand-soft: #e6f9fc;
+
+  --color-tag: #f97316;
+  --color-tag-ink: #431407;
+  --color-tag-strong: #c2410c;
+  --color-tag-soft: #fff3e8;
 
   --color-zap: #25d366;
   --color-zap-ink: #04301a;
-
-  --color-brand: var(--color-ink);
 
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
@@ -38,8 +41,13 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-tag);
+    outline: 2px solid var(--color-brand-strong);
     outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-brand-ink);
   }
 
   /* Uma família só, usada nos dois extremos do eixo de largura. */
@@ -75,13 +83,10 @@
     border-end-end-radius: var(--radius-sm);
   }
 
-  /* Etiqueta presa na borda direita: o chanfro aponta para dentro da foto. */
+  /* Presa à direita, com recorte à esquerda e a borda externa reta. */
   .price-tag--right {
-    padding: 0.25rem 0.625rem 0.25rem 0.5rem;
-    clip-path: polygon(0 0, 100% 0, calc(100% - 0.5rem) 50%, 100% 100%, 0 100%);
+    padding: 0.25rem 0.5rem 0.25rem 0.875rem;
     border-radius: 0;
-    border-start-start-radius: var(--radius-sm);
-    border-end-start-radius: var(--radius-sm);
   }
 }
 

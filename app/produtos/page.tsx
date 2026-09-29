@@ -5,8 +5,9 @@ import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { Container } from "@/components/ui/section"
-import { listCategories, listProducts } from "@/lib/catalog"
+import { listProducts } from "@/lib/catalog"
 import { getStore } from "@/lib/store"
+import { catalogSubmenu } from "@/lib/submenu"
 
 export const revalidate = 300
 
@@ -18,15 +19,20 @@ export const metadata: Metadata = {
 }
 
 export default async function ProductsPage() {
-  const [store, products, categories] = await Promise.all([
+  const [store, products, submenu] = await Promise.all([
     getStore(),
     listProducts(),
-    listCategories(),
+    catalogSubmenu(),
   ])
 
   return (
     <>
-      <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
+      <Header
+        storeName={store.name}
+        logoUrl={store.brand.logoUrl}
+        whatsapp={store.whatsapp}
+        submenu={submenu}
+      />
       <main className="py-8">
         <Container>
           {products.length === 0 ? (
@@ -35,7 +41,7 @@ export default async function ProductsPage() {
             </p>
           ) : (
             <Suspense fallback={null}>
-              <CatalogBrowser products={products} categories={categories} />
+              <CatalogBrowser products={products} />
             </Suspense>
           )}
         </Container>

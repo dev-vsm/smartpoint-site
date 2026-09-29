@@ -12,15 +12,14 @@ export interface ProductCardData {
 }
 
 /**
- * Card da vitrine: a foto manda, a etiqueta de preço fica sobre ela e o nome
- * vem embaixo. Sem sombra e sem borda dupla — o produto recortado no branco já
- * é o contorno.
+ * Card da vitrine: foto em cima, preço à direita no início do corpo e nome
+ * logo abaixo. Sem sombra e sem borda dupla.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
   return (
     <Link
       href={`/produtos/${product.slug}`}
-      className="group block rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-ink"
+      className="group block rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong"
     >
       <div className="relative aspect-square overflow-hidden rounded-t-md bg-paper">
         {product.image ? (
@@ -36,19 +35,25 @@ export function ProductCard({ product }: { product: ProductCardData }) {
             sem foto
           </span>
         )}
-        <PriceTag
-          cents={product.priceFromCents}
-          from={product.hasVariants}
-          size="sm"
-          align="right"
-          className="absolute bottom-2 right-0"
-        />
       </div>
-      <div className="p-3">
-        {product.category && <p className="text-xs text-ink-soft">{product.category}</p>}
-        <p className="mt-0.5 line-clamp-2 text-sm font-semibold group-hover:underline">
-          {product.name}
-        </p>
+      <div className="pt-2 pb-3">
+        <div className="mb-2 flex items-center justify-between gap-2 pl-3">
+          {product.category && (
+            <p className="min-w-0 wrap-break-word text-xs text-brand-strong">{product.category}</p>
+          )}
+          <PriceTag
+            cents={product.priceFromCents}
+            from={product.hasVariants}
+            size="sm"
+            align="right"
+            className="ml-auto shrink-0 flex-col items-end whitespace-nowrap sm:flex-row sm:items-baseline"
+          />
+        </div>
+        <div className="px-3">
+          <p className="mt-0.5 line-clamp-2 text-sm font-semibold group-hover:text-brand-strong group-hover:underline">
+            {product.name}
+          </p>
+        </div>
       </div>
     </Link>
   )

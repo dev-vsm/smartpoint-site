@@ -74,7 +74,7 @@ export default async function ContactPage() {
                     href={store.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center rounded-sm border border-line bg-paper px-4 text-sm font-semibold hover:border-ink"
+                    className="inline-flex min-h-11 items-center rounded-sm border border-line bg-paper px-4 text-sm font-semibold hover:border-brand-strong hover:bg-brand-soft"
                   >
                     Instagram
                   </a>

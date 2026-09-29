@@ -2,7 +2,9 @@
 
 # CLAUDE.md — SmartPoint Site
 
-Site público da SmartPoint (acessórios de celular e assistência técnica, Uberlândia/MG).
+Site público da SmartPoint — **vitrine de acessórios de celular**, Uberlândia/MG.
+Os consertos saíram daqui (decisão D14) e terão site próprio: não volte a adicionar
+serviço, reparo ou orçamento a este repositório sem o usuário pedir.
 O plano vive em `docs/design-doc.md`; o andamento, em `docs/etapas.md`. **Leia os dois antes
 de propor mudanças de escopo.**
 
@@ -46,7 +48,7 @@ pnpm check       # lint + typecheck + testes
 | Produtos | `Products` + `productVariants` | Só aparece com `isActive !== false` **e** `site.published === true` |
 | Loja (endereço, telefone, WhatsApp, horário, redes) | `settings/store` | Mesmo documento que o admin edita em `/loja` |
 | Marca (logo, ícone, og:image, cor) | `settings/store.brand` | URLs no Storage; **nunca** arquivo de logo no repositório |
-| Conteúdo editorial (hero, banners, destaques) | `siteContent/*` | Tela nova no admin |
+| Conteúdo editorial (hero, banners, destaques) | `siteContent/*` | Tela nova no admin; sem serviços |
 
 Nada de endereço, telefone, horário ou logo escritos no código — apenas fallbacks mínimos
 para quando o documento não existir.

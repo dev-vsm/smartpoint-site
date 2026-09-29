@@ -17,12 +17,12 @@ export interface FooterStore {
  */
 export function Footer({ store }: { store: FooterStore }) {
   return (
-    <footer className="mt-16 border-t border-line bg-paper">
+    <footer className="mt-16 border-t border-line bg-brand-soft/50">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
         <div>
           <Brand name={store.name} logoUrl={store.logoUrl} />
           <p className="mt-3 text-sm text-ink-soft">
-            Acessórios e assistência para celular, no quiosque da {store.addressLine}.
+            Acessórios para celular, no quiosque da {store.addressLine}.
           </p>
         </div>
 
@@ -38,7 +38,7 @@ export function Footer({ store }: { store: FooterStore }) {
               href={store.instagram}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-block text-sm font-semibold hover:underline"
+              className="mt-3 inline-block text-sm font-semibold text-brand-strong hover:underline"
             >
               Instagram
             </a>

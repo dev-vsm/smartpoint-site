@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/sobre" },
   title: "A loja — SmartPoint em Uberlândia",
   description:
-    "Quiosque de acessórios e assistência para celular na Av. João Pinheiro, em Uberlândia. Atendimento rápido, no balcão e pelo WhatsApp.",
+    "Quiosque de acessórios para celular na Av. João Pinheiro, em Uberlândia. Atendimento rápido, no balcão e pelo WhatsApp.",
 }
 
 export default async function AboutPage() {
@@ -29,13 +29,12 @@ export default async function AboutPage() {
             ) : (
               <>
                 <p>
-                  A {store.name} é um quiosque de rua: acessório escolhido na hora, película
-                  colocada na hora e conserto sem enrolação. Sem vitrine fechada, sem senha de
-                  atendimento — é chegar, perguntar e resolver.
+                  A {store.name} é um quiosque de rua: acessório escolhido na hora e película
+                  colocada na hora. Sem vitrine fechada, sem senha de atendimento — é chegar,
+                  perguntar e resolver.
                 </p>
                 <p>
-                  Trabalhamos com capinhas, películas, fones, carregadores e cabos, e cuidamos dos
-                  reparos mais comuns: tela, bateria, dock de carga, tampa e botões. O que não está
+                  Trabalhamos com capinhas, películas, fones, carregadores e cabos. O que não está
                   na vitrine, a gente procura.
                 </p>
               </>

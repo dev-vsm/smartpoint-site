@@ -11,6 +11,7 @@ import { Container, SectionHeading } from "@/components/ui/section"
 import { getProductBySlug, listProducts, listRelated, listVariants } from "@/lib/catalog"
 import { absolute, breadcrumbJsonLd, productJsonLd } from "@/lib/seo"
 import { getStore } from "@/lib/store"
+import { catalogSubmenu } from "@/lib/submenu"
 
 export const revalidate = 300
 
@@ -41,10 +42,11 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
   const product = await getProductBySlug(slug)
   if (!product) notFound()
 
-  const [store, variants, related] = await Promise.all([
+  const [store, variants, related, submenu] = await Promise.all([
     getStore(),
     listVariants(product.id),
     listRelated(product),
+    catalogSubmenu(),
   ])
   return (
     <>
@@ -55,7 +57,12 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
           { name: product.name, path: `/produtos/${product.slug}` },
         ])}
       />
-      <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
+      <Header
+        storeName={store.name}
+        logoUrl={store.brand.logoUrl}
+        whatsapp={store.whatsapp}
+        submenu={submenu}
+      />
       <main className="py-8">
         <Container>
           <nav aria-label="Você está em" className="mb-6 text-sm text-ink-soft">

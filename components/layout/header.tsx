@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
 import { Brand } from "@/components/layout/brand"
 import { SearchField } from "@/components/layout/search-field"
@@ -9,45 +10,62 @@ import { cn } from "@/lib/utils"
 
 const LINKS = [
   { href: "/produtos", label: "Produtos" },
-  { href: "/servicos", label: "Consertos" },
   { href: "/sobre", label: "A loja" },
   { href: "/contato", label: "Onde estamos" },
 ]
 
+/** Item do submenu da rota (hoje, as categorias da vitrine). */
+export interface SubmenuItem {
+  label: string
+  href: string
+  count?: number
+  /** Parâmetro que marca este item como ativo (ex.: `categoria=Capinhas`). */
+  match?: { param: string; value: string | null }
+}
+
+/**
+ * Três faixas: navegação principal, busca e — quando a rota tem — o submenu
+ * dela. A hierarquia fica explícita: onde estou, o que procuro, o que existe
+ * dentro daqui.
+ */
 export function Header({
   storeName,
   logoUrl,
   whatsapp,
+  submenu = [],
 }: {
   storeName: string
   logoUrl?: string
   whatsapp: string
+  submenu?: SubmenuItem[]
 }) {
   const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-paper">
+    <header className="sticky top-0 z-30 bg-paper">
+      {/* 1 · marca, rotas principais e o contato */}
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="shrink-0">
           <Brand name={storeName} logoUrl={logoUrl} />
         </Link>
 
-        <nav aria-label="Principal" className="hidden shrink-0 gap-5 lg:flex">
+        <nav aria-label="Principal" className="hidden gap-6 md:flex">
           {LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-semibold hover:underline"
+              aria-current={pathname.startsWith(link.href) ? "page" : undefined}
+              className={cn(
+                "text-sm font-semibold transition-colors hover:text-brand-strong",
+                pathname.startsWith(link.href) &&
+                  "text-brand-strong underline decoration-tag decoration-2 underline-offset-8",
+              )}
             >
               {link.label}
             </Link>
           ))}
         </nav>
-
-        {/* A busca mora no cabeçalho: funciona de qualquer página. */}
-        <Suspense fallback={null}>
-          <SearchField className="hidden w-full max-w-sm md:block" />
-        </Suspense>
 
         <div className="hidden shrink-0 md:block">
           <WhatsAppCta number={whatsapp} label="WhatsApp" />
@@ -77,14 +95,22 @@ export function Header({
         </button>
       </div>
 
-      <div className="border-t border-line px-4 py-2 md:hidden">
+      {/* 2 · busca, logo abaixo das rotas */}
+      <div className="mx-auto max-w-6xl px-4 py-2">
         <Suspense fallback={null}>
           <SearchField />
         </Suspense>
       </div>
 
+      {/* 3 · submenu da rota atual */}
+      {submenu.length > 0 && (
+        <Suspense fallback={null}>
+          <Submenu items={submenu} />
+        </Suspense>
+      )}
+
       {open && (
-        <nav id="menu-mobile" aria-label="Principal" className="border-t border-line md:hidden">
+        <nav id="menu-mobile" aria-label="Principal" className="md:hidden">
           <ul className="mx-auto max-w-6xl px-4 py-2">
             {LINKS.map((link) => (
               <li key={link.href}>
@@ -104,5 +130,67 @@ export function Header({
         </nav>
       )}
     </header>
+  )
+}
+
+/** Rola na horizontal no celular: nunca esconde categoria atrás de "mais". */
+function Submenu({ items }: { items: SubmenuItem[] }) {
+  const params = useSearchParams()
+  const pathname = usePathname()
+  const isCatalog = items.some((item) => item.match?.param === "categoria")
+
+  return (
+    <nav
+      aria-label={isCatalog ? "Categorias de produtos" : "Seções desta página"}
+      className="mx-auto flex max-w-6xl items-center gap-5 px-4"
+    >
+      {isCatalog && (
+        <span className="hidden shrink-0 pr-5 text-xs font-semibold uppercase tracking-widest text-ink-soft md:block">
+          Categorias
+        </span>
+      )}
+      <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-2 [scrollbar-width:thin]">
+        {items.map((item) => {
+          const active = item.match
+            ? pathname === item.href.split("?")[0] &&
+              (params.get(item.match.param) || null) === item.match.value
+            : false
+          let href = item.href
+          if (item.match?.param === "categoria" && pathname === "/produtos") {
+            const search = new URLSearchParams(params.toString())
+            if (item.match.value) search.set("categoria", item.match.value)
+            else search.delete("categoria")
+            href = search.size ? `/produtos?${search}` : "/produtos"
+          }
+          return (
+            <li key={item.href} className="shrink-0">
+              <Link
+                href={href}
+                scroll={isCatalog && pathname === "/produtos" ? false : undefined}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-md px-3 text-sm font-semibold transition-colors focus-visible:-outline-offset-2",
+                  active
+                    ? "bg-brand text-brand-ink shadow-sm"
+                    : "text-ink-soft hover:bg-brand-soft hover:text-brand-strong",
+                )}
+              >
+                {item.label}
+                {item.count !== undefined && (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 py-0.5 text-[11px] leading-none tabular-nums",
+                      active ? "bg-paper/40 text-brand-ink" : "bg-brand-soft text-brand-strong",
+                    )}
+                  >
+                    {item.count}
+                  </span>
+                )}
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
   )
 }

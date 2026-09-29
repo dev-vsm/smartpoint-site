@@ -5,9 +5,9 @@ type Variant = "solid" | "outline" | "ghost" | "whatsapp"
 
 const VARIANTS: Record<Variant, string> = {
   // Ação principal da marca (navegar, filtrar, ver mais).
-  solid: "bg-ink text-paper hover:bg-ink/90",
-  outline: "border border-line bg-paper text-ink hover:border-ink",
-  ghost: "text-ink hover:bg-ink/5",
+  solid: "bg-brand text-brand-ink hover:bg-brand-strong hover:text-paper",
+  outline: "border border-brand-strong bg-paper text-brand-strong hover:bg-brand-soft",
+  ghost: "text-brand-strong hover:bg-brand-soft",
   // Verde é exclusivo de "falar com a loja" — ver CLAUDE.md.
   whatsapp: "bg-zap text-zap-ink hover:brightness-95",
 }

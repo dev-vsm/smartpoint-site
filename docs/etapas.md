@@ -5,13 +5,16 @@ cada etapa só é considerada pronta quando o **critério de pronto** passa.
 
 Legenda: `[ ]` pendente · `[x]` concluído · `[~]` em andamento · `[!]` bloqueado
 
+> **29/09/2026 — os consertos saíram deste site** (decisão D14). A assistência técnica vai
+> ganhar um site próprio; aqui fica só a vitrine de acessórios. A Etapa 5 foi cancelada e o
+> que dependia dela está marcado abaixo.
+
 ---
 
 ## Etapa 0 — Dados e acessos (bloqueia tudo)
 
 - [x] Domínio definido — **capinhasudi.com.br** (acesso ao DNS a confirmar no lançamento)
-- [x] Serviços listados (tela, bateria, dock, tampa, botões) — preço e prazo a combinar no WhatsApp
-- [x] Canal de orçamento definido: **só WhatsApp**, sem e-mail e sem backend
+- [x] ~~Serviços listados~~ — fora deste site (D14)
 - [x] Service accounts disponíveis (`acesso-rpido` em produção, `smartpoint-admin-staging` em preview)
 - [x] CNPJ e endereço (rua e número)
 - [x] WhatsApp completo — **+55 34 99834-9528** (`wa.me/5534998349528`)
@@ -50,7 +53,7 @@ desenvolvimento (há fallback em texto), mas travam o lançamento.
 - [x] Paleta definida: `ink`, `ink-soft`, `shelf`, `line`, `tag`, `zap` — conceito "quiosque"
 - [x] Tokens no `@theme` do `app/globals.css` (Tailwind 4 é CSS-first, sem `tailwind.config.ts`)
 - [x] Tipografia: **Archivo** variável via `next/font`, uma família em dois extremos de largura
-- [x] Componentes base: botão/link, etiqueta de preço, card de produto, campos, skeleton, seção
+- [x] Componentes base: botão/link, etiqueta de preço, card de produto, skeleton, seção
 - [x] `Brand` — logo do banco com fallback em texto
 - [x] Cabeçalho com menu mobile e rodapé (endereço, horário, Instagram, CNPJ)
 - [x] CTA de WhatsApp (inline e flutuante) com mensagem contextual
@@ -88,31 +91,28 @@ componente sem uso.)
 - [x] Estados vazios: vitrine sendo montada, busca sem resultado, produto sem foto/estoque
 - [x] `generateStaticParams` — cada produto publicado vira página estática
 - [x] Regra nova descoberta no dado real: preço zero não entra na vitrine
-- [ ] `/` — hero, categorias e resumo de serviços (hoje só os destaques)
+- [ ] `/` — hero e categorias (hoje só os destaques)
 
 **Pronto quando:** dá para navegar da home ao WhatsApp passando por um produto real. ✅
 (a home ganha hero e seções quando o `siteContent` existir — Etapa 8 no admin)
 
 ---
 
-## Etapa 5 — Serviços e orçamento (WhatsApp)
+## Etapa 5 — ~~Serviços e orçamento (WhatsApp)~~ — CANCELADA (D14)
 
-- [x] `/servicos` — os cinco reparos, cada um com CTA e "preço na conversa"
-- [x] `/servicos/orcamento` — formulário: aparelho, reparo, problema e nome
-- [x] Validação com Zod **no cliente** (nada é enviado ao servidor)
-- [x] `quoteMessage` / `productMessage` — mensagens formatadas e testadas
-- [x] Botão abre `wa.me` em nova aba com a mensagem pronta
-- [x] Evento `orcamento_whatsapp` no Vercel Analytics
-- [x] Testes das mensagens (acentos, quebras de linha, campos vazios)
-- [x] Serviços vindos de `siteContent/services`, com a lista da loja como padrão
+Estava pronta e foi **removida do repositório** em 29/09/2026: saíram `/servicos`,
+`/servicos/orcamento`, o `ServiceCard`, o `QuoteForm`, `lib/quote-validation.ts`,
+`lib/site-content.ts`, o `quoteMessage` e o `serviceJsonLd`. O histórico fica no git,
+pronto para servir de base ao site da assistência.
 
-**Pronto quando:** preencher o formulário abre o WhatsApp Business com a mensagem completa. ✅
+- [x] Conteúdo de serviços removido do site e das rotas
+- [ ] Site próprio da assistência (outro repositório, outro plano)
 
 ---
 
 ## Etapa 6 — Institucional
 
-- [x] `/sobre` — usa `store.about`, com texto padrão enquanto não for cadastrado
+- [x] `/sobre` — usa `store.about`, com texto padrão enquanto não for cadastrado (sem consertos)
 - [x] `/contato` — endereço, horário, mapa preguiçoso e canais, tudo de `settings/store`
 - [x] `/privacidade` — sem cookie, sem envio, sem armazenamento (é o que o site faz)
 - [x] 404 e boundary de erro com a identidade do site
@@ -124,12 +124,11 @@ componente sem uso.)
 ## Etapa 7 — SEO, performance e analytics
 
 - [x] `metadata` por rota com canonical, Open Graph e Twitter Card; ícone e og:image da marca
-- [x] JSON-LD: `MobilePhoneStore` (home e contato), `Product` + `Offer`, `Service`, `BreadcrumbList`
+- [x] JSON-LD: `MobilePhoneStore` (home e contato), `Product` + `Offer`, `BreadcrumbList`
 - [x] `sitemap.xml` (inclui cada produto publicado) e `robots.txt` (bloqueia `/styleguide`)
 - [x] Imagens pelo `next/image` com `sizes`; `priority` só na foto do produto (LCP)
-- [x] Vercel Analytics + evento `orcamento_whatsapp`
+- [x] Vercel Analytics (o evento `orcamento_whatsapp` saiu com o formulário)
 - [x] Orçamento de peso: **182–184 KB de JS (gzip)** em todas as páginas
-- [x] Zod saiu do cliente: a validação do orçamento virou função própria testada (−89 KB)
 - [ ] Lighthouse ≥ 95 (mobile) — falta rodar em navegador
 
 **Pronto quando:** as metas de Lighthouse e de peso passam em `/`, `/produtos` e `/produtos/[slug]`.
@@ -142,7 +141,7 @@ Peso ✅ · Lighthouse pendente (precisa de navegador).
 - [ ] Campo `site.published` (e `highlight`, `slug`, SEO) no cadastro de produto
 - [ ] Campos novos em `/loja`: `whatsapp`, `hours`, `social`, `mapsUrl`, `about`
 - [ ] Upload da marca em `/loja` (logo, ícone, og:image) para o Storage + cor da marca
-- [ ] Tela de conteúdo do site (`siteContent`): hero, banners, destaques, depoimentos
+- [ ] Tela de conteúdo do site (`siteContent`): hero, banners, destaques, depoimentos (sem serviços)
 - [ ] Bloqueio de publicação para produto sem foto ou sem descrição
 - [ ] (Opcional) Webhook de revalidação sob demanda ao publicar
 

@@ -68,7 +68,7 @@ export function ProductDetail({
                   onClick={() => setPhoto(index)}
                   className={cn(
                     "relative block h-16 w-16 overflow-hidden rounded-sm bg-paper ring-1 transition-colors",
-                    index === photo ? "ring-ink" : "ring-line hover:ring-ink-soft",
+                    index === photo ? "ring-brand-strong" : "ring-line hover:ring-brand-strong",
                   )}
                 >
                   <Image src={image} alt="" fill sizes="64px" className="object-contain p-1" />
@@ -108,8 +108,8 @@ export function ProductDetail({
                   className={cn(
                     "min-h-11 rounded-sm border px-3 text-sm font-semibold transition-colors",
                     variant.id === selectedId
-                      ? "border-ink bg-ink text-paper"
-                      : "border-line bg-paper hover:border-ink",
+                      ? "border-brand-strong bg-brand text-brand-ink"
+                      : "border-line bg-paper hover:border-brand-strong hover:bg-brand-soft",
                     variant.stock === 0 && "opacity-60",
                   )}
                 >

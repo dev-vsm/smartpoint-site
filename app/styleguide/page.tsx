@@ -3,11 +3,9 @@ import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { Button } from "@/components/ui/button"
-import { Field, Input, Select, Textarea } from "@/components/ui/field"
 import { PriceTag } from "@/components/ui/price-tag"
 import { ProductCard } from "@/components/ui/product-card"
 import { Container, SectionHeading } from "@/components/ui/section"
-import { ServiceCard } from "@/components/ui/service-card"
 import { Skeleton } from "@/components/ui/skeleton"
 
 // Página de referência do design system. Fora do índice: é ferramenta de trabalho.
@@ -46,18 +44,6 @@ const PRODUCTS = [
   },
 ]
 
-const SERVICES = [
-  { title: "Troca de tela", description: "Display original ou compatível, com teste na hora." },
-  {
-    title: "Troca de bateria",
-    description: "Aparelho segurando pouca carga ou desligando sozinho.",
-  },
-  {
-    title: "Troca de dock de carga",
-    description: "Não carrega, carrega só em uma posição ou não reconhece o cabo.",
-  },
-]
-
 export default function Styleguide() {
   return (
     <>
@@ -67,20 +53,29 @@ export default function Styleguide() {
           <section>
             <SectionHeading
               title="Cores"
-              description="Seis tokens. O verde só aparece em botão de falar com a loja."
+              description="Ciano nas ações, laranja nos destaques e tons claros nos fundos. Verde reservado ao WhatsApp."
             />
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {[
-                ["ink", "bg-ink"],
-                ["ink-soft", "bg-ink-soft"],
-                ["shelf", "bg-shelf"],
-                ["line", "bg-line"],
-                ["tag", "bg-tag"],
-                ["zap", "bg-zap"],
-              ].map(([name, background]) => (
+                ["Ciano · marca", "bg-brand", "#06B6D4"],
+                ["Ciano escuro · links", "bg-brand-strong", "#0E7490"],
+                ["Ciano profundo", "bg-brand-deep", "#155E75"],
+                ["Ciano suave", "bg-brand-soft", "#E6F9FC"],
+                ["Laranja · destaques", "bg-tag", "#F97316"],
+                ["Laranja escuro", "bg-tag-strong", "#C2410C"],
+                ["Laranja suave", "bg-tag-soft", "#FFF3E8"],
+                ["Texto principal", "bg-ink", "#083344"],
+                ["Texto secundário", "bg-ink-soft", "#476573"],
+                ["Fundo", "bg-shelf", "#F2F9FB"],
+                ["Bordas", "bg-line", "#CCE3E9"],
+                ["WhatsApp", "bg-zap", "#25D366"],
+              ].map(([name, background, hex]) => (
                 <li key={name} className="overflow-hidden rounded-md ring-1 ring-line">
                   <div className={`${background} h-16`} />
-                  <p className="bg-paper p-2 text-xs">{name}</p>
+                  <div className="bg-paper p-2 text-xs">
+                    <p className="font-semibold">{name}</p>
+                    <p className="mt-1 font-mono text-ink-soft">{hex}</p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -93,8 +88,8 @@ export default function Styleguide() {
             />
             <div className="space-y-3 rounded-md bg-paper p-5 ring-1 ring-line">
               <h1 className="text-4xl">Capinha nova, película colocada na hora</h1>
-              <h2 className="text-2xl">Conserto no mesmo dia</h2>
-              <h3 className="text-lg">Troca de tela</h3>
+              <h2 className="text-2xl">Película colocada no balcão</h2>
+              <h3 className="text-lg">Capa anti-impacto</h3>
               <p className="max-w-prose text-sm text-ink-soft">
                 Texto corrido em Archivo 400, com no máximo 80 caracteres por linha para leitura
                 confortável no celular, que é onde quase todo mundo vai abrir este site.
@@ -137,37 +132,6 @@ export default function Styleguide() {
                 </li>
               ))}
             </ul>
-          </section>
-
-          <section>
-            <SectionHeading title="Consertos" description="Um card por reparo." />
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {SERVICES.map((service) => (
-                <ServiceCard key={service.title} service={service} whatsapp={WHATSAPP} />
-              ))}
-            </ul>
-          </section>
-
-          <section>
-            <SectionHeading title="Formulário" description="Usado no pedido de orçamento." />
-            <form className="grid gap-4 rounded-md bg-paper p-5 ring-1 ring-line sm:max-w-md">
-              <Field
-                label="Aparelho"
-                htmlFor="sg-device"
-                hint="Marca e modelo, como está na caixa."
-              >
-                <Input id="sg-device" placeholder="iPhone 13" />
-              </Field>
-              <Field label="O que precisa" htmlFor="sg-service">
-                <Select id="sg-service" defaultValue="tela">
-                  <option value="tela">Troca de tela</option>
-                  <option value="bateria">Troca de bateria</option>
-                </Select>
-              </Field>
-              <Field label="Conte o que está acontecendo" htmlFor="sg-problem">
-                <Textarea id="sg-problem" placeholder="Caiu e a tela trincou no canto." />
-              </Field>
-            </form>
           </section>
 
           <section>
