@@ -9,9 +9,13 @@ import type { SiteNotice } from "@/lib/site-content"
 export type { SubmenuItem }
 
 /**
- * Três faixas: marca e avisos, busca e — quando a rota tem — o submenu dela.
- * O topo não navega: quem navega é a busca, o submenu de categorias e o
- * rodapé. Sem menu, o cabeçalho inteiro é HTML, sem JS de estado.
+ * A marca mora na margem da esquerda — o vazio que sobra dos lados da faixa
+ * centralizada —, e a faixa fica só com o que muda: avisos, busca e o submenu
+ * da rota. O topo não navega: quem navega é a busca, as categorias e o rodapé.
+ *
+ * A margem só existe em tela larga: a faixa tem 1152px e a marca pede mais 160
+ * de cada lado para o conteúdo seguir centralizado. Abaixo de 1400px, então, a
+ * marca volta para cima das linhas.
  */
 export function Header({
   storeName,
@@ -26,30 +30,35 @@ export function Header({
 }) {
   return (
     <header className="sticky top-0 z-30 bg-paper">
-      {/* 1 · marca no canto e os avisos da loja ocupando o resto */}
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
-        <Link href="/" className="shrink-0">
-          <Brand name={storeName} logoUrl={logoUrl} />
+      <div className="relative mx-auto max-w-6xl px-4">
+        <Link
+          href="/"
+          className="flex h-14 w-40 items-center min-[1400px]:absolute min-[1400px]:top-0 min-[1400px]:right-full min-[1400px]:h-full min-[1400px]:w-[calc((100vw-72rem)/2)] min-[1400px]:justify-center"
+        >
+          <Brand
+            name={storeName}
+            logoUrl={logoUrl}
+            className="min-[1400px]:w-full! min-[1400px]:object-center! min-[1400px]:text-center"
+          />
         </Link>
-        <NoticeStrip notices={notices} className="hidden flex-1 justify-end md:flex" />
+
+        <NoticeStrip notices={notices} className="hidden justify-end py-3 md:flex" />
+
+        {/* No celular os avisos ganham a linha inteira: no topo não cabem. */}
+        <NoticeStrip notices={notices} className="pb-1 md:hidden" />
+
+        <div className="py-2">
+          <Suspense fallback={null}>
+            <SearchField />
+          </Suspense>
+        </div>
+
+        {submenu.length > 0 && (
+          <Suspense fallback={null}>
+            <SubmenuNav items={submenu} />
+          </Suspense>
+        )}
       </div>
-
-      {/* No celular os avisos ganham a linha inteira: no topo não cabem. */}
-      <NoticeStrip notices={notices} className="mx-auto max-w-6xl px-3 pb-1 md:hidden" />
-
-      {/* 2 · busca, logo abaixo da marca */}
-      <div className="mx-auto max-w-6xl px-4 py-2">
-        <Suspense fallback={null}>
-          <SearchField />
-        </Suspense>
-      </div>
-
-      {/* 3 · submenu da rota atual */}
-      {submenu.length > 0 && (
-        <Suspense fallback={null}>
-          <SubmenuNav items={submenu} />
-        </Suspense>
-      )}
     </header>
   )
 }

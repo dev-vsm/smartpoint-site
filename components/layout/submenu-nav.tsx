@@ -21,7 +21,7 @@ export function SubmenuNav({ items }: { items: SubmenuItem[] }) {
   return (
     <nav
       aria-label={isCatalog ? "Categorias de produtos" : "Seções desta página"}
-      className="mx-auto flex max-w-6xl items-center gap-5 px-4"
+      className="flex items-center gap-5"
     >
       {isCatalog && (
         <span className="hidden shrink-0 pr-5 text-xs font-semibold uppercase tracking-widest text-ink-soft md:block">
