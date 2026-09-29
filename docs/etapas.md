@@ -55,7 +55,7 @@ desenvolvimento (há fallback em texto), mas travam o lançamento.
 - [x] Tipografia: **Archivo** variável via `next/font`, uma família em dois extremos de largura
 - [x] Componentes base: botão/link, etiqueta de preço, card de produto, skeleton, seção
 - [x] `Brand` — logo do banco com fallback em texto
-- [x] Cabeçalho com menu mobile e rodapé (endereço, horário, Instagram, CNPJ)
+- [x] Cabeçalho com menu (em toda tela), faixa de avisos e rodapé (endereço, horário, Instagram, CNPJ)
 - [x] CTA de WhatsApp (inline e flutuante) com mensagem contextual
 - [x] `/styleguide` com tudo junto, fora do índice (`robots: noindex`)
 - [x] Foco visível, `prefers-reduced-motion` respeitado, alvos de toque ≥ 44px
@@ -142,6 +142,7 @@ Peso ✅ · Lighthouse pendente (precisa de navegador).
 - [ ] Campos novos em `/loja`: `whatsapp`, `hours`, `social`, `mapsUrl`, `about`
 - [ ] Upload da marca em `/loja` (logo, ícone, og:image) para o Storage + cor da marca
 - [ ] Tela de conteúdo do site (`siteContent`): hero, banners, destaques, depoimentos (sem serviços)
+- [ ] Faixa de avisos (`siteContent/notices`): texto, ícone, tom (info/promo) e link
 - [ ] Bloqueio de publicação para produto sem foto ou sem descrição
 - [ ] (Opcional) Webhook de revalidação sob demanda ao publicar
 

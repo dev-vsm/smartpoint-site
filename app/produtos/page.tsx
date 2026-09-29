@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { Container } from "@/components/ui/section"
 import { listProducts } from "@/lib/catalog"
+import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
@@ -19,10 +20,11 @@ export const metadata: Metadata = {
 }
 
 export default async function ProductsPage() {
-  const [store, products, submenu] = await Promise.all([
+  const [store, products, submenu, notices] = await Promise.all([
     getStore(),
     listProducts(),
     catalogSubmenu(),
+    listNotices(),
   ])
 
   return (
@@ -31,6 +33,7 @@ export default async function ProductsPage() {
         storeName={store.name}
         logoUrl={store.brand.logoUrl}
         whatsapp={store.whatsapp}
+        notices={notices}
         submenu={submenu}
       />
       <main className="py-8">

@@ -4,8 +4,10 @@ import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
 import { Brand } from "@/components/layout/brand"
+import { NoticeStrip } from "@/components/layout/notice-strip"
 import { SearchField } from "@/components/layout/search-field"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
+import type { SiteNotice } from "@/lib/site-content"
 import { cn } from "@/lib/utils"
 
 const LINKS = [
@@ -23,19 +25,21 @@ export interface SubmenuItem {
 }
 
 /**
- * Três faixas: navegação principal, busca e — quando a rota tem — o submenu
- * dela. A hierarquia fica explícita: onde estou, o que procuro, o que existe
- * dentro daqui.
+ * Três faixas: marca e avisos, busca e — quando a rota tem — o submenu dela.
+ * As rotas do site vivem no menu do botão, em qualquer tamanho de tela: o topo
+ * é da loja falando com o cliente (entrega, pagamento, promoção).
  */
 export function Header({
   storeName,
   logoUrl,
   whatsapp,
+  notices = [],
   submenu = [],
 }: {
   storeName: string
   logoUrl?: string
   whatsapp: string
+  notices?: SiteNotice[]
   submenu?: SubmenuItem[]
 }) {
   const [open, setOpen] = useState(false)
@@ -43,28 +47,13 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-30 bg-paper">
-      {/* 1 · marca, rotas principais e o contato */}
+      {/* 1 · marca, avisos e o contato */}
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
         <Link href="/" className="shrink-0">
           <Brand name={storeName} logoUrl={logoUrl} />
         </Link>
 
-        <nav aria-label="Principal" className="hidden gap-6 md:flex">
-          {LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={pathname.startsWith(link.href) ? "page" : undefined}
-              className={cn(
-                "text-sm font-semibold transition-colors hover:text-brand-strong",
-                pathname.startsWith(link.href) &&
-                  "text-brand-strong underline decoration-tag decoration-2 underline-offset-8",
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <NoticeStrip notices={notices} className="hidden flex-1 justify-center md:flex" />
 
         <div className="hidden shrink-0 md:block">
           <WhatsAppCta number={whatsapp} label="WhatsApp" />
@@ -73,10 +62,10 @@ export function Header({
         <button
           type="button"
           aria-expanded={open}
-          aria-controls="menu-mobile"
+          aria-controls="menu-principal"
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           onClick={() => setOpen((current) => !current)}
-          className="flex h-11 w-11 items-center justify-center rounded-sm md:hidden"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm"
         >
           <span className="relative block h-4 w-6">
             {[0, 1, 2].map((line) => (
@@ -94,7 +83,10 @@ export function Header({
         </button>
       </div>
 
-      {/* 2 · busca, logo abaixo das rotas */}
+      {/* No celular os avisos ganham a linha inteira: no topo não cabem. */}
+      <NoticeStrip notices={notices} className="mx-auto max-w-6xl px-3 pb-1 md:hidden" />
+
+      {/* 2 · busca, logo abaixo da marca */}
       <div className="mx-auto max-w-6xl px-4 py-2">
         <Suspense fallback={null}>
           <SearchField />
@@ -109,14 +101,18 @@ export function Header({
       )}
 
       {open && (
-        <nav id="menu-mobile" aria-label="Principal" className="md:hidden">
+        <nav id="menu-principal" aria-label="Principal" className="border-t border-line bg-paper">
           <ul className="mx-auto max-w-6xl px-4 py-2">
             {LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block py-3 text-base font-semibold"
+                  aria-current={pathname.startsWith(link.href) ? "page" : undefined}
+                  className={cn(
+                    "block py-3 text-base font-semibold",
+                    pathname.startsWith(link.href) && "text-brand-strong",
+                  )}
                 >
                   {link.label}
                 </Link>
@@ -124,7 +120,7 @@ export function Header({
             ))}
           </ul>
           <div className="mx-auto max-w-6xl px-4 pb-4">
-            <WhatsAppCta number={whatsapp} label="Chamar no WhatsApp" />
+            <WhatsAppCta number={whatsapp} label="Chamar no WhatsApp" className="sm:w-auto" />
           </div>
         </nav>
       )}

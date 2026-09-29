@@ -10,6 +10,7 @@ import { ProductCard } from "@/components/ui/product-card"
 import { Container, SectionHeading } from "@/components/ui/section"
 import { getProductBySlug, listProducts, listRelated, listVariants } from "@/lib/catalog"
 import { absolute, breadcrumbJsonLd, productJsonLd } from "@/lib/seo"
+import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
@@ -42,11 +43,12 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
   const product = await getProductBySlug(slug)
   if (!product) notFound()
 
-  const [store, variants, related, submenu] = await Promise.all([
+  const [store, variants, related, submenu, notices] = await Promise.all([
     getStore(),
     listVariants(product.id),
     listRelated(product),
     catalogSubmenu(),
+    listNotices(),
   ])
   return (
     <>
@@ -61,6 +63,7 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
         storeName={store.name}
         logoUrl={store.brand.logoUrl}
         whatsapp={store.whatsapp}
+        notices={notices}
         submenu={submenu}
       />
       <main className="py-8">

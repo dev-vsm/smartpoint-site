@@ -156,6 +156,9 @@ site próprio, com o SEO e a conversa de venda dela.
   testimonials: Array<{ name, text, rating }>
 }
 
+// siteContent/notices — a faixa de avisos do cabeçalho
+{ items: Array<{ text, icon?, tone?: 'info' | 'promo', href? }> }
+
 ```
 
 ### 6.3 Dados da loja (documento já existente)

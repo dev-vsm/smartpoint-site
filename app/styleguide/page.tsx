@@ -1,17 +1,25 @@
 import type { Metadata } from "next"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
+import { NoticeStrip } from "@/components/layout/notice-strip"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { Button } from "@/components/ui/button"
 import { PriceTag } from "@/components/ui/price-tag"
 import { ProductCard } from "@/components/ui/product-card"
 import { Container, SectionHeading } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { SiteNotice } from "@/lib/site-content"
 
 // Página de referência do design system. Fora do índice: é ferramenta de trabalho.
 export const metadata: Metadata = { robots: { index: false, follow: false } }
 
 const WHATSAPP = "5534998349528"
+
+const NOTICES: SiteNotice[] = [
+  { text: "Fazemos entrega", icon: "entrega" },
+  { text: "Parcelamos no cartão", icon: "cartao" },
+  { text: "10% à vista no PIX", icon: "pix", tone: "promo" },
+]
 
 const PRODUCTS = [
   {
@@ -47,7 +55,7 @@ const PRODUCTS = [
 export default function Styleguide() {
   return (
     <>
-      <Header storeName="SmartPoint" whatsapp={WHATSAPP} />
+      <Header storeName="SmartPoint" whatsapp={WHATSAPP} notices={NOTICES} />
       <main className="py-10">
         <Container className="space-y-12">
           <section>
@@ -107,6 +115,16 @@ export default function Styleguide() {
               <PriceTag cents={7990} />
               <PriceTag cents={12900} from size="lg" />
               <PriceTag cents={4990} align="right" />
+            </div>
+          </section>
+
+          <section>
+            <SectionHeading
+              title="Avisos do cabeçalho"
+              description="Entrega, pagamento e a promoção do momento. Laranja só na promoção."
+            />
+            <div className="rounded-md bg-paper p-5 ring-1 ring-line">
+              <NoticeStrip notices={NOTICES} />
             </div>
           </section>
 

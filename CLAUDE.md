@@ -49,6 +49,7 @@ pnpm check       # lint + typecheck + testes
 | Loja (endereço, telefone, WhatsApp, horário, redes) | `settings/store` | Mesmo documento que o admin edita em `/loja` |
 | Marca (logo, ícone, og:image, cor) | `settings/store.brand` | URLs no Storage; **nunca** arquivo de logo no repositório |
 | Conteúdo editorial (hero, banners, destaques) | `siteContent/*` | Tela nova no admin; sem serviços |
+| Avisos do cabeçalho (entrega, pagamento, promoção) | `siteContent/notices` | Faixa no topo; `tone: promo` pinta de laranja |
 
 Nada de endereço, telefone, horário ou logo escritos no código — apenas fallbacks mínimos
 para quando o documento não existir.

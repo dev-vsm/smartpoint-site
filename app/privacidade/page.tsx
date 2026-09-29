@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { Container, SectionHeading } from "@/components/ui/section"
+import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 
 export const revalidate = 86400
@@ -13,11 +14,16 @@ export const metadata: Metadata = {
 }
 
 export default async function PrivacyPage() {
-  const store = await getStore()
+  const [store, notices] = await Promise.all([getStore(), listNotices()])
 
   return (
     <>
-      <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
+      <Header
+        storeName={store.name}
+        logoUrl={store.brand.logoUrl}
+        whatsapp={store.whatsapp}
+        notices={notices}
+      />
       <main className="py-8">
         <Container>
           <SectionHeading title="Privacidade" />

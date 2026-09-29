@@ -5,6 +5,7 @@ import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { JsonLd } from "@/components/seo/json-ld"
 import { Container, SectionHeading } from "@/components/ui/section"
 import { localBusinessJsonLd } from "@/lib/seo"
+import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 
 export const revalidate = 3600
@@ -17,12 +18,17 @@ export const metadata: Metadata = {
 }
 
 export default async function ContactPage() {
-  const store = await getStore()
+  const [store, notices] = await Promise.all([getStore(), listNotices()])
 
   return (
     <>
       <JsonLd data={localBusinessJsonLd(store)} />
-      <Header storeName={store.name} logoUrl={store.brand.logoUrl} whatsapp={store.whatsapp} />
+      <Header
+        storeName={store.name}
+        logoUrl={store.brand.logoUrl}
+        whatsapp={store.whatsapp}
+        notices={notices}
+      />
       <main className="py-8">
         <Container>
           <SectionHeading
