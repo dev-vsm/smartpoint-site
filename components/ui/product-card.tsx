@@ -28,7 +28,7 @@ export function ProductCard({ product, whatsapp }: { product: ProductCardData; w
   })
 
   return (
-    <article className="flex h-full flex-col rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
+    <article className="flex h-full flex-col overflow-hidden rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
       <Link href={`/produtos/${product.slug}`} className="group block grow">
         <div className="relative aspect-square overflow-hidden rounded-t-md bg-paper">
           {product.image ? (
@@ -68,15 +68,14 @@ export function ProductCard({ product, whatsapp }: { product: ProductCardData; w
         </div>
       </Link>
 
-      <div className="border-t border-line p-2">
-        <WhatsAppCta
-          number={whatsapp}
-          message={message}
-          label="Quero esse"
-          ariaLabel={`Falar no WhatsApp sobre ${product.name}`}
-          className="w-full px-2"
-        />
-      </div>
+      {/* O botão é o rodapé: encosta nas bordas e o card recorta os cantos. */}
+      <WhatsAppCta
+        number={whatsapp}
+        message={message}
+        label="Quero esse"
+        ariaLabel={`Falar no WhatsApp sobre ${product.name}`}
+        className="min-h-10! w-full! rounded-none!"
+      />
     </article>
   )
 }
