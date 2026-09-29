@@ -62,7 +62,6 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
       <Header
         storeName={store.name}
         logoUrl={store.brand.logoUrl}
-        whatsapp={store.whatsapp}
         notices={notices}
         submenu={submenu}
       />

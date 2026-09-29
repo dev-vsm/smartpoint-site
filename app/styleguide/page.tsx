@@ -55,7 +55,7 @@ const PRODUCTS = [
 export default function Styleguide() {
   return (
     <>
-      <Header storeName="SmartPoint" whatsapp={WHATSAPP} notices={NOTICES} />
+      <Header storeName="SmartPoint" notices={NOTICES} />
       <main className="py-10">
         <Container className="space-y-12">
           <section>

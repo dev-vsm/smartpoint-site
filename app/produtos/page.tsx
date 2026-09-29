@@ -32,7 +32,6 @@ export default async function ProductsPage() {
       <Header
         storeName={store.name}
         logoUrl={store.brand.logoUrl}
-        whatsapp={store.whatsapp}
         notices={notices}
         submenu={submenu}
       />

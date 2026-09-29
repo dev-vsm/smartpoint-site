@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { Brand } from "@/components/layout/brand"
 
+const PAGES = [
+  { href: "/sobre", label: "A loja" },
+  { href: "/contato", label: "Onde estamos" },
+]
+
 export interface FooterStore {
   name: string
   logoUrl?: string
@@ -24,6 +29,18 @@ export function Footer({ store }: { store: FooterStore }) {
           <p className="mt-3 text-sm text-ink-soft">
             Acessórios para celular, no quiosque da {store.addressLine}.
           </p>
+          {/* As rotas do site moram aqui: o cabeçalho é só marca, busca e categorias. */}
+          <nav aria-label="Páginas do site" className="mt-4">
+            <ul className="space-y-1 text-sm font-semibold">
+              {PAGES.map((page) => (
+                <li key={page.href}>
+                  <Link href={page.href} className="text-brand-strong hover:underline">
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
         <div>

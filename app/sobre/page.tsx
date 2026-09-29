@@ -20,12 +20,7 @@ export default async function AboutPage() {
 
   return (
     <>
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        whatsapp={store.whatsapp}
-        notices={notices}
-      />
+      <Header storeName={store.name} logoUrl={store.brand.logoUrl} notices={notices} />
       <main className="py-8">
         <Container>
           <SectionHeading title="A loja" />

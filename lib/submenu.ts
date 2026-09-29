@@ -1,5 +1,5 @@
 import "server-only"
-import type { SubmenuItem } from "@/components/layout/header"
+import type { SubmenuItem } from "@/components/layout/submenu-nav"
 import { listCategories } from "@/lib/catalog"
 
 /** Categorias do catálogo como submenu da vitrine. */

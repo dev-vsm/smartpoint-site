@@ -22,12 +22,7 @@ export default async function Home() {
   return (
     <>
       <JsonLd data={localBusinessJsonLd(store)} />
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        whatsapp={store.whatsapp}
-        notices={notices}
-      />
+      <Header storeName={store.name} logoUrl={store.brand.logoUrl} notices={notices} />
       <main className="py-10">
         <Container>
           <SectionHeading
