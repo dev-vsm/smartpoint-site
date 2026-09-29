@@ -31,14 +31,14 @@ export function CatalogBrowser({ products }: { products: SiteProduct[] }) {
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-2xl">{category || "Todos os produtos"}</h1>
-        {query && (
-          <p className="text-sm text-ink-soft">
-            Resultados para <strong className="text-ink">{query}</strong>
-          </p>
-        )}
-      </div>
+      {/* O submenu do cabeçalho já diz a categoria: aqui o título só serve ao
+          leitor de tela e ao Google. */}
+      <h1 className="sr-only">{category || "Todos os produtos"}</h1>
+      {query && (
+        <p className="mb-5 text-sm text-ink-soft">
+          Resultados para <strong className="text-ink">{query}</strong>
+        </p>
+      )}
 
       {visible.length === 0 ? (
         <div className="rounded-md bg-paper p-6 ring-1 ring-line">
@@ -48,18 +48,13 @@ export function CatalogBrowser({ products }: { products: SiteProduct[] }) {
           </Button>
         </div>
       ) : (
-        <>
-          <p className="mb-3 text-sm text-ink-soft">
-            {visible.length} {visible.length === 1 ? "produto" : "produtos"}
-          </p>
-          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {visible.map((product) => (
-              <li key={product.id}>
-                <ProductCard product={product} />
-              </li>
-            ))}
-          </ul>
-        </>
+        <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {visible.map((product) => (
+            <li key={product.id}>
+              <ProductCard product={product} />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )

@@ -18,7 +18,6 @@ const LINKS = [
 export interface SubmenuItem {
   label: string
   href: string
-  count?: number
   /** Parâmetro que marca este item como ativo (ex.: `categoria=Capinhas`). */
   match?: { param: string; value: string | null }
 }
@@ -169,23 +168,13 @@ function Submenu({ items }: { items: SubmenuItem[] }) {
                 scroll={isCatalog && pathname === "/produtos" ? false : undefined}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-md px-3 text-sm font-semibold transition-colors focus-visible:-outline-offset-2",
+                  "inline-flex min-h-11 items-center whitespace-nowrap rounded-md px-3 text-sm font-semibold transition-colors focus-visible:-outline-offset-2",
                   active
                     ? "bg-brand text-brand-ink shadow-sm"
                     : "text-ink-soft hover:bg-brand-soft hover:text-brand-strong",
                 )}
               >
                 {item.label}
-                {item.count !== undefined && (
-                  <span
-                    className={cn(
-                      "rounded-full px-1.5 py-0.5 text-[11px] leading-none tabular-nums",
-                      active ? "bg-paper/40 text-brand-ink" : "bg-brand-soft text-brand-strong",
-                    )}
-                  >
-                    {item.count}
-                  </span>
-                )}
               </Link>
             </li>
           )

@@ -13,7 +13,6 @@ export async function catalogSubmenu(): Promise<SubmenuItem[]> {
     },
     ...categories.map((category) => ({
       label: category.name,
-      count: category.count,
       href: `/produtos?categoria=${encodeURIComponent(category.name)}`,
       match: { param: "categoria", value: category.name },
     })),
