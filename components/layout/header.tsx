@@ -43,9 +43,15 @@ export function Header({
           />
         </Link>
 
+        {/* `100vw` inclui a barra de rolagem: o `- 1rem` evita rolagem lateral. */}
         {whatsapp && (
-          <div className="absolute top-0 right-4 hidden h-14 items-center md:flex min-[1856px]:right-auto min-[1856px]:left-full min-[1856px]:h-full min-[1856px]:w-[calc((100vw-var(--container-site))/2)] min-[1856px]:justify-center">
-            <WhatsAppCta number={whatsapp} label="WhatsApp" ariaLabel="Falar no WhatsApp" />
+          <div className="absolute top-0 right-4 hidden h-14 items-center md:flex min-[1856px]:right-auto min-[1856px]:left-full min-[1856px]:h-full min-[1856px]:w-[calc((100vw-var(--container-site))/2-1rem)] min-[1856px]:justify-center">
+            <WhatsAppCta
+              number={whatsapp}
+              label="WhatsApp"
+              ariaLabel="Falar no WhatsApp"
+              source="cabecalho"
+            />
           </div>
         )}
 

@@ -1,4 +1,5 @@
-import type { SiteProduct } from "@/lib/catalog-rules"
+import type { Availability, SiteProduct } from "@/lib/catalog-rules"
+import { parseDays } from "@/lib/hours"
 import type { SiteStore } from "@/lib/store"
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://capinhasudi.com.br").replace(
@@ -8,18 +9,7 @@ export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://capinhasudi
 
 export const absolute = (path: string) => `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`
 
-/** Dias da semana em inglês, como o schema.org espera. */
-const DAY_MAP: Record<string, string> = {
-  segunda: "Monday",
-  terça: "Tuesday",
-  terca: "Tuesday",
-  quarta: "Wednesday",
-  quinta: "Thursday",
-  sexta: "Friday",
-  sábado: "Saturday",
-  sabado: "Saturday",
-  domingo: "Sunday",
-}
+const SCHEMA_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 /**
  * "Segunda a sexta" → Monday..Friday. É o que faz o horário aparecer no
@@ -28,18 +18,22 @@ const DAY_MAP: Record<string, string> = {
 export function openingHours(hours: SiteStore["hours"]) {
   return hours
     .map((slot) => {
-      const days = Object.entries(DAY_MAP)
-        .filter(([label]) => slot.days.toLowerCase().includes(label))
-        .map(([, day]) => day)
+      const days = parseDays(slot.days)
       if (!days.length) return null
       return {
         "@type": "OpeningHoursSpecification",
-        dayOfWeek: [...new Set(days)],
+        dayOfWeek: days.map((day) => SCHEMA_DAYS[day]),
         opens: slot.opens,
         closes: slot.closes,
       }
     })
     .filter(Boolean)
+}
+
+const SCHEMA_AVAILABILITY: Record<Availability, string> = {
+  in_stock: "https://schema.org/InStock",
+  on_order: "https://schema.org/BackOrder",
+  sold_out: "https://schema.org/OutOfStock",
 }
 
 export function localBusinessJsonLd(store: SiteStore) {
@@ -84,9 +78,7 @@ export function productJsonLd(product: SiteProduct, store: SiteStore) {
       "@type": "Offer",
       price: (product.priceFromCents / 100).toFixed(2),
       priceCurrency: "BRL",
-      availability: product.available
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      availability: SCHEMA_AVAILABILITY[product.availability],
       url: absolute(`/produtos/${product.slug}`),
       seller: { "@type": "Organization", name: store.name },
     },

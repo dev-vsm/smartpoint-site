@@ -13,6 +13,8 @@ const store: SiteStore = {
     { days: "Segunda a sexta", opens: "09:00", closes: "18:00" },
     { days: "Sábado", opens: "09:00", closes: "13:00" },
   ],
+  payment: { methods: [], maxInstallments: 1, interestFreeInstallments: 1, minInstallmentCents: 0 },
+  photos: [],
   brand: {},
 }
 
@@ -21,7 +23,7 @@ describe("dados estruturados", () => {
     expect(openingHours(store.hours)).toEqual([
       {
         "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Friday"],
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         opens: "09:00",
         closes: "18:00",
       },
@@ -51,23 +53,24 @@ describe("dados estruturados", () => {
   })
 
   it("oferta do produto usa preço em reais e disponibilidade", () => {
-    const data = productJsonLd(
-      {
-        id: "1",
-        slug: "capa",
-        name: "Capa",
-        images: [],
-        priceFromCents: 7990,
-        priceToCents: 7990,
-        hasVariants: false,
-        available: false,
-        highlight: false,
-        order: 0,
-      },
-      store,
-    )
+    const product = {
+      id: "1",
+      slug: "capa",
+      name: "Capa",
+      images: [],
+      priceFromCents: 7990,
+      priceToCents: 7990,
+      hasVariants: false,
+      availability: "sold_out" as const,
+      highlight: false,
+      order: 0,
+    }
+    const data = productJsonLd(product, store)
     expect(data.offers.price).toBe("79.90")
     expect(data.offers.availability).toBe("https://schema.org/OutOfStock")
+    expect(productJsonLd({ ...product, availability: "on_order" }, store).offers.availability).toBe(
+      "https://schema.org/BackOrder",
+    )
   })
 
   it("breadcrumb numera os níveis", () => {

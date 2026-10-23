@@ -20,4 +20,13 @@ describe("mensagens do WhatsApp", () => {
   it("produto sem variação nem preço fica só com o nome", () => {
     expect(productMessage({ name: "Película 3D" })).toBe("Olá! Tenho interesse em Película 3D.")
   })
+
+  it("sem estoque, já pede encomenda ou aviso de chegada", () => {
+    expect(productMessage({ name: "Boneco Goku", availability: "on_order" })).toBe(
+      "Olá! Tenho interesse em Boneco Goku.\nQuero encomendar: qual o prazo?",
+    )
+    expect(productMessage({ name: "Cabo", availability: "sold_out" })).toBe(
+      "Olá! Tenho interesse em Cabo.\nVi que está esgotado. Me avisa quando chegar?",
+    )
+  })
 })

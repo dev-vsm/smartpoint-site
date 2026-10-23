@@ -1,9 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
+import { AvailabilityBadge, CTA_LABEL } from "@/components/ui/availability"
 import { PriceTag } from "@/components/ui/price-tag"
+import type { Availability } from "@/lib/catalog-rules"
 import { productMessage } from "@/lib/messages"
 import { absolute } from "@/lib/seo"
+import { cn } from "@/lib/utils"
 
 /** Cards da primeira linha da grade no desktop: os que aparecem sem rolar. */
 export const ABOVE_THE_FOLD = 4
@@ -15,6 +18,7 @@ export interface ProductCardData {
   priceFromCents: number
   hasVariants: boolean
   category?: string
+  availability: Availability
 }
 
 /**
@@ -43,7 +47,9 @@ export function ProductCard({
     // Com variação o preço da etiqueta é "a partir de": não promete valor na mensagem.
     priceCents: product.hasVariants ? undefined : product.priceFromCents,
     url: absolute(`/produtos/${product.slug}`),
+    availability: product.availability,
   })
+  const soldOut = product.availability === "sold_out"
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
@@ -56,13 +62,17 @@ export function ProductCard({
               fill
               sizes={sizes}
               loading={eager ? "eager" : undefined}
-              className="object-contain p-3"
+              className={cn("object-contain p-3", soldOut && "opacity-50 grayscale")}
             />
           ) : (
             <span className="flex h-full items-center justify-center text-sm text-ink-soft">
               sem foto
             </span>
           )}
+          <AvailabilityBadge
+            availability={product.availability}
+            className="absolute top-2 left-2 shadow-sm"
+          />
         </div>
         <div className="pt-2 pb-3">
           <div className="mb-2 flex items-center justify-between gap-2 pl-3">
@@ -91,8 +101,10 @@ export function ProductCard({
       <WhatsAppCta
         number={whatsapp}
         message={message}
-        label="Quero esse"
-        ariaLabel={`Falar no WhatsApp sobre ${product.name}`}
+        label={CTA_LABEL[product.availability].short}
+        ariaLabel={`${CTA_LABEL[product.availability].short}: ${product.name}, pelo WhatsApp`}
+        source="card"
+        product={product.slug}
         className="min-h-10! w-full! rounded-none!"
       />
     </article>

@@ -47,7 +47,7 @@ export function NoticeStrip({ notices, className }: { notices: SiteNotice[]; cla
 }
 
 /** Traço simples, 1.5px, para pesar o mínimo no HTML de toda página. */
-function NoticeIconArt({ name }: { name: NoticeIcon }) {
+export function NoticeIconArt({ name, className }: { name: NoticeIcon; className?: string }) {
   return (
     <svg
       viewBox="0 0 20 20"
@@ -57,7 +57,7 @@ function NoticeIconArt({ name }: { name: NoticeIcon }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="h-4 w-4 shrink-0"
+      className={cn("h-4 w-4 shrink-0", className)}
     >
       {PATHS[name]}
     </svg>
@@ -95,6 +95,18 @@ const PATHS: Record<NoticeIcon, React.ReactNode> = {
     <>
       <circle cx="10" cy="10" r="7" />
       <path d="M10 6v4.5l3 1.5" />
+    </>
+  ),
+  online: (
+    <>
+      <rect x="5.5" y="2.5" width="9" height="15" rx="1.5" />
+      <path d="M8.5 7.5h3M10 7.5v5M8.5 11l1.5 1.5 1.5-1.5" />
+    </>
+  ),
+  garantia: (
+    <>
+      <path d="M10 2.5 4 4.5v5c0 3.6 2.6 6.4 6 8 3.4-1.6 6-4.4 6-8v-5z" />
+      <path d="m7.5 10 2 2 3-3.5" />
     </>
   ),
 }

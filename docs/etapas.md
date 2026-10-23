@@ -136,6 +136,20 @@ Peso ✅ · Lighthouse pendente (precisa de navegador).
 
 ---
 
+## Etapa 7.1 — Conversão e confiança (23/10/2026)
+
+- [x] Evento `whatsapp_click` com origem (card, produto, barra, cabeçalho, flutuante…) e produto
+- [x] Disponibilidade: pronta entrega, sob encomenda (action figures) e esgotado no fim da lista
+- [x] Página do produto: parcelamento, disponibilidade, "aberto agora", faixa de confiança,
+      trilha completa e barra fixa de preço e WhatsApp no celular
+- [x] Home: abertura (`siteContent/home`), faixa de confiança, depoimentos, "venha conhecer
+      a loja" e Instagram
+- [x] Avisos padrão do cabeçalho a partir de `settings/store` (entrega, cartões, Mercado Pago)
+- [x] Horário do JSON-LD corrigido ("Segunda a sexta" virava só segunda e sexta)
+- [ ] Cadastrar no admin: fotos da loja, depoimentos, garantia padrão e mais destaques
+
+---
+
 ## Etapa 8 — Publicação no admin (outro repositório)
 
 - [ ] Campo `site.published` (e `highlight`, `slug`, SEO) no cadastro de produto

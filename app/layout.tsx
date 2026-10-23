@@ -1,6 +1,7 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
 import { Archivo } from "next/font/google"
+import { ConversionTracker } from "@/components/layout/conversion-tracker"
 import { siteUrl } from "@/lib/seo"
 import { getStore } from "@/lib/store"
 import "./globals.css"
@@ -20,9 +21,10 @@ const archivo = Archivo({
  */
 export async function generateMetadata(): Promise<Metadata> {
   const store = await getStore()
-  const title = `${store.name} — Acessórios para celular em Uberlândia`
-  const description =
-    "Capinhas, películas, fones e carregadores com preço na etiqueta. Troca de tela, bateria e mais, no quiosque da Av. João Pinheiro. Fale pelo WhatsApp."
+  const city = store.city ?? "Uberlândia"
+  const title = `${store.name} — Acessórios para celular em ${city}`
+  const where = store.district ? `Retire na loja no ${store.district}` : "Retire na loja"
+  const description = `Capinhas, películas, fones e carregadores com preço na etiqueta. ${where} ou receba em toda ${city}. Fale pelo WhatsApp.`
 
   return {
     metadataBase: new URL(siteUrl),
@@ -49,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         {children}
         <Analytics />
+        <ConversionTracker />
       </body>
     </html>
   )

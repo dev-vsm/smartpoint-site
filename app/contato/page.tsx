@@ -12,11 +12,14 @@ import { catalogSubmenu } from "@/lib/submenu"
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
-  title: "Onde estamos",
-  alternates: { canonical: "/contato" },
-  description:
-    "Endereço, horário e contato do quiosque SmartPoint, na Av. João Pinheiro, em Uberlândia.",
+export async function generateMetadata(): Promise<Metadata> {
+  const store = await getStore()
+  const place = [store.addressLine, store.cityLine].filter(Boolean).join(", ")
+  return {
+    title: "Onde estamos",
+    alternates: { canonical: "/contato" },
+    description: `Endereço, horário e contato da ${store.name}${place ? `: ${place}` : ""}.`,
+  }
 }
 
 export default async function ContactPage() {
@@ -34,7 +37,7 @@ export default async function ContactPage() {
       <PageShell submenu={submenu} className="py-8">
         <SectionHeading
           title="Onde estamos"
-          description="Passe no quiosque ou resolva pelo WhatsApp — o que for mais rápido para você."
+          description="Passe na loja ou resolva pelo WhatsApp — o que for mais rápido para você."
         />
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -75,7 +78,7 @@ export default async function ContactPage() {
             )}
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <WhatsAppCta number={store.whatsapp} className="w-auto" />
+              <WhatsAppCta number={store.whatsapp} className="w-auto" source="contato" />
               {store.social.map((link) => (
                 <a
                   key={link.network}

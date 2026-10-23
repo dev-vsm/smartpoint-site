@@ -19,6 +19,21 @@ const doc = {
     googleMapsUrl: "https://maps.app.goo.gl/abc",
     googleMapsEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18",
   },
+  hours: [
+    { days: "Segunda a sexta", opens: "09:30", closes: "20:00" },
+    { days: "", opens: "09:00", closes: "12:00" },
+  ],
+  photos: [
+    "https://cdn/fachada.jpg",
+    { url: "https://cdn/balcao.jpg", alt: "Balcão" },
+    { alt: "x" },
+  ],
+  payment: {
+    interestFreeInstallments: 1,
+    minInstallmentCents: 0,
+    maxInstallments: 12,
+    methods: ["credit", "debit", "pix_maquina", "pix_chave", "cash", "payment_link", "boleto"],
+  },
   redesSociais: {
     whatsapp: "(34) 99834-9528",
     instagram: "https://www.instagram.com/udiasmartpoint/",
@@ -46,6 +61,30 @@ describe("toSiteStore", () => {
       cityLine: "Uberlândia, MG",
       postalCode: "38401-883",
     })
+  })
+
+  it("horário, fotos e pagamento: só o que é válido", () => {
+    const store = toSiteStore(doc)
+    expect(store.city).toBe("Uberlândia")
+    expect(store.district).toBe("Jardim Brasília")
+    expect(store.hours).toEqual([{ days: "Segunda a sexta", opens: "09:30", closes: "20:00" }])
+    expect(store.photos).toEqual([
+      { url: "https://cdn/fachada.jpg" },
+      { url: "https://cdn/balcao.jpg", alt: "Balcão" },
+    ])
+    expect(store.payment).toEqual({
+      methods: ["credit", "debit", "pix_maquina", "pix_chave", "cash", "payment_link"],
+      maxInstallments: 12,
+      interestFreeInstallments: 1,
+      minInstallmentCents: 0,
+    })
+  })
+
+  it("pagamento ausente ou torto vira só à vista, sem método", () => {
+    expect(toSiteStore({}).payment).toEqual(FALLBACK_STORE.payment)
+    expect(
+      toSiteStore({ payment: { maxInstallments: 3, interestFreeInstallments: 10 } }).payment,
+    ).toMatchObject({ maxInstallments: 3, interestFreeInstallments: 3 })
   })
 
   it("o mapa usa o link e o embed cadastrados em `endereco`", () => {

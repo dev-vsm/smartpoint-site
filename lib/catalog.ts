@@ -51,8 +51,10 @@ async function readPublishedProducts(): Promise<SiteProduct[]> {
  * `unstable_cache` é o caminho do Next 16 sem Cache Components; ao migrar para
  * `cacheComponents`, ele vira a diretiva `"use cache"` com `cacheLife`.
  */
+// A versão na chave muda quando o formato de `SiteProduct` muda: o cache de
+// dados sobrevive a deploys e o código novo não pode ler o objeto antigo.
 export const listProducts = cache(
-  unstable_cache(readPublishedProducts, ["catalog:published-products"], {
+  unstable_cache(readPublishedProducts, ["catalog:published-products:v2"], {
     revalidate: 300,
     tags: ["products"],
   }),

@@ -125,6 +125,7 @@ export async function Footer() {
                 <a
                   href={contact.href}
                   {...(contact.external && { target: "_blank", rel: "noopener noreferrer" })}
+                  {...(contact.label === "WhatsApp" && { "data-wa-source": "rodape" })}
                   className={linkStyle}
                 >
                   {contact.text}

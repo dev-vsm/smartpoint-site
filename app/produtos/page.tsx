@@ -43,7 +43,7 @@ export async function generateMetadata({
   return {
     title,
     description:
-      "O que tem no quiosque hoje, com preço na etiqueta. Escolha e fale com a gente pelo WhatsApp.",
+      "O que tem na loja hoje, com preço na etiqueta. Escolha e fale com a gente pelo WhatsApp.",
     // Cada página da categoria é canônica de si mesma; a busca não entra no
     // índice (resultado volátil), mas os links dela são seguidos.
     alternates: { canonical: catalogHref({ category, page: page ?? 1 }) },

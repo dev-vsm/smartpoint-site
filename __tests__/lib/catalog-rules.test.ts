@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  availabilityOf,
   catalogHref,
   collectCategories,
   filterProducts,
@@ -64,8 +65,61 @@ describe("produto da vitrine", () => {
     expect(hasPrice(toSiteProduct(raw({ priceRange: { min: 0, max: 0 } })))).toBe(false)
   })
 
-  it("sem estoque continua visível, mas marcado como indisponível", () => {
-    expect(toSiteProduct(raw({ totalStock: 0 })).available).toBe(false)
+  it("sem estoque continua visível, mas marcado como esgotado", () => {
+    expect(toSiteProduct(raw()).availability).toBe("in_stock")
+    expect(toSiteProduct(raw({ totalStock: 0 })).availability).toBe("sold_out")
+  })
+
+  it("action figure sem estoque vira encomenda; com estoque, pronta entrega", () => {
+    const figure = (totalStock: number) =>
+      toSiteProduct(
+        raw({
+          totalStock,
+          categorization: {
+            categoryName: "Presentes e Colecionáveis",
+            subcategoryId: "presentes-e-colecionaveis--bonecos",
+            subcategoryName: "Bonecos e action figures",
+          },
+        }),
+      )
+    expect(figure(0).availability).toBe("on_order")
+    expect(figure(2).availability).toBe("in_stock")
+    expect(availabilityOf(0, "cabos-e-adaptadores--cabos-para-celular")).toBe("sold_out")
+  })
+
+  it("esgotado vai para o fim, nem destaque passa na frente", () => {
+    const list = [
+      toSiteProduct(
+        raw({
+          id: "x",
+          name: "Antes esgotado",
+          totalStock: 0,
+          site: { published: true, highlight: true, order: 0 },
+        }),
+      ),
+      toSiteProduct(raw({ id: "b", name: "Bateria" })),
+      toSiteProduct(
+        raw({
+          id: "f",
+          name: "Figura",
+          totalStock: 0,
+          categorization: { subcategoryId: "presentes-e-colecionaveis--bonecos" },
+        }),
+      ),
+    ]
+    expect(sortForShowcase(list).map((item) => item.name)).toEqual([
+      "Bateria",
+      "Figura",
+      "Antes esgotado",
+    ])
+    expect(pickHighlights(sortForShowcase(list))).toEqual([])
+  })
+
+  it("busca também olha a subcategoria", () => {
+    const product = toSiteProduct(
+      raw({ name: "Goku", categorization: { subcategoryName: "Bonecos e action figures" } }),
+    )
+    expect(filterProducts([product], { query: "action figure" })).toHaveLength(1)
   })
 
   it("ordena destaque, depois ordem manual, depois nome", () => {

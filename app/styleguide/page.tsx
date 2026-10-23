@@ -5,7 +5,7 @@ import { NoticeStrip } from "@/components/layout/notice-strip"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { Button } from "@/components/ui/button"
 import { PriceTag } from "@/components/ui/price-tag"
-import { ProductCard } from "@/components/ui/product-card"
+import { ProductCard, type ProductCardData } from "@/components/ui/product-card"
 import { Container, SectionHeading } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { SiteNotice } from "@/lib/site-content"
@@ -21,13 +21,14 @@ const NOTICES: SiteNotice[] = [
   { text: "10% à vista no PIX", icon: "pix", tone: "promo" },
 ]
 
-const PRODUCTS = [
+const PRODUCTS: ProductCardData[] = [
   {
     slug: "capa-iphone-15",
     name: "Capa anti-impacto iPhone 15",
     priceFromCents: 7990,
     hasVariants: true,
     category: "Capinhas",
+    availability: "in_stock",
   },
   {
     slug: "pelicula-3d",
@@ -35,6 +36,7 @@ const PRODUCTS = [
     priceFromCents: 3500,
     hasVariants: false,
     category: "Películas",
+    availability: "in_stock",
   },
   {
     slug: "fone-bluetooth",
@@ -42,6 +44,7 @@ const PRODUCTS = [
     priceFromCents: 12900,
     hasVariants: true,
     category: "Áudio",
+    availability: "on_order",
   },
   {
     slug: "carregador-turbo",
@@ -49,6 +52,7 @@ const PRODUCTS = [
     priceFromCents: 8900,
     hasVariants: false,
     category: "Carregadores",
+    availability: "sold_out",
   },
 ]
 

@@ -1,20 +1,26 @@
 import type { Metadata } from "next"
+import { VisitStore } from "@/components/home/visit-store"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppCta, WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { SectionHeading } from "@/components/ui/section"
+import { TrustList } from "@/components/ui/trust-list"
 import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
+import { trustItems } from "@/lib/trust"
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/sobre" },
-  title: "A loja — SmartPoint em Uberlândia",
-  description:
-    "Quiosque de acessórios para celular na Av. João Pinheiro, em Uberlândia. Atendimento rápido, no balcão e pelo WhatsApp.",
+export async function generateMetadata(): Promise<Metadata> {
+  const store = await getStore()
+  const city = store.city ?? "Uberlândia"
+  return {
+    alternates: { canonical: "/sobre" },
+    title: `A loja — ${store.name} em ${city}`,
+    description: `Loja de acessórios para celular${store.district ? ` no ${store.district}` : ""}, em ${city}. Atendimento no balcão e pelo WhatsApp.`,
+  }
 }
 
 export default async function AboutPage() {
@@ -36,9 +42,8 @@ export default async function AboutPage() {
           ) : (
             <>
               <p>
-                A {store.name} é um quiosque de rua: acessório escolhido na hora e película colocada
-                na hora. Sem vitrine fechada, sem senha de atendimento — é chegar, perguntar e
-                resolver.
+                A {store.name} é loja de acessórios para celular: escolha na vitrine, tire a dúvida
+                no balcão ou pelo WhatsApp e leve na hora.
               </p>
               <p>
                 Trabalhamos com capinhas, películas, fones, carregadores e cabos. O que não está na
@@ -48,8 +53,15 @@ export default async function AboutPage() {
           )}
         </div>
         <div className="mt-8">
-          <WhatsAppCta number={store.whatsapp} label="Falar com a loja" className="w-auto" />
+          <WhatsAppCta
+            number={store.whatsapp}
+            label="Falar com a loja"
+            className="w-auto"
+            source="sobre"
+          />
         </div>
+        <TrustList items={trustItems(store)} variant="bar" className="mt-10" />
+        <VisitStore store={store} className="mt-12" />
       </PageShell>
       <Footer />
       <WhatsAppFloating number={store.whatsapp} />

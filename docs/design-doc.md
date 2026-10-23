@@ -27,7 +27,7 @@ site próprio, com o SEO e a conversa de venda dela.
 
 | Métrica | Alvo na v1 |
 |---|---|
-| Cliques em "Chamar no WhatsApp" | principal indicador de conversão |
+| Cliques em "Chamar no WhatsApp" | principal indicador de conversão — evento `whatsapp_click` (origem, produto, página) no Vercel Analytics |
 | Páginas de produto indexadas no Google | > 80% do catálogo publicado |
 | Core Web Vitals (campo) | LCP < 2,5s · INP < 200ms · CLS < 0,1 |
 | Peso da home | < 250 KB de JS |
@@ -145,6 +145,20 @@ site próprio, com o SEO e a conversa de venda dela.
 `site.published === true`. O preço mostrado é o menor preço entre as variantes ativas
 ("a partir de" quando houver mais de um valor).
 
+**Categoria:** vem de `categorization` (`categoryName`, `subcategoryId`, `subcategoryName`,
+ids de `catalog_categories`); o campo antigo `category` só vale sem ela.
+
+**Disponibilidade** (`lib/catalog-rules.ts`):
+
+| Situação | Quando | Na vitrine |
+|---|---|---|
+| Pronta entrega | `totalStock > 0` | Selo "Pronta entrega", botão "Quero esse" |
+| Sob encomenda | sem estoque **e** subcategoria em `ON_ORDER_SUBCATEGORIES` (hoje só bonecos e action figures) | Selo laranja, botão "Encomendar" |
+| Esgotado | sem estoque, qualquer outra subcategoria | Continua visível, foto esmaecida, botão "Avise-me", **sempre no fim da lista** e nunca em destaque |
+
+A mesma regra vale por variação na página do produto: variação esgotada fica desativada
+enquanto houver outra disponível.
+
 ### 6.2 Conteúdo editorial (nova coleção)
 
 ```ts
@@ -185,6 +199,14 @@ mesmo documento que o admin já edita em `/loja` e que alimenta o recibo da maqu
   social?: { ... };           // alternativa a redesSociais (aceita, não usado hoje)
   mapsUrl?: string;           // alternativa a endereco.googleMapsUrl (aceita, não usado hoje)
   about?: string;             // texto curto usado na página Sobre
+  payment?: {                 // faixa de confiança, avisos padrão e "ou em até 12x"
+    methods: Array<'credit' | 'debit' | 'pix_maquina' | 'pix_chave' | 'cash' | 'payment_link'>;
+    maxInstallments: number;           // 1 = só à vista
+    interestFreeInstallments: number;  // 1 = nenhuma sem juros
+    minInstallmentCents: number;
+  };
+  photos?: Array<string | { url: string; alt?: string }>;  // fachada e balcão (home e Sobre)
+  warranty?: string;          // garantia padrão; a do produto, quando houver, vale mais
   brand?: {
     logoUrl: string;          // marca principal (SVG/PNG transparente) — cabeçalho e rodapé
     logoDarkUrl?: string;     // versão para fundo escuro, se houver
@@ -206,6 +228,12 @@ compartilhamento. Duas consequências técnicas:
 
 > Não confundir com `receiptLogoBase64`, que já existe: aquele é um BMP monocromático para a
 > impressora da maquininha e não serve para a web.
+
+**Confiança e avisos** (`lib/trust.ts`): retirada (bairro e cidade), "entrega em toda
+<cidade>", cartões com parcelamento, Pix, pagamento online pelo link do Mercado Pago
+(`payment_link`) e garantia saem desse documento. Sem `siteContent/notices`, os avisos do
+cabeçalho são essas mesmas frases. Não há campo de entrega: ela é anunciada para a cidade
+do endereço.
 
 **Regra:** a loja é a **fonte única** desses dados. O site não tem endereço, telefone nem
 horário escritos no código — só um fallback mínimo para o caso de o documento não existir.

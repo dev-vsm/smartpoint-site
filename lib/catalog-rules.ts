@@ -45,12 +45,35 @@ export interface SiteProduct {
   priceFromCents: number
   priceToCents: number
   hasVariants: boolean
-  available: boolean
+  availability: Availability
+  /** Subcategoria da classificação atual (`categorization.subcategoryName`). */
+  subcategory?: string
+  /** Id da subcategoria — decide se a variação esgotada vira encomenda. */
+  subcategoryId?: string
   highlight: boolean
   order: number
   warranty?: string
   seoTitle?: string
   seoDescription?: string
+}
+
+/**
+ * Situação do produto na vitrine:
+ * - `in_stock`: tem no balcão, pronto para retirar ou entregar;
+ * - `on_order`: acabou, mas a loja encomenda (ver `ON_ORDER_SUBCATEGORIES`);
+ * - `sold_out`: acabou e não há encomenda — continua visível, sempre no fim da lista.
+ */
+export type Availability = "in_stock" | "on_order" | "sold_out"
+
+/**
+ * Subcategorias que a loja traz por encomenda quando o estoque zera — hoje só
+ * os bonecos e action figures. O id é o de `catalog_categories`.
+ */
+export const ON_ORDER_SUBCATEGORIES = new Set(["presentes-e-colecionaveis--bonecos"])
+
+export function availabilityOf(stock: number, subcategoryId?: string): Availability {
+  if (stock > 0) return "in_stock"
+  return subcategoryId && ON_ORDER_SUBCATEGORIES.has(subcategoryId) ? "on_order" : "sold_out"
 }
 
 /** Aparece na vitrine quando está ativo no estoque **e** marcado para o site. */
@@ -113,7 +136,12 @@ export function toSiteProduct(product: RawProduct): SiteProduct {
     priceToCents: max,
     // "a partir de" só quando os preços realmente variam.
     hasVariants: max > min,
-    available: (product.totalStock ?? 0) > 0,
+    availability: availabilityOf(
+      product.totalStock ?? 0,
+      product.categorization?.subcategoryId?.trim(),
+    ),
+    subcategory: product.categorization?.subcategoryName?.trim() || undefined,
+    subcategoryId: product.categorization?.subcategoryId?.trim() || undefined,
     highlight: product.site?.highlight === true,
     order: product.site?.order ?? Number.MAX_SAFE_INTEGER,
     warranty: product.warranty,
@@ -122,9 +150,14 @@ export function toSiteProduct(product: RawProduct): SiteProduct {
   }
 }
 
-/** Vitrine ordenada: destaque primeiro, depois a ordem manual, depois o nome. */
+/**
+ * Vitrine ordenada: o que dá para levar vem antes do esgotado — sempre, nem
+ * destaque passa na frente. Dentro de cada grupo: destaque, ordem manual, nome.
+ */
 export function sortForShowcase(products: SiteProduct[]): SiteProduct[] {
   return [...products].sort((a, b) => {
+    const soldOut = Number(a.availability === "sold_out") - Number(b.availability === "sold_out")
+    if (soldOut !== 0) return soldOut
     if (a.highlight !== b.highlight) return a.highlight ? -1 : 1
     if (a.order !== b.order) return a.order - b.order
     return a.name.localeCompare(b.name, "pt-BR")
@@ -134,9 +167,12 @@ export function sortForShowcase(products: SiteProduct[]): SiteProduct[] {
 /**
  * Destaques marcados no admin, na ordem da vitrine. Sem fallback: a home já
  * mostra o começo do catálogo logo abaixo, então repeti-lo seria ruído.
+ * Esgotado não vira destaque: vitrine de oferta é do que dá para levar.
  */
 export function pickHighlights(products: SiteProduct[], limit = 12): SiteProduct[] {
-  return products.filter((product) => product.highlight).slice(0, limit)
+  return products
+    .filter((product) => product.highlight && product.availability !== "sold_out")
+    .slice(0, limit)
 }
 
 /** Lista de categorias com contagem, para os filtros da vitrine. */
@@ -161,7 +197,7 @@ function normalize(value: string): string {
 
 /**
  * Filtro da vitrine: categoria exata e busca por termos (todos precisam
- * aparecer no nome, na categoria ou na marca, em qualquer ordem).
+ * aparecer no nome, na categoria, na subcategoria ou na marca, em qualquer ordem).
  */
 export function filterProducts(
   products: SiteProduct[],
@@ -174,7 +210,9 @@ export function filterProducts(
     if (category && product.category !== category) return false
     if (!terms.length) return true
     const haystack = normalize(
-      [product.name, product.category, product.brand].filter(Boolean).join(" "),
+      [product.name, product.category, product.subcategory, product.brand]
+        .filter(Boolean)
+        .join(" "),
     )
     return terms.every((term) => haystack.includes(term))
   })

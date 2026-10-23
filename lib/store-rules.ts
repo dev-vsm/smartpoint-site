@@ -1,3 +1,4 @@
+import type { HoursSlot } from "@/lib/hours"
 import { buildStoreMap, type StoreMap } from "@/lib/maps"
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp"
 
@@ -15,6 +16,39 @@ export interface SocialLink {
   url: string
 }
 
+/** Formas de pagamento como o admin grava em `payment.methods`. */
+export type PaymentMethod =
+  | "credit"
+  | "debit"
+  | "pix_maquina"
+  | "pix_chave"
+  | "cash"
+  | "payment_link"
+
+const PAYMENT_METHODS: PaymentMethod[] = [
+  "credit",
+  "debit",
+  "pix_maquina",
+  "pix_chave",
+  "cash",
+  "payment_link",
+]
+
+export interface StorePayment {
+  methods: PaymentMethod[]
+  /** Parcelas no crédito; 1 = só à vista. */
+  maxInstallments: number
+  /** Até quantas parcelas sem juros; 1 = nenhuma. */
+  interestFreeInstallments: number
+  /** Valor mínimo de cada parcela, em centavos; 0 = sem mínimo. */
+  minInstallmentCents: number
+}
+
+export interface StorePhoto {
+  url: string
+  alt?: string
+}
+
 export interface SiteStore {
   name: string
   legalName?: string
@@ -24,13 +58,21 @@ export interface SiteStore {
   whatsapp: string
   addressLine: string
   cityLine: string
+  /** Só a cidade ("Uberlândia") e o bairro, para frases como "entrega em toda Uberlândia". */
+  city?: string
+  district?: string
   postalCode?: string
   /** Derivado do link/embed cadastrado ou do endereço; ausente quando não há onde apontar. */
   map?: StoreMap
   about?: string
   /** Só as redes preenchidas, na ordem de `SOCIAL_NETWORKS`. */
   social: SocialLink[]
-  hours: Array<{ days: string; opens: string; closes: string }>
+  hours: HoursSlot[]
+  payment: StorePayment
+  /** Fotos da loja (fachada, balcão) — o que prova que ela existe. */
+  photos: StorePhoto[]
+  /** Garantia padrão da loja; a do produto, quando houver, vale mais. */
+  warranty?: string
   brand: {
     logoUrl?: string
     logoDarkUrl?: string
@@ -60,6 +102,8 @@ export const FALLBACK_STORE: SiteStore = {
   cityLine: "",
   social: [],
   hours: [],
+  payment: { methods: [], maxInstallments: 1, interestFreeInstallments: 1, minInstallmentCents: 0 },
+  photos: [],
   brand: {},
 }
 
@@ -72,6 +116,46 @@ function text(value: unknown): string | undefined {
 
 function record(value: unknown): Doc {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Doc) : {}
+}
+
+/** Inteiro ≥ `min`, ou o padrão. */
+function count(value: unknown, fallback: number, min = 1): number {
+  const number = Number(value)
+  return Number.isFinite(number) && number >= min ? Math.floor(number) : fallback
+}
+
+function toPayment(value: unknown): StorePayment {
+  const payment = record(value)
+  const methods = Array.isArray(payment.methods) ? payment.methods : []
+  const maxInstallments = count(payment.maxInstallments, 1)
+  return {
+    methods: PAYMENT_METHODS.filter((method) => methods.includes(method)),
+    maxInstallments,
+    interestFreeInstallments: Math.min(count(payment.interestFreeInstallments, 1), maxInstallments),
+    minInstallmentCents: count(payment.minInstallmentCents, 0, 0),
+  }
+}
+
+/** Aceita `["https://…"]` ou `[{ url, alt }]`; ignora o resto. */
+function toPhotos(value: unknown): StorePhoto[] {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    const url = typeof item === "string" ? text(item) : text(record(item).url)
+    if (!url) return []
+    const alt = typeof item === "string" ? undefined : text(record(item).alt)
+    return [alt ? { url, alt } : { url }]
+  })
+}
+
+function toHours(value: unknown): HoursSlot[] {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    const slot = record(item)
+    const days = text(slot.days)
+    const opens = text(slot.opens)
+    const closes = text(slot.closes)
+    return days && opens && closes ? [{ days, opens, closes }] : []
+  })
 }
 
 /**
@@ -103,6 +187,8 @@ export function toSiteStore(data: Doc | undefined): SiteStore {
     whatsapp: whatsapp ? normalizeWhatsAppNumber(whatsapp) : FALLBACK_STORE.whatsapp,
     addressLine,
     cityLine,
+    city: text(address.cidade),
+    district: text(address.bairro),
     postalCode,
     map: buildStoreMap({
       mapsUrl: text(address.googleMapsUrl) ?? text(data.mapsUrl),
@@ -116,7 +202,10 @@ export function toSiteStore(data: Doc | undefined): SiteStore {
       const url = text(socials[network])
       return url ? [{ network, label, url }] : []
     }),
-    hours: Array.isArray(data.hours) ? data.hours : [],
+    hours: toHours(data.hours),
+    payment: toPayment(data.payment),
+    photos: toPhotos(data.photos),
+    warranty: text(data.warranty) ?? text(data.garantia),
     brand: record(data.brand) as SiteStore["brand"],
   }
 }
