@@ -1,51 +1,55 @@
 import Link from "next/link"
 import { Suspense } from "react"
 import { Brand } from "@/components/layout/brand"
-import { NoticeStrip } from "@/components/layout/notice-strip"
 import { SearchField } from "@/components/layout/search-field"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
-import type { SiteNotice } from "@/lib/site-content"
+import type { HomeHero } from "@/lib/home-content"
 
-/**
- * A marca mora na margem da esquerda — o vazio que sobra dos lados da faixa
- * centralizada —, e a faixa fica com avisos e busca, centralizados. As
- * categorias moram na coluna lateral (`PageShell`), não aqui.
- *
- * A margem só existe em tela larga: a faixa tem 1536px (`--container-site`) e a
- * marca pede mais 160 de cada lado para o conteúdo seguir centralizado. Abaixo
- * de 1856px, então, a marca volta para cima das linhas.
- *
- * O WhatsApp espelha a marca no canto direito, só do tablet para cima: no
- * celular ele é o botão flutuante (`WhatsAppFloating`), que fica sempre à mão.
- */
+/** Cabeçalho fixo com marca, busca e contato. */
 export function Header({
   storeName,
   logoUrl,
-  notices = [],
   whatsapp,
+  hero,
+  city,
 }: {
   storeName: string
   logoUrl?: string
-  notices?: SiteNotice[]
   whatsapp?: string
+  hero?: HomeHero
+  city?: string
 }) {
   return (
-    <header className="sticky top-0 z-30 bg-paper">
-      <div className="relative mx-auto max-w-site px-4">
-        <Link
-          href="/"
-          className="flex h-14 w-40 items-center min-[1856px]:absolute min-[1856px]:top-0 min-[1856px]:right-full min-[1856px]:h-full min-[1856px]:w-[calc((100vw-var(--container-site))/2)] min-[1856px]:justify-center"
-        >
-          <Brand
-            name={storeName}
-            logoUrl={logoUrl}
-            className="min-[1856px]:w-full! min-[1856px]:object-center! min-[1856px]:text-center"
-          />
-        </Link>
+    <header className="sticky top-0 z-30 border-b border-line bg-paper shadow-sm shadow-ink/5">
+      {/* Celular: marca numa linha, busca na de baixo. Do tablet para cima,
+          marca, busca e WhatsApp dividem uma linha só. */}
+      <div className="mx-auto flex max-w-site flex-wrap items-center gap-x-4 px-4 md:h-24 md:flex-nowrap">
+        <div className="flex h-24 w-full min-w-0 flex-col justify-center gap-1 md:w-[44%] md:max-w-md md:shrink-0">
+          <Link href="/" className="flex h-6 w-fit max-w-full items-center">
+            <Brand name={storeName} logoUrl={logoUrl} />
+          </Link>
+          <p className="line-clamp-1 text-xs font-semibold leading-tight text-ink">
+            {hero?.title ?? `Acessórios para celular${city ? ` em ${city}` : ""}`}
+          </p>
+          {hero?.subtitle && (
+            <p className="line-clamp-1 text-[11px] leading-tight text-ink-soft">{hero.subtitle}</p>
+          )}
+          <Link
+            href={hero?.ctaHref ?? "/produtos"}
+            className="w-fit text-[11px] font-semibold leading-tight text-brand-strong hover:underline"
+          >
+            {hero?.ctaLabel ?? "Encontre seu acessório"} <span aria-hidden="true">→</span>
+          </Link>
+        </div>
 
-        {/* `100vw` inclui a barra de rolagem: o `- 1rem` evita rolagem lateral. */}
+        <div className="w-full pb-2 md:mx-auto md:max-w-3xl md:flex-1 md:pb-0">
+          <Suspense fallback={null}>
+            <SearchField />
+          </Suspense>
+        </div>
+
         {whatsapp && (
-          <div className="absolute top-0 right-4 hidden h-14 items-center md:flex min-[1856px]:right-auto min-[1856px]:left-full min-[1856px]:h-full min-[1856px]:w-[calc((100vw-var(--container-site))/2-1rem)] min-[1856px]:justify-center">
+          <div className="hidden shrink-0 items-center md:flex">
             <WhatsAppCta
               number={whatsapp}
               label="WhatsApp"
@@ -54,17 +58,6 @@ export function Header({
             />
           </div>
         )}
-
-        <NoticeStrip notices={notices} className="hidden justify-center-safe py-3 md:flex" />
-
-        {/* No celular os avisos ganham a linha inteira: no topo não cabem. */}
-        <NoticeStrip notices={notices} className="justify-center-safe pb-1 md:hidden" />
-
-        <div className="mx-auto max-w-xl py-2">
-          <Suspense fallback={null}>
-            <SearchField />
-          </Suspense>
-        </div>
       </div>
     </header>
   )

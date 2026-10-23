@@ -1,12 +1,10 @@
 import type { Metadata } from "next"
 import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
 import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { JsonLd } from "@/components/seo/json-ld"
 import { SectionHeading } from "@/components/ui/section"
 import { localBusinessJsonLd } from "@/lib/seo"
-import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
@@ -23,17 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const [store, notices, submenu] = await Promise.all([getStore(), listNotices(), catalogSubmenu()])
+  const [store, submenu] = await Promise.all([getStore(), catalogSubmenu()])
 
   return (
     <>
       <JsonLd data={localBusinessJsonLd(store)} />
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        notices={notices}
-        whatsapp={store.whatsapp}
-      />
       <PageShell submenu={submenu} className="py-8">
         <SectionHeading
           title="Onde estamos"

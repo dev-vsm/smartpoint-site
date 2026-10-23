@@ -33,18 +33,25 @@
 
   /* Largura útil do site (classe `max-w-site`): cabeçalho, miolo e rodapé. */
   --container-site: 96rem;
+
+  /* Avisos do topo no celular: a fila anda meia largura (uma cópia) e recomeça. */
+  --animate-marquee: marquee var(--marquee-duration, 18s) linear infinite;
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }
 
-/*
- * Altura do cabeçalho fixo, para a coluna de categorias parar logo abaixo dele.
- * Até 1856px a marca ocupa uma linha própria (+56px); acima, vai para a margem.
- */
+/* Apenas a linha de navegação fica fixa; banners e avisos rolam com a página. */
 :root {
-  --header-height: 167px;
+  --header-height: 149px;
+  scroll-padding-top: calc(var(--header-height) + 16px);
 }
-@media (min-width: 1856px) {
+
+@media (min-width: 768px) {
   :root {
-    --header-height: 111px;
+    --header-height: 97px;
   }
 }
 

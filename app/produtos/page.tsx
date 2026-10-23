@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { Pagination } from "@/components/catalog/pagination"
 import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
 import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { ButtonLink } from "@/components/ui/button"
@@ -10,7 +9,6 @@ import { ABOVE_THE_FOLD, ProductCard } from "@/components/ui/product-card"
 import { listProducts } from "@/lib/catalog"
 import { CATALOG_PAGE_SIZE, catalogHref, filterProducts } from "@/lib/catalog-rules"
 import { paginate, parsePage } from "@/lib/pagination"
-import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
@@ -52,12 +50,11 @@ export async function generateMetadata({
 }
 
 export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
-  const [{ category, query, page }, store, products, submenu, notices] = await Promise.all([
+  const [{ category, query, page }, store, products, submenu] = await Promise.all([
     readFilters(searchParams),
     getStore(),
     listProducts(),
     catalogSubmenu(),
-    listNotices(),
   ])
 
   if (page === null) notFound()
@@ -69,12 +66,6 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
 
   return (
     <>
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        notices={notices}
-        whatsapp={store.whatsapp}
-      />
       <PageShell submenu={submenu} className="py-8">
         <h1 className="mb-5 text-2xl first-letter:uppercase">{category ?? "Todos os produtos"}</h1>
         {query && (

@@ -1,12 +1,10 @@
 import type { Metadata } from "next"
 import { VisitStore } from "@/components/home/visit-store"
 import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
 import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppCta, WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { SectionHeading } from "@/components/ui/section"
 import { TrustList } from "@/components/ui/trust-list"
-import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 import { trustItems } from "@/lib/trust"
@@ -24,16 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const [store, notices, submenu] = await Promise.all([getStore(), listNotices(), catalogSubmenu()])
+  const [store, submenu] = await Promise.all([getStore(), catalogSubmenu()])
 
   return (
     <>
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        notices={notices}
-        whatsapp={store.whatsapp}
-      />
       <PageShell submenu={submenu} className="py-8">
         <SectionHeading title="A loja" />
         <div className="max-w-prose space-y-4 text-ink-soft">

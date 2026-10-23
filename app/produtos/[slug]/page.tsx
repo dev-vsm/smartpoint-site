@@ -3,7 +3,6 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ProductDetail } from "@/components/catalog/product-detail"
 import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
 import { PageShell } from "@/components/layout/page-shell"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ProductCard } from "@/components/ui/product-card"
@@ -11,7 +10,6 @@ import { SectionHeading } from "@/components/ui/section"
 import { getProductBySlug, listProducts, listRelated, listVariants } from "@/lib/catalog"
 import { catalogHref } from "@/lib/catalog-rules"
 import { absolute, breadcrumbJsonLd, productJsonLd } from "@/lib/seo"
-import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 import { installmentsText, trustItems } from "@/lib/trust"
@@ -45,12 +43,11 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
   const product = await getProductBySlug(slug)
   if (!product) notFound()
 
-  const [store, variants, related, submenu, notices] = await Promise.all([
+  const [store, variants, related, submenu] = await Promise.all([
     getStore(),
     listVariants(product.id),
     listRelated(product),
     catalogSubmenu(),
-    listNotices(),
   ])
   const crumbs = [
     { name: "Início", path: "/" },
@@ -65,12 +62,6 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
     <>
       <JsonLd data={productJsonLd(product, store)} />
       <JsonLd data={breadcrumbJsonLd(crumbs)} />
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        notices={notices}
-        whatsapp={store.whatsapp}
-      />
       <PageShell submenu={submenu} className="py-8">
         <nav aria-label="Você está em" className="mb-6 text-sm text-ink-soft">
           <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">

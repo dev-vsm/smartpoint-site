@@ -1,8 +1,11 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
 import { Archivo } from "next/font/google"
+import { StoreBanners } from "@/components/home/store-banners"
 import { ConversionTracker } from "@/components/layout/conversion-tracker"
+import { Header } from "@/components/layout/header"
 import { siteUrl } from "@/lib/seo"
+import { getHomeContent } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import "./globals.css"
 
@@ -45,10 +48,19 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const [store, home] = await Promise.all([getStore(), getHomeContent()])
   return (
     <html lang="pt-BR" className={archivo.variable}>
       <body>
+        <Header
+          storeName={store.name}
+          logoUrl={store.brand.logoUrl}
+          whatsapp={store.whatsapp}
+          hero={home.hero}
+          city={store.city}
+        />
+        <StoreBanners store={store} />
         {children}
         <Analytics />
         <ConversionTracker />

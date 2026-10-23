@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
 import { NoticeStrip } from "@/components/layout/notice-strip"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { Button } from "@/components/ui/button"
@@ -59,7 +58,6 @@ const PRODUCTS: ProductCardData[] = [
 export default function Styleguide() {
   return (
     <>
-      <Header storeName="SmartPoint" notices={NOTICES} />
       <main className="py-10">
         <Container className="space-y-12">
           <section>

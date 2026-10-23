@@ -2,47 +2,89 @@ import type { NoticeIcon, SiteNotice } from "@/lib/site-content"
 import { cn } from "@/lib/utils"
 
 /**
- * Faixa de avisos do cabeçalho, no espaço que era do menu: entrega, formas de
- * pagamento, promoção do momento. Texto e ícone vêm do banco (`siteContent/
- * notices`) — nada de promessa escrita no código além do padrão mínimo.
+ * Avisos no topo de toda página: entrega, formas de pagamento, promoção do
+ * momento. Cada aviso é um cartão próprio, em cor cheia e com sombra, solto
+ * sobre o fundo — é a primeira coisa que o olho pega. Texto e ícone vêm do banco (`siteContent/notices`, ou os padrões
+ * de `settings/store`) — nada de promessa escrita no código.
+ *
+ * No desktop os avisos ficam lado a lado; no celular e no tablet, onde não cabem, passam
+ * rolando sozinhos (só CSS). Quem prefere menos movimento recebe a lista parada,
+ * com rolagem lateral.
  */
 export function NoticeStrip({ notices, className }: { notices: SiteNotice[]; className?: string }) {
   if (notices.length === 0) return null
 
   return (
-    <ul
-      aria-label="Avisos da loja"
-      className={cn(
-        "flex min-w-0 items-center gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        className,
-      )}
-    >
-      {notices.map((notice) => {
-        const promo = notice.tone === "promo"
-        const content = (
-          <>
-            {notice.icon && <NoticeIconArt name={notice.icon} />}
-            {notice.text}
-          </>
-        )
-        const style = cn(
-          "inline-flex items-center gap-1.5 whitespace-nowrap rounded-sm px-2 py-1 text-xs font-semibold",
-          promo ? "bg-tag-soft text-tag-strong" : "text-brand-strong",
-        )
-
-        return (
-          <li key={notice.text} className="shrink-0">
-            {notice.href ? (
-              <a href={notice.href} className={cn(style, "hover:underline")}>
-                {content}
-              </a>
-            ) : (
-              <span className={style}>{content}</span>
-            )}
+    <div className={cn("bg-shelf", className)}>
+      <ul
+        aria-label="Avisos da loja"
+        className="mx-auto hidden max-w-site flex-wrap items-center justify-center gap-3 px-4 pt-3 pb-2 lg:flex"
+      >
+        {notices.map((notice) => (
+          <li key={notice.text}>
+            <NoticeItem notice={notice} />
           </li>
-        )
-      })}
-    </ul>
+        ))}
+      </ul>
+
+      {notices.length === 1 ? (
+        <div className="flex justify-center px-4 pt-3 pb-2 lg:hidden">
+          <NoticeItem notice={notices[0]} />
+        </div>
+      ) : (
+        <div className="overflow-hidden lg:hidden motion-reduce:overflow-x-auto">
+          <div
+            className="flex w-max animate-marquee hover:[animation-play-state:paused] motion-reduce:animate-none"
+            style={{ "--marquee-duration": `${notices.length * 6}s` } as React.CSSProperties}
+          >
+            {/* Duas cópias em fila: quando a primeira sai, a segunda está no lugar dela. */}
+            {[0, 1].map((copy) => (
+              <ul
+                key={copy}
+                aria-label={copy === 0 ? "Avisos da loja" : undefined}
+                aria-hidden={copy === 1 || undefined}
+                className="flex shrink-0 items-center gap-3 pt-3 pr-3 pb-2 pl-4"
+              >
+                {notices.map((notice) => (
+                  <li key={notice.text}>
+                    <NoticeItem notice={notice} hidden={copy === 1} />
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function NoticeItem({ notice, hidden = false }: { notice: SiteNotice; hidden?: boolean }) {
+  const promo = notice.tone === "promo"
+  const content = (
+    <>
+      {notice.icon && <NoticeIconArt name={notice.icon} className="text-brand-soft" />}
+      {notice.text}
+    </>
+  )
+  const style = cn(
+    "inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3.5 py-2 text-sm font-semibold",
+    "shadow-md ring-1 transition-transform",
+    promo
+      ? "bg-tag text-tag-ink shadow-tag/30 ring-tag-strong/20 [&_svg]:text-tag-ink"
+      : "bg-brand-deep text-paper shadow-brand-deep/30 ring-paper/10",
+  )
+
+  return notice.href ? (
+    <a
+      href={notice.href}
+      tabIndex={hidden ? -1 : undefined}
+      className={cn(style, "underline-offset-2 hover:-translate-y-0.5 hover:underline")}
+    >
+      {content}
+    </a>
+  ) : (
+    <span className={style}>{content}</span>
   )
 }
 

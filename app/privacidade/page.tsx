@@ -1,9 +1,7 @@
 import type { Metadata } from "next"
 import { Footer } from "@/components/layout/footer"
-import { Header } from "@/components/layout/header"
 import { PageShell } from "@/components/layout/page-shell"
 import { SectionHeading } from "@/components/ui/section"
-import { listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
@@ -16,16 +14,10 @@ export const metadata: Metadata = {
 }
 
 export default async function PrivacyPage() {
-  const [store, notices, submenu] = await Promise.all([getStore(), listNotices(), catalogSubmenu()])
+  const [store, submenu] = await Promise.all([getStore(), catalogSubmenu()])
 
   return (
     <>
-      <Header
-        storeName={store.name}
-        logoUrl={store.brand.logoUrl}
-        notices={notices}
-        whatsapp={store.whatsapp}
-      />
       <PageShell submenu={submenu} className="py-8">
         <SectionHeading title="Privacidade" />
         <div className="max-w-prose space-y-4 text-sm text-ink-soft">
