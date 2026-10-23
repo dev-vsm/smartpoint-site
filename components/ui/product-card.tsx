@@ -5,6 +5,9 @@ import { PriceTag } from "@/components/ui/price-tag"
 import { productMessage } from "@/lib/messages"
 import { absolute } from "@/lib/seo"
 
+/** Cards da primeira linha da grade no desktop: os que aparecem sem rolar. */
+export const ABOVE_THE_FOLD = 4
+
 export interface ProductCardData {
   slug: string
   name: string
@@ -19,7 +22,22 @@ export interface ProductCardData {
  * logo abaixo e, no rodapé, o atalho para o WhatsApp já falando deste produto.
  * O link do card e o do rodapé são irmãos — âncora dentro de âncora não existe.
  */
-export function ProductCard({ product, whatsapp }: { product: ProductCardData; whatsapp: string }) {
+export function ProductCard({
+  product,
+  whatsapp,
+  sizes = "(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 45vw",
+  eager = false,
+}: {
+  product: ProductCardData
+  whatsapp: string
+  /** Largura da foto; muda quando o card não está na grade (ex.: faixa de destaques). */
+  sizes?: string
+  /**
+   * Card visível já na abertura da página: a foto pode ser o LCP, então carrega
+   * na hora em vez de esperar a rolagem. Use só na primeira linha da lista.
+   */
+  eager?: boolean
+}) {
   const message = productMessage({
     name: product.name,
     // Com variação o preço da etiqueta é "a partir de": não promete valor na mensagem.
@@ -36,7 +54,8 @@ export function ProductCard({ product, whatsapp }: { product: ProductCardData; w
               src={product.image}
               alt={product.name}
               fill
-              sizes="(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 45vw"
+              sizes={sizes}
+              loading={eager ? "eager" : undefined}
               className="object-contain p-3"
             />
           ) : (

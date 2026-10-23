@@ -1,4 +1,6 @@
 import "server-only"
+import { unstable_cache } from "next/cache"
+import { cache } from "react"
 import { firestore } from "@/lib/firebase-admin"
 
 /** Ícones disponíveis para os avisos — o admin escolhe pelo nome. */
@@ -23,7 +25,7 @@ const DEFAULT_NOTICES: SiteNotice[] = [
   { text: "Parcelamos no cartão", icon: "cartao" },
 ]
 
-export async function listNotices(): Promise<SiteNotice[]> {
+async function readNotices(): Promise<SiteNotice[]> {
   const db = firestore()
   if (!db) return DEFAULT_NOTICES
 
@@ -43,3 +45,11 @@ export async function listNotices(): Promise<SiteNotice[]> {
   // Documento existente mas vazio significa "sem aviso", não "use o padrão".
   return items.length === 0 ? [] : notices
 }
+
+/** Cache entre requisições, como a loja e o catálogo (ver `lib/store.ts`). */
+export const listNotices = cache(
+  unstable_cache(readNotices, ["site-content:notices"], {
+    revalidate: 300,
+    tags: ["site-content"],
+  }),
+)

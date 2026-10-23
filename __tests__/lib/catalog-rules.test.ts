@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest"
 import {
+  catalogHref,
   collectCategories,
+  filterProducts,
   hasPrice,
   isPublished,
+  pickHighlights,
   productSlug,
   slugify,
   sortForShowcase,
@@ -78,6 +81,17 @@ describe("produto da vitrine", () => {
     ])
   })
 
+  it("destaques: só os marcados, até o limite, sem completar com o resto", () => {
+    const list = sortForShowcase([
+      toSiteProduct(raw({ id: "a", name: "Anel" })),
+      toSiteProduct(raw({ id: "b", name: "Bateria", site: { published: true, highlight: true } })),
+      toSiteProduct(raw({ id: "c", name: "Capa", site: { published: true, highlight: true } })),
+    ])
+    expect(pickHighlights(list).map((item) => item.name)).toEqual(["Bateria", "Capa"])
+    expect(pickHighlights(list, 1).map((item) => item.name)).toEqual(["Bateria"])
+    expect(pickHighlights([toSiteProduct(raw())])).toEqual([])
+  })
+
   it("agrupa categorias por quantidade", () => {
     const list = [
       toSiteProduct(raw({ id: "1", category: "Capinhas" })),
@@ -88,5 +102,70 @@ describe("produto da vitrine", () => {
       { name: "Capinhas", count: 2 },
       { name: "Áudio", count: 1 },
     ])
+  })
+})
+
+describe("categoria", () => {
+  it("vem da classificação atual e cai no campo antigo sem ela", () => {
+    const current = raw({
+      id: "1",
+      category: "cabos",
+      categorization: {
+        categoryName: "Cabos e Adaptadores",
+        subcategoryName: "Cabos para celular",
+      },
+    })
+    expect(toSiteProduct(current).category).toBe("Cabos e Adaptadores")
+    expect(toSiteProduct(raw({ id: "2", category: "cabos" })).category).toBe("cabos")
+    expect(toSiteProduct(raw({ id: "3", categorization: {} })).category).toBeUndefined()
+  })
+})
+
+describe("filterProducts", () => {
+  const products = [
+    toSiteProduct(raw({ id: "p1", name: "Película de vidro iPhone 15", category: "películas" })),
+    toSiteProduct(raw({ id: "p2", name: "Capinha silicone iPhone 15", category: "capinhas" })),
+    toSiteProduct(raw({ id: "p3", name: "Fone bluetooth", category: "fones", brand: "JBL" })),
+  ]
+  const ids = (list: ReturnType<typeof filterProducts>) => list.map((product) => product.id)
+
+  it("sem filtro devolve tudo", () => {
+    expect(filterProducts(products, {})).toBe(products)
+  })
+
+  it("filtra pela categoria exata", () => {
+    expect(ids(filterProducts(products, { category: "capinhas" }))).toEqual(["p2"])
+  })
+
+  it("busca ignora acento, caixa e ordem dos termos", () => {
+    expect(ids(filterProducts(products, { query: "IPHONE pelicula" }))).toEqual(["p1"])
+    expect(ids(filterProducts(products, { query: "iphone 15" }))).toEqual(["p1", "p2"])
+  })
+
+  it("busca também olha a marca", () => {
+    expect(ids(filterProducts(products, { query: "jbl" }))).toEqual(["p3"])
+  })
+
+  it("busca e categoria juntas", () => {
+    expect(ids(filterProducts(products, { query: "iphone", category: "películas" }))).toEqual([
+      "p1",
+    ])
+  })
+})
+
+describe("catalogHref", () => {
+  it("sem filtro nem página é a vitrine pura", () => {
+    expect(catalogHref({})).toBe("/produtos")
+    expect(catalogHref({ page: 1 })).toBe("/produtos")
+  })
+
+  it("ordem fixa: categoria, busca, página", () => {
+    expect(catalogHref({ page: 3, query: " fone ", category: "fones" })).toBe(
+      "/produtos?categoria=fones&q=fone&pagina=3",
+    )
+  })
+
+  it("codifica acento e espaço", () => {
+    expect(catalogHref({ category: "películas" })).toBe("/produtos?categoria=pel%C3%ADculas")
   })
 })

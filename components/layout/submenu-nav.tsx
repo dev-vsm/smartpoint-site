@@ -12,23 +12,39 @@ export interface SubmenuItem {
   match?: { param: string; value: string | null }
 }
 
-/** Rola na horizontal no celular: nunca esconde categoria atrás de "mais". */
+/**
+ * Coluna vertical no desktop; no celular, onde a lateral não cabe, vira uma
+ * linha que rola na horizontal — nunca esconde categoria atrás de "mais".
+ */
 export function SubmenuNav({ items }: { items: SubmenuItem[] }) {
   const params = useSearchParams()
   const pathname = usePathname()
+  return <SubmenuLinks items={items} pathname={pathname} params={params} />
+}
+
+/**
+ * O mesmo menu sem ler a URL, para o HTML estático: `useSearchParams` só
+ * resolve no navegador, e sem isto as categorias surgiriam depois do JS,
+ * empurrando a página para baixo. Fica sem item ativo até hidratar.
+ */
+export function SubmenuFallback({ items }: { items: SubmenuItem[] }) {
+  return <SubmenuLinks items={items} pathname="" params={new URLSearchParams()} />
+}
+
+function SubmenuLinks({
+  items,
+  pathname,
+  params,
+}: {
+  items: SubmenuItem[]
+  pathname: string
+  params: Pick<URLSearchParams, "get" | "toString">
+}) {
   const isCatalog = items.some((item) => item.match?.param === "categoria")
 
   return (
-    <nav
-      aria-label={isCatalog ? "Categorias de produtos" : "Seções desta página"}
-      className="flex items-center gap-5"
-    >
-      {isCatalog && (
-        <span className="hidden shrink-0 pr-5 text-xs font-semibold uppercase tracking-widest text-ink-soft md:block">
-          Categorias
-        </span>
-      )}
-      <ul className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-2 [scrollbar-width:thin]">
+    <nav aria-label={isCatalog ? "Categorias de produtos" : "Seções desta página"}>
+      <ul className="flex gap-1 overflow-x-auto py-2 [scrollbar-width:thin] lg:flex-col lg:overflow-visible lg:py-0">
         {items.map((item) => {
           const active = item.match
             ? pathname === item.href.split("?")[0] &&
@@ -39,16 +55,17 @@ export function SubmenuNav({ items }: { items: SubmenuItem[] }) {
             const search = new URLSearchParams(params.toString())
             if (item.match.value) search.set("categoria", item.match.value)
             else search.delete("categoria")
+            // Outra categoria tem outra contagem: volta para a primeira página.
+            search.delete("pagina")
             href = search.size ? `/produtos?${search}` : "/produtos"
           }
           return (
             <li key={item.href} className="shrink-0">
               <Link
                 href={href}
-                scroll={isCatalog && pathname === "/produtos" ? false : undefined}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex min-h-11 items-center whitespace-nowrap rounded-md px-3 text-sm font-semibold transition-colors focus-visible:-outline-offset-2",
+                  "flex min-h-11 items-center whitespace-nowrap rounded-md px-3 lg:min-h-9 lg:whitespace-normal lg:py-1.5 text-sm font-semibold transition-colors focus-visible:-outline-offset-2",
                   active
                     ? "bg-brand text-brand-ink shadow-sm"
                     : "text-ink-soft hover:bg-brand-soft hover:text-brand-strong",

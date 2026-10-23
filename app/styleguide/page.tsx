@@ -166,19 +166,7 @@ export default function Styleguide() {
           </section>
         </Container>
       </main>
-      <Footer
-        store={{
-          name: "SmartPoint",
-          addressLine: "Av. João Pinheiro, 337",
-          cityLine: "Uberlândia, MG",
-          hours: [
-            { days: "Segunda a sexta", opens: "09:00", closes: "18:00" },
-            { days: "Sábado", opens: "09:00", closes: "13:00" },
-          ],
-          instagram: "https://www.instagram.com/udiasmartpoint/",
-          cnpj: "59.237.018/0001-54",
-        }}
-      />
+      <Footer />
     </>
   )
 }

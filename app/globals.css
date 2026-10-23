@@ -30,6 +30,22 @@
   --radius-md: 0.5rem;
 
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+
+  /* Largura útil do site (classe `max-w-site`): cabeçalho, miolo e rodapé. */
+  --container-site: 96rem;
+}
+
+/*
+ * Altura do cabeçalho fixo, para a coluna de categorias parar logo abaixo dele.
+ * Até 1856px a marca ocupa uma linha própria (+56px); acima, vai para a margem.
+ */
+:root {
+  --header-height: 167px;
+}
+@media (min-width: 1856px) {
+  :root {
+    --header-height: 111px;
+  }
 }
 
 @layer base {

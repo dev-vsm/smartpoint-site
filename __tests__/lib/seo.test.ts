@@ -8,6 +8,7 @@ const store: SiteStore = {
   addressLine: "Av. João Pinheiro, 337 — Centro",
   cityLine: "Uberlândia, MG",
   postalCode: "38400-000",
+  social: [],
   hours: [
     { days: "Segunda a sexta", opens: "09:00", closes: "18:00" },
     { days: "Sábado", opens: "09:00", closes: "13:00" },
@@ -75,5 +76,20 @@ describe("dados estruturados", () => {
       { name: "Capa", path: "/produtos/capa" },
     ])
     expect(data.itemListElement.map((item) => item.position)).toEqual([1, 2])
+  })
+
+  it("todas as redes cadastradas entram em sameAs", () => {
+    const withSocial: SiteStore = {
+      ...store,
+      social: [
+        { network: "instagram", label: "Instagram", url: "https://instagram.com/loja" },
+        { network: "tiktok", label: "TikTok", url: "https://tiktok.com/@loja" },
+      ],
+    }
+    expect(localBusinessJsonLd(withSocial).sameAs).toEqual([
+      "https://instagram.com/loja",
+      "https://tiktok.com/@loja",
+    ])
+    expect(localBusinessJsonLd(store)).not.toHaveProperty("sameAs")
   })
 })

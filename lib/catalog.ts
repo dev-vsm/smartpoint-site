@@ -1,4 +1,6 @@
 import "server-only"
+import { unstable_cache } from "next/cache"
+import { cache } from "react"
 import {
   collectCategories,
   hasPrice,
@@ -24,7 +26,7 @@ export interface ProductVariant {
  * filtrado em memória — evita índice composto no Firestore para um catálogo
  * desta ordem de grandeza (centenas de itens).
  */
-export async function listProducts(): Promise<SiteProduct[]> {
+async function readPublishedProducts(): Promise<SiteProduct[]> {
   const db = firestore()
   if (!db) return []
 
@@ -38,12 +40,23 @@ export async function listProducts(): Promise<SiteProduct[]> {
   return sortForShowcase(products)
 }
 
-export async function listHighlights(limit = 8): Promise<SiteProduct[]> {
-  const products = await listProducts()
-  const highlighted = products.filter((product) => product.highlight)
-  // Sem destaque marcado, a home mostra o começo da vitrine em vez de um vazio.
-  return (highlighted.length ? highlighted : products).slice(0, limit)
-}
+/**
+ * Duas camadas de cache:
+ * - `unstable_cache` guarda o catálogo entre requisições por 5 minutos (a mesma
+ *   janela do ISR). Sem ele, `/produtos` — que renderiza por requisição por
+ *   causa de `?pagina=` e `?q=` — leria o Firestore inteiro a cada visita.
+ * - `cache` do React dedupa dentro de uma renderização: a página e o menu de
+ *   categorias pedem o catálogo, mas a leitura acontece uma vez.
+ *
+ * `unstable_cache` é o caminho do Next 16 sem Cache Components; ao migrar para
+ * `cacheComponents`, ele vira a diretiva `"use cache"` com `cacheLife`.
+ */
+export const listProducts = cache(
+  unstable_cache(readPublishedProducts, ["catalog:published-products"], {
+    revalidate: 300,
+    tags: ["products"],
+  }),
+)
 
 export async function listCategories() {
   return collectCategories(await listProducts())

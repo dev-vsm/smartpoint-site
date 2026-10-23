@@ -7,3 +7,13 @@ export function cn(...classes: Array<string | false | null | undefined>): string
 export function formatPrice(cents: number): string {
   return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100)
 }
+
+/**
+ * Telefone para gente ler: "5534998349528" → "(34) 99834-9528". Aceita o que o
+ * admin digitar; se não reconhecer o formato, devolve como veio.
+ */
+export function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, "")
+  const match = digits.match(/^(\d{2})(\d{4,5})(\d{4})$/)
+  return match ? `(${match[1]}) ${match[2]}-${match[3]}` : raw
+}

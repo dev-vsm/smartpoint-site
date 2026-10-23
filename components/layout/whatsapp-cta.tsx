@@ -35,7 +35,7 @@ export function WhatsAppCta({
   )
 }
 
-/** Botão fixo no canto, presente em todas as páginas no celular. */
+/** Botão fixo no canto, só no celular: do tablet para cima ele mora no cabeçalho. */
 export function WhatsAppFloating({ number, message }: { number: string; message?: string }) {
   return (
     <a
@@ -43,7 +43,7 @@ export function WhatsAppFloating({ number, message }: { number: string; message?
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar no WhatsApp"
-      className="fixed bottom-4 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-zap text-zap-ink shadow-lg shadow-ink/20 transition-transform hover:scale-105"
+      className="fixed bottom-4 right-4 z-40 flex md:hidden h-14 w-14 items-center justify-center rounded-full bg-zap text-zap-ink shadow-lg shadow-ink/20 transition-transform hover:scale-105"
     >
       <WhatsAppIcon className="h-7 w-7" />
     </a>

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 /** Largura útil do site. Uma medida só, para tudo alinhar. */
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("mx-auto w-full max-w-6xl px-4", className)}>{children}</div>
+  return <div className={cn("mx-auto w-full max-w-site px-4", className)}>{children}</div>
 }
 
 /**
@@ -11,10 +11,13 @@ export function Container({ children, className }: { children: ReactNode; classN
  * caixa alta: o título já diz o que é.
  */
 export function SectionHeading({
+  id,
   title,
   description,
   action,
 }: {
+  /** Para a seção apontar para o título com `aria-labelledby`. */
+  id?: string
   title: string
   description?: string
   action?: ReactNode
@@ -22,7 +25,9 @@ export function SectionHeading({
   return (
     <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-2xl">{title}</h2>
+        <h2 id={id} className="text-2xl">
+          {title}
+        </h2>
         {description && <p className="mt-1 max-w-prose text-sm text-ink-soft">{description}</p>}
       </div>
       {action}

@@ -167,18 +167,23 @@ Nome, CNPJ, telefone e endereço **não são duplicados no site**: vêm de `sett
 mesmo documento que o admin já edita em `/loja` e que alimenta o recibo da maquininha.
 
 ```ts
-// settings/store — o que já existe
+// settings/store — o que já existe (formato real, lido por lib/store-rules.ts)
 {
   nomeFantasia, razaoSocial, cnpj, telefone, email,
-  endereco: { logradouro, numero, complemento?, bairro, cidade, estado, cep }
+  endereco: {
+    logradouro, numero, complemento?, bairro, cidade, estado, cep,
+    googleMapsUrl?,           // link de compartilhamento → link do endereço
+    googleMapsEmbedUrl?,      // embed → iframe do mapa, com o pino exato
+  },
+  redesSociais: { whatsapp, instagram, facebook, tiktok, youtube, x },  // "" = não tem
 }
 
 // Campos NOVOS para o site (escritos na mesma tela do admin):
 {
-  whatsapp?: string;          // só dígitos, formato wa.me (ex.: 5534998349528)
+  whatsapp?: string;          // alternativa a redesSociais.whatsapp (aceita, não usado hoje)
   hours?: Array<{ days: string; opens: string; closes: string }>;  // vira openingHours no JSON-LD
-  social?: { instagram?: string; facebook?: string };
-  mapsUrl?: string;           // link/iframe do Google Maps
+  social?: { ... };           // alternativa a redesSociais (aceita, não usado hoje)
+  mapsUrl?: string;           // alternativa a endereco.googleMapsUrl (aceita, não usado hoje)
   about?: string;             // texto curto usado na página Sobre
   brand?: {
     logoUrl: string;          // marca principal (SVG/PNG transparente) — cabeçalho e rodapé
@@ -214,7 +219,7 @@ aqui só para fixar o contrato.
 | Rota | Conteúdo | Render | Revalidação |
 |---|---|---|---|
 | `/` | Hero, destaques, categorias, prova social, CTA | Estática | 5 min |
-| `/produtos` | Listagem com busca e filtros (categoria, marca, faixa de preço) | Estática + filtro no cliente | 5 min |
+| `/produtos` | Listagem com busca, categoria e paginação (24 por página, `?pagina=`) | Sob demanda, catálogo em cache (`unstable_cache`) | 5 min |
 | `/produtos/[slug]` | Galeria, preço, variações, descrição, relacionados, CTA WhatsApp | Estática (`generateStaticParams`) | 5 min |
 | `/sobre` | História, equipe, diferenciais | Estática | 1 h |
 | `/contato` | Endereço, mapa, horário, canais | Estática | 1 h |

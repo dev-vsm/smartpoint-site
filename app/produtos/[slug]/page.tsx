@@ -4,10 +4,11 @@ import { notFound } from "next/navigation"
 import { ProductDetail } from "@/components/catalog/product-detail"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
+import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ProductCard } from "@/components/ui/product-card"
-import { Container, SectionHeading } from "@/components/ui/section"
+import { SectionHeading } from "@/components/ui/section"
 import { getProductBySlug, listProducts, listRelated, listVariants } from "@/lib/catalog"
 import { absolute, breadcrumbJsonLd, productJsonLd } from "@/lib/seo"
 import { listNotices } from "@/lib/site-content"
@@ -63,49 +64,37 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
         storeName={store.name}
         logoUrl={store.brand.logoUrl}
         notices={notices}
-        submenu={submenu}
+        whatsapp={store.whatsapp}
       />
-      <main className="py-8">
-        <Container>
-          <nav aria-label="Você está em" className="mb-6 text-sm text-ink-soft">
-            <Link href="/produtos" className="hover:underline">
-              Produtos
-            </Link>
-            {product.category && <span> · {product.category}</span>}
-          </nav>
+      <PageShell submenu={submenu} className="py-8">
+        <nav aria-label="Você está em" className="mb-6 text-sm text-ink-soft">
+          <Link href="/produtos" className="hover:underline">
+            Produtos
+          </Link>
+          {product.category && <span> · {product.category}</span>}
+        </nav>
 
-          <ProductDetail
-            product={product}
-            variants={variants}
-            whatsapp={store.whatsapp}
-            url={absolute(`/produtos/${product.slug}`)}
-          />
+        <ProductDetail
+          product={product}
+          variants={variants}
+          whatsapp={store.whatsapp}
+          url={absolute(`/produtos/${product.slug}`)}
+        />
 
-          {related.length > 0 && (
-            <section className="mt-16">
-              <SectionHeading title="Também leva junto" />
-              <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {related.map((item) => (
-                  <li key={item.id}>
-                    <ProductCard product={item} whatsapp={store.whatsapp} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </Container>
-      </main>
-      <Footer
-        store={{
-          name: store.name,
-          logoUrl: store.brand.logoUrl,
-          addressLine: store.addressLine,
-          cityLine: store.cityLine,
-          hours: store.hours,
-          instagram: store.instagram,
-          cnpj: store.cnpj,
-        }}
-      />
+        {related.length > 0 && (
+          <section className="mt-16">
+            <SectionHeading title="Também leva junto" />
+            <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              {related.map((item) => (
+                <li key={item.id}>
+                  <ProductCard product={item} whatsapp={store.whatsapp} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </PageShell>
+      <Footer />
       <WhatsAppFloating number={store.whatsapp} />
     </>
   )

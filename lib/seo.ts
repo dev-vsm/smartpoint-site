@@ -54,9 +54,7 @@ export function localBusinessJsonLd(store: SiteStore) {
     ...(store.brand.ogImageUrl ? { image: store.brand.ogImageUrl } : {}),
     ...(store.phone ? { telephone: store.phone } : {}),
     ...(store.cnpj ? { taxID: store.cnpj } : {}),
-    ...(store.instagram || store.facebook
-      ? { sameAs: [store.instagram, store.facebook].filter(Boolean) }
-      : {}),
+    ...(store.social.length ? { sameAs: store.social.map((link) => link.url) } : {}),
     ...(street || city
       ? {
           address: {
