@@ -1,5 +1,7 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Brand } from "@/components/layout/brand"
+import { OpenNow } from "@/components/layout/open-now"
 import { getStore } from "@/lib/store"
 import { formatPhone } from "@/lib/utils"
 import { buildWhatsAppUrl, normalizeWhatsAppNumber } from "@/lib/whatsapp"
@@ -87,7 +89,7 @@ export async function Footer() {
 
         {(hasAddress || store.map) && (
           <div>
-            <h2 className="text-sm">Onde estamos</h2>
+            <h2 className="text-sm">Venha conhecer a loja</h2>
             {store.map && (
               // Abaixo da dobra em toda página: `lazy` segura o iframe até o cliente rolar.
               <iframe
@@ -112,6 +114,16 @@ export async function Footer() {
                   )}
                 </AddressLink>
               </address>
+            )}
+            {store.map && (
+              <a
+                href={store.map.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-brand-strong hover:underline"
+              >
+                Como chegar →
+              </a>
             )}
           </div>
         )}
@@ -138,6 +150,7 @@ export async function Footer() {
         {store.hours.length > 0 && (
           <div>
             <h2 className="text-sm">Horário</h2>
+            <OpenNow hours={store.hours} className="mt-2" />
             <dl className="mt-2 space-y-1 text-sm text-ink-soft">
               {store.hours.map((slot) => (
                 <div key={slot.days} className="flex justify-between gap-3">
@@ -151,6 +164,25 @@ export async function Footer() {
           </div>
         )}
       </div>
+
+      {store.photos.length > 0 && (
+        <div className="mx-auto max-w-site px-4 pb-8">
+          <h2 className="mb-3 text-sm">Conheça nosso espaço</h2>
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {store.photos.slice(0, 4).map((photo, index) => (
+              <li key={photo.url} className="relative aspect-[4/3] overflow-hidden rounded-md">
+                <Image
+                  src={photo.url}
+                  alt={photo.alt ?? `Foto ${index + 1} da loja ${store.name}`}
+                  fill
+                  sizes="(min-width: 1536px) 368px, (min-width: 640px) 25vw, 50vw"
+                  className="object-cover"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-site flex-wrap items-center justify-between gap-2 px-4 py-4 text-xs text-ink-soft">

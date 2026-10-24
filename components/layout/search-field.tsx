@@ -27,20 +27,27 @@ export function SearchField({ className }: { className?: string }) {
           const query = value.trim()
           router.push(query ? `/produtos?q=${encodeURIComponent(query)}` : "/produtos")
         }}
-        className="relative flex min-w-0 items-center"
+        className="flex h-11 min-w-0 items-stretch overflow-hidden rounded-sm bg-brand-soft/60 ring-1 ring-inset ring-line transition-colors focus-within:bg-paper focus-within:ring-2 focus-within:ring-brand-strong"
       >
         <label htmlFor="busca" className="sr-only">
           Buscar produtos
         </label>
-        <SearchIcon />
         <input
           id="busca"
           type="search"
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder="Buscar capinha, película, fone…"
-          className="min-h-11 w-full rounded-sm border border-line bg-brand-soft/60 pl-9 pr-3 text-sm outline-none transition-colors focus:border-brand-strong focus:bg-paper focus:ring-2 focus:ring-brand/20"
+          className="h-full min-w-0 flex-1 bg-transparent px-2 text-sm outline-none focus-visible:outline-none sm:px-3"
         />
+        <button
+          type="submit"
+          aria-label="Buscar produtos"
+          className="flex w-11 shrink-0 self-stretch items-center justify-center gap-2 bg-brand-strong text-paper transition-colors hover:bg-brand-deep focus-visible:-outline-offset-4 lg:w-auto lg:px-4"
+        >
+          <SearchIcon />
+          <span className="hidden text-sm font-semibold lg:inline">Buscar</span>
+        </button>
       </form>
     </search>
   )
@@ -54,7 +61,7 @@ function SearchIcon() {
       stroke="currentColor"
       strokeWidth="2"
       aria-hidden="true"
-      className="pointer-events-none absolute left-3 h-4 w-4 text-ink-soft"
+      className="h-4 w-4"
     >
       <circle cx="9" cy="9" r="6" />
       <path d="m14 14 4 4" strokeLinecap="round" />

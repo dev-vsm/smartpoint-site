@@ -43,18 +43,6 @@
   }
 }
 
-/* Apenas a linha de navegação fica fixa; banners e avisos rolam com a página. */
-:root {
-  --header-height: 149px;
-  scroll-padding-top: calc(var(--header-height) + 16px);
-}
-
-@media (min-width: 768px) {
-  :root {
-    --header-height: 97px;
-  }
-}
-
 @layer base {
   body {
     background-color: var(--color-shelf);

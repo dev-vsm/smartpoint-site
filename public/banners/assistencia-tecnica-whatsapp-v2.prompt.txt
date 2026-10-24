@@ -1,0 +1,17 @@
+Use case: ads-marketing. Create a finished high-end Brazilian Portuguese website hero banner for SmartPoint cellphone repair service. Wide landscape aspect ratio 3:1, ideally 2400x800. Actual banner edge to edge, not browser or website mockup. Color palette matches store: white, cyan #06b6d4, deep teal #083344; green for the WhatsApp CTA, warm orange accent for the free screen protector offer. Clear confident premium retail design, strong conversion hierarchy, generous whitespace and immaculate typography. Left 60% contains copy, right 40% photorealistic closeup of a skilled technician's black-gloved hands using a precision screwdriver on an opened unbranded smartphone, clean cyan antistatic work surface and neatly placed replacement screen and battery. Realistic believable device, precision tools, refined studio light, soft blend into white copy background. No invented certification, ratings, prices or speed claims.
+Exact Portuguese copy, correctly accented and fully legible:
+small brand at upper left: "SmartPoint"
+eyebrow: "ASSISTÊNCIA TÉCNICA PARA CELULARES"
+large headline, two lines: "Seu celular em boas mãos."
+support line: "Reparo com cuidado. Atendimento pelo WhatsApp."
+Four service lines in compact two-column arrangement with elegant restrained icons:
+"Troca de tela"
+"Troca de bateria"
+"Troca de conector de carga ou fone de ouvido"
+"Troca de tampa traseira"
+Under services, two conspicuous but tasteful trust and offer labels:
+shield check icon with "Garantia de 90 dias"
+orange/light peach offer strip with "Película de brinde na troca de tela"
+Prominent green CTA button with WhatsApp outline icon: "Pedir orçamento pelo WhatsApp"
+Small microcopy beneath CTA: "Conte o problema e informe o modelo do seu celular."
+Make the guarantee and free protector strongly visible but subordinate to the headline and CTA. All copy must fit with generous outer padding, good contrast and clean readable typesetting. No extra text, no watermarks, no fake certification seals, no phone numbers. Photograph feels professional and trustworthy. Use large typography, no tiny footnotes.

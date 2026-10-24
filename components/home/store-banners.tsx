@@ -1,29 +1,59 @@
+import Link from "next/link"
 import { NoticeIconArt } from "@/components/layout/notice-strip"
+import { purchaseHighlights } from "@/lib/purchase-highlights"
 import type { SiteStore } from "@/lib/store"
-import { trustItems } from "@/lib/trust"
+import { buildWhatsAppUrl } from "@/lib/whatsapp"
 
-/** Faixa comercial abaixo do cabeçalho; acompanha a rolagem da página. */
+/** Uma faixa editorial: condição em destaque, contexto legível e ação específica. */
 export function StoreBanners({ store }: { store: SiteStore }) {
-  const items = trustItems(store)
+  const items = purchaseHighlights(store)
   if (items.length === 0) return null
   return (
-    <section aria-label="Conheça a loja e as facilidades de compra" className="bg-shelf">
-      <div className="mx-auto max-w-site px-4 py-3">
-        <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:thin]">
-          {items.map((item) => (
-            <div
-              key={item.title}
-              className="flex w-52 shrink-0 snap-start flex-col justify-center rounded-md border border-line border-t-2 border-t-brand bg-paper px-4 py-4 lg:flex-1 lg:basis-44"
-            >
-              <NoticeIconArt name={item.icon} className="mb-3 h-6 w-6 text-brand-strong" />
-              <p className="text-sm font-bold leading-snug text-ink">{item.title}</p>
-              {item.detail && (
-                <p className="mt-1 text-xs leading-relaxed text-ink-soft">{item.detail}</p>
+    <section aria-label="Condições e facilidades da loja" className="min-w-0">
+      <ul className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] lg:grid lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))] lg:overflow-visible">
+        {items.map((item, index) => {
+          const content = (
+            <>
+              <span className="flex items-center justify-between gap-3 text-brand-strong">
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em]">
+                  {item.label}
+                </span>
+                <NoticeIconArt name={item.icon} className="h-5 w-5 shrink-0" />
+              </span>
+              <span className="mt-1 block text-lg font-bold leading-tight text-ink xl:text-xl">
+                {item.title}
+              </span>
+              <span className="mt-1 block text-xs leading-snug text-ink-soft">{item.detail}</span>
+              <span className="mt-auto flex items-center gap-2 pt-2 text-xs font-semibold text-brand-strong group-hover:underline">
+                {item.action} <span aria-hidden="true">↗</span>
+              </span>
+            </>
+          )
+          const className = `group flex h-full flex-col border-l-2 px-4 py-3 transition-colors hover:bg-brand-soft focus-visible:-outline-offset-2 ${index === 0 ? "border-tag bg-tag-soft/70" : "border-brand bg-brand-soft/50"}`
+          return (
+            <li key={item.id} className="w-[min(82vw,22rem)] shrink-0 snap-start lg:w-auto">
+              {item.id === "loja" ? (
+                <Link href="/contato" className={className}>
+                  {content}
+                </Link>
+              ) : (
+                <a
+                  href={buildWhatsAppUrl(
+                    store.whatsapp,
+                    `Olá! Gostaria de saber mais sobre: ${item.title}.`,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-wa-source={`beneficio_${item.id}`}
+                  className={className}
+                >
+                  {content}
+                </a>
               )}
-            </div>
-          ))}
-        </div>
-      </div>
+            </li>
+          )
+        })}
+      </ul>
     </section>
   )
 }

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { ButtonLink } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { buildWhatsAppUrl } from "@/lib/whatsapp"
@@ -33,7 +34,7 @@ export function WhatsAppCta({
 }: WhatsAppTracking & {
   number: string
   message?: string
-  label?: string
+  label?: ReactNode
   /** Quando o rótulo se repete na página (um por card), diga de qual produto é. */
   ariaLabel?: string
   className?: string

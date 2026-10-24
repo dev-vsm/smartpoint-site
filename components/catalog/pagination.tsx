@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { CATALOG_PAGE_SIZES } from "@/lib/catalog-rules"
 import { type Page, pageWindow } from "@/lib/pagination"
 import { cn } from "@/lib/utils"
 
@@ -15,6 +16,8 @@ export function Pagination({
   page: { page, totalPages, totalItems, from, to },
   href,
   noun = ["produto", "produtos"],
+  perPage,
+  pageSizeHref,
   className,
 }: {
   page: Pick<Page<unknown>, "page" | "totalPages" | "totalItems" | "from" | "to">
@@ -22,6 +25,9 @@ export function Pagination({
   href: (page: number) => string
   /** Singular e plural do que se conta. */
   noun?: [string, string]
+  /** Se informado, mostra o controle de itens por página. */
+  perPage?: number
+  pageSizeHref?: (size: number) => string
   className?: string
 }) {
   if (totalItems === 0) return null
@@ -39,6 +45,30 @@ export function Pagination({
         </span>{" "}
         de <span className="font-semibold text-ink">{totalItems}</span> {unit}
       </p>
+
+      {perPage && pageSizeHref && (
+        <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
+          <span className="text-ink-soft">Itens por página</span>
+          <nav aria-label="Itens por página" className="flex items-center gap-1">
+            {CATALOG_PAGE_SIZES.map((size) => (
+              <Link
+                key={size}
+                href={pageSizeHref(size)}
+                aria-current={size === perPage ? "true" : undefined}
+                aria-label={`${size} itens por página`}
+                className={cn(
+                  "inline-flex h-9 min-w-9 items-center justify-center rounded-sm px-2 font-semibold tabular-nums transition-colors",
+                  size === perPage
+                    ? "bg-brand text-brand-ink"
+                    : "text-ink-soft hover:bg-brand-soft hover:text-brand-strong",
+                )}
+              >
+                {size}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
 
       <nav aria-label="Paginação" className="flex items-center gap-1 sm:gap-2">
         <StepLink target={prev} href={href} label="Anterior" direction="prev" />

@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { VisitStore } from "@/components/home/visit-store"
 import { Footer } from "@/components/layout/footer"
 import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppCta, WhatsAppFloating } from "@/components/layout/whatsapp-cta"
@@ -53,7 +52,6 @@ export default async function AboutPage() {
           />
         </div>
         <TrustList items={trustItems(store)} variant="bar" className="mt-10" />
-        <VisitStore store={store} className="mt-12" />
       </PageShell>
       <Footer />
       <WhatsAppFloating number={store.whatsapp} />

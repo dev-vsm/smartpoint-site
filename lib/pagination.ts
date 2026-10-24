@@ -25,6 +25,13 @@ export function parsePage(raw: string | string[] | undefined): number | null {
   return Number(raw)
 }
 
+/** Tamanho de página permitido; ausente usa o padrão de 20 itens. */
+export function parsePageSize(raw: string | string[] | undefined): number | null {
+  if (raw === undefined) return 20
+  if (Array.isArray(raw) || !["20", "40", "60"].includes(raw)) return null
+  return Number(raw)
+}
+
 /** Fatia a lista. Página além da última devolve `null`, exceto lista vazia. */
 export function paginate<T>(items: T[], page: number, perPage: number): Page<T> | null {
   const totalItems = items.length

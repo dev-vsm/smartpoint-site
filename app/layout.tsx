@@ -1,9 +1,12 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next"
 import { Archivo } from "next/font/google"
+import { InstagramBand } from "@/components/home/instagram-band"
+import { RepairBanner } from "@/components/home/repair-banner"
 import { StoreBanners } from "@/components/home/store-banners"
 import { ConversionTracker } from "@/components/layout/conversion-tracker"
 import { Header } from "@/components/layout/header"
+import { RepairBannerVisibility } from "@/components/layout/repair-banner-visibility"
 import { siteUrl } from "@/lib/seo"
 import { getHomeContent } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
@@ -58,9 +61,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           logoUrl={store.brand.logoUrl}
           whatsapp={store.whatsapp}
           hero={home.hero}
-          city={store.city}
+          benefits={<StoreBanners store={store} />}
+          instagram={<InstagramBand store={store} />}
         />
-        <StoreBanners store={store} />
+        <RepairBannerVisibility>
+          <RepairBanner whatsapp={store.whatsapp} />
+        </RepairBannerVisibility>
         {children}
         <Analytics />
         <ConversionTracker />

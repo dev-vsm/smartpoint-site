@@ -1,8 +1,6 @@
 import Link from "next/link"
 import { Pagination } from "@/components/catalog/pagination"
-import { InstagramBand } from "@/components/home/instagram-band"
 import { Testimonials } from "@/components/home/testimonials"
-import { VisitStore } from "@/components/home/visit-store"
 import { Footer } from "@/components/layout/footer"
 import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppFloating } from "@/components/layout/whatsapp-cta"
@@ -103,8 +101,6 @@ export default async function Home() {
         </section>
 
         <Testimonials items={home.testimonials} />
-        <VisitStore store={store} className="mt-14" />
-        <InstagramBand store={store} />
       </PageShell>
       <Footer />
       <WhatsAppFloating number={store.whatsapp} />

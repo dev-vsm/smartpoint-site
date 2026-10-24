@@ -8,7 +8,7 @@ import { ButtonLink } from "@/components/ui/button"
 import { ABOVE_THE_FOLD, ProductCard } from "@/components/ui/product-card"
 import { listProducts } from "@/lib/catalog"
 import { CATALOG_PAGE_SIZE, catalogHref, filterProducts } from "@/lib/catalog-rules"
-import { paginate, parsePage } from "@/lib/pagination"
+import { paginate, parsePage, parsePageSize } from "@/lib/pagination"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
@@ -24,6 +24,7 @@ async function readFilters(searchParams: SearchParams) {
     category: first(params.categoria)?.trim() || null,
     query: first(params.q)?.trim() ?? "",
     page: parsePage(params.pagina),
+    perPage: parsePageSize(params.porPagina),
   }
 }
 
@@ -32,7 +33,7 @@ export async function generateMetadata({
 }: {
   searchParams: SearchParams
 }): Promise<Metadata> {
-  const { category, query, page } = await readFilters(searchParams)
+  const { category, query, page, perPage } = await readFilters(searchParams)
   const base = category
     ? `Produtos: ${category}`
     : "Produtos — capinhas, películas, fones e carregadores"
@@ -44,25 +45,28 @@ export async function generateMetadata({
       "O que tem na loja hoje, com preço na etiqueta. Escolha e fale com a gente pelo WhatsApp.",
     // Cada página da categoria é canônica de si mesma; a busca não entra no
     // índice (resultado volátil), mas os links dela são seguidos.
-    alternates: { canonical: catalogHref({ category, page: page ?? 1 }) },
+    alternates: {
+      canonical: catalogHref({ category, page: page ?? 1, perPage: perPage ?? CATALOG_PAGE_SIZE }),
+    },
     ...(query && { robots: { index: false, follow: true } }),
   }
 }
 
 export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
-  const [{ category, query, page }, store, products, submenu] = await Promise.all([
+  const [{ category, query, page, perPage }, store, products, submenu] = await Promise.all([
     readFilters(searchParams),
     getStore(),
     listProducts(),
     catalogSubmenu(),
   ])
 
-  if (page === null) notFound()
-  const result = paginate(filterProducts(products, { category, query }), page, CATALOG_PAGE_SIZE)
+  if (page === null || perPage === null) notFound()
+  const result = paginate(filterProducts(products, { category, query }), page, perPage)
   // Página além da última: 404, não uma página vazia indexável.
   if (!result) notFound()
 
-  const href = (target: number) => catalogHref({ category, query, page: target })
+  const href = (target: number) => catalogHref({ category, query, page: target, perPage })
+  const pageSizeHref = (size: number) => catalogHref({ category, query, perPage: size })
 
   return (
     <>
@@ -98,7 +102,13 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
                 </li>
               ))}
             </ul>
-            <Pagination page={result} href={href} className="mt-8" />
+            <Pagination
+              page={result}
+              href={href}
+              perPage={perPage}
+              pageSizeHref={pageSizeHref}
+              className="mt-8"
+            />
           </>
         )}
       </PageShell>

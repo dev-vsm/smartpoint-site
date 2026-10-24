@@ -13,8 +13,7 @@ export interface SubmenuItem {
 }
 
 /**
- * Coluna vertical no desktop; no celular, onde a lateral não cabe, vira uma
- * linha que rola na horizontal — nunca esconde categoria atrás de "mais".
+ * Categorias fluem na página em qualquer tela, sem criar uma área de rolagem própria.
  */
 export function SubmenuNav({ items }: { items: SubmenuItem[] }) {
   const params = useSearchParams()
@@ -44,7 +43,7 @@ function SubmenuLinks({
 
   return (
     <nav aria-label={isCatalog ? "Categorias de produtos" : "Seções desta página"}>
-      <ul className="flex gap-1 overflow-x-auto py-2 [scrollbar-width:thin] lg:flex-col lg:overflow-visible lg:py-0">
+      <ul className="flex flex-wrap gap-1 py-2 lg:flex-col lg:flex-nowrap lg:py-0">
         {items.map((item) => {
           const active = item.match
             ? pathname === item.href.split("?")[0] &&

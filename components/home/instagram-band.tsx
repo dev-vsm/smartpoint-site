@@ -11,21 +11,27 @@ export function InstagramBand({ store }: { store: SiteStore }) {
     .pop()
 
   return (
-    <section className="mt-14 flex flex-wrap items-center justify-between gap-4 rounded-md bg-brand-soft p-6 ring-1 ring-line">
-      <div>
-        <h2 className="text-xl">Novidades toda semana no Instagram</h2>
-        <p className="mt-1 text-sm text-ink-soft">
-          Lançamentos, ofertas e o que acabou de chegar na loja.
-        </p>
-      </div>
-      <a
-        href={instagram.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex min-h-11 items-center rounded-sm bg-brand px-4 text-sm font-semibold text-brand-ink hover:bg-brand-strong hover:text-paper"
+    <a
+      href={instagram.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Ver novidades ${handle ? `de @${handle.replace(/^@/, "")}` : "da loja"} no Instagram`}
+      title="Novidades e ofertas no Instagram"
+      className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-sm border border-tag/30 bg-tag-soft px-2 text-tag-strong transition-colors hover:border-tag-strong hover:bg-paper lg:px-3"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        aria-hidden="true"
+        className="h-5 w-5 shrink-0 text-tag-strong"
       >
-        Seguir {handle ? `@${handle.replace(/^@/, "")}` : "no Instagram"}
-      </a>
-    </section>
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r="0.75" fill="currentColor" stroke="none" />
+      </svg>
+      <span className="hidden text-xs font-semibold lg:inline">Instagram</span>
+    </a>
   )
 }

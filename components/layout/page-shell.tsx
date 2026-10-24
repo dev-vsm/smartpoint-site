@@ -4,9 +4,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Miolo das páginas: as categorias numa coluna à esquerda e o conteúdo ao lado.
- * A coluna acompanha a rolagem logo abaixo do cabeçalho fixo e, se a lista
- * passar da altura da tela, rola sozinha. No celular não há
- * espaço para a lateral: o menu vira uma linha rolável acima do conteúdo.
+ * O menu flui com a página em vez de criar sua própria área de rolagem.
  */
 export function PageShell({
   submenu = [],
@@ -27,7 +25,7 @@ export function PageShell({
       )}
     >
       {hasNav && (
-        <aside className="border-b border-line lg:sticky lg:top-(--header-height) lg:max-h-[calc(100dvh-var(--header-height))] lg:self-start lg:overflow-y-auto lg:border-b-0 lg:py-8 lg:[scrollbar-width:thin]">
+        <aside className="border-b border-line lg:border-b-0 lg:py-8">
           <Suspense fallback={<SubmenuFallback items={submenu} />}>
             <SubmenuNav items={submenu} />
           </Suspense>

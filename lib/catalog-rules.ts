@@ -219,7 +219,8 @@ export function filterProducts(
 }
 
 /** Produtos por página. Múltiplo de 2, 3 e 4: a última linha fecha em qualquer grade. */
-export const CATALOG_PAGE_SIZE = 24
+export const CATALOG_PAGE_SIZE = 20
+export const CATALOG_PAGE_SIZES = [20, 40, 60] as const
 
 /**
  * URL da vitrine com filtro e página, em ordem fixa (uma URL por estado, bom
@@ -230,14 +231,17 @@ export function catalogHref({
   category,
   query,
   page = 1,
+  perPage = CATALOG_PAGE_SIZE,
 }: {
   category?: string | null
   query?: string | null
   page?: number
+  perPage?: number
 }): string {
   const params = new URLSearchParams()
   if (category) params.set("categoria", category)
   if (query?.trim()) params.set("q", query.trim())
+  if (perPage !== CATALOG_PAGE_SIZE) params.set("porPagina", String(perPage))
   if (page > 1) params.set("pagina", String(page))
   return params.size ? `/produtos?${params}` : "/produtos"
 }
