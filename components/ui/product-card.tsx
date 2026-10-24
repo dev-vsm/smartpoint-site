@@ -22,8 +22,8 @@ export interface ProductCardData {
 }
 
 /**
- * Card da vitrine: foto em cima, preço à direita no início do corpo, nome
- * logo abaixo e, no rodapé, o atalho para o WhatsApp já falando deste produto.
+ * Card da vitrine: foto em cima, com o selo de disponibilidade no canto superior
+ * direito; no corpo, o preço à direita e o nome; no rodapé, o atalho para o WhatsApp já falando deste produto.
  * O link do card e o do rodapé são irmãos — âncora dentro de âncora não existe.
  */
 export function ProductCard({
@@ -71,7 +71,7 @@ export function ProductCard({
           )}
           <AvailabilityBadge
             availability={product.availability}
-            className="absolute top-2 left-2 shadow-sm"
+            className="absolute top-2 right-2"
           />
         </div>
         <div className="pt-2 pb-3">

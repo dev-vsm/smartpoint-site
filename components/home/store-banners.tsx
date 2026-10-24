@@ -1,59 +1,85 @@
-import Link from "next/link"
 import { NoticeIconArt } from "@/components/layout/notice-strip"
-import { purchaseHighlights } from "@/lib/purchase-highlights"
+import { type PurchaseHighlight, purchaseHighlights } from "@/lib/purchase-highlights"
+import type { SiteNotice } from "@/lib/site-content"
 import type { SiteStore } from "@/lib/store"
-import { buildWhatsAppUrl } from "@/lib/whatsapp"
+import { cn } from "@/lib/utils"
 
-/** Uma faixa editorial: condição em destaque, contexto legível e ação específica. */
-export function StoreBanners({ store }: { store: SiteStore }) {
-  const items = purchaseHighlights(store)
+/**
+ * Mini cards acima da busca, no padrão "barra de benefícios" do varejo: ícone,
+ * promessa em negrito e um detalhe. São só informação, não botões: a
+ * conversão fica com os CTAs do WhatsApp. A oferta vem primeiro, em laranja e
+ * um pouco mais larga; as condições da loja vêm depois, em branco. Só CSS: no
+ * celular a fila rola de lado e o próximo card aparece pela metade.
+ */
+export function StoreBanners({ store, notices }: { store: SiteStore; notices?: SiteNotice[] }) {
+  const items = purchaseHighlights(store, notices)
   if (items.length === 0) return null
+
   return (
-    <section aria-label="Condições e facilidades da loja" className="min-w-0">
-      <ul className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] lg:grid lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))] lg:overflow-visible">
-        {items.map((item, index) => {
-          const content = (
-            <>
-              <span className="flex items-center justify-between gap-3 text-brand-strong">
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em]">
-                  {item.label}
-                </span>
-                <NoticeIconArt name={item.icon} className="h-5 w-5 shrink-0" />
-              </span>
-              <span className="mt-1 block text-lg font-bold leading-tight text-ink xl:text-xl">
-                {item.title}
-              </span>
-              <span className="mt-1 block text-xs leading-snug text-ink-soft">{item.detail}</span>
-              <span className="mt-auto flex items-center gap-2 pt-2 text-xs font-semibold text-brand-strong group-hover:underline">
-                {item.action} <span aria-hidden="true">↗</span>
-              </span>
-            </>
-          )
-          const className = `group flex h-full flex-col border-l-2 px-4 py-3 transition-colors hover:bg-brand-soft focus-visible:-outline-offset-2 ${index === 0 ? "border-tag bg-tag-soft/70" : "border-brand bg-brand-soft/50"}`
-          return (
-            <li key={item.id} className="w-[min(82vw,22rem)] shrink-0 snap-start lg:w-auto">
-              {item.id === "loja" ? (
-                <Link href="/contato" className={className}>
-                  {content}
-                </Link>
-              ) : (
-                <a
-                  href={buildWhatsAppUrl(
-                    store.whatsapp,
-                    `Olá! Gostaria de saber mais sobre: ${item.title}.`,
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-wa-source={`beneficio_${item.id}`}
-                  className={className}
-                >
-                  {content}
-                </a>
-              )}
-            </li>
-          )
-        })}
+    <section aria-label="Vantagens de comprar na loja" className="min-w-0">
+      <ul className="-mx-3 flex snap-x snap-mandatory scroll-px-3 gap-2 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:-mx-4 sm:scroll-px-4 sm:px-4 lg:mx-0 lg:overflow-visible lg:px-0 lg:pb-0">
+        {items.map((item) => (
+          <li
+            key={item.id}
+            className={cn(
+              "flex shrink-0 snap-start",
+              item.tone === "promo"
+                ? "w-[min(84vw,20rem)] lg:w-auto lg:flex-[1.35]"
+                : "w-[min(70vw,16rem)] lg:w-auto lg:flex-1",
+            )}
+          >
+            <HighlightCard item={item} />
+          </li>
+        ))}
       </ul>
     </section>
+  )
+}
+
+function HighlightCard({ item }: { item: PurchaseHighlight }) {
+  const promo = item.tone === "promo"
+
+  return (
+    <div
+      className={cn(
+        "relative flex w-full min-h-15 items-center gap-3 overflow-hidden rounded-md px-3 py-2",
+        promo
+          ? "bg-tag text-tag-ink shadow-md shadow-tag/30"
+          : "bg-paper text-ink ring-1 ring-line",
+      )}
+    >
+      {promo && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-paper/25 animate-shine motion-reduce:hidden"
+        />
+      )}
+      <span
+        className={cn(
+          "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-sm",
+          promo ? "bg-paper/30 text-tag-ink" : "bg-brand-soft text-brand-strong",
+        )}
+      >
+        <NoticeIconArt name={item.icon} className="h-5 w-5" />
+      </span>
+      <p className="relative min-w-0 flex-1">
+        {promo && (
+          <span className="mb-0.5 inline-block rounded-sm bg-tag-ink px-1.5 py-px text-[10px] font-bold uppercase tracking-wider text-tag-soft">
+            Oferta
+          </span>
+        )}
+        <strong className="display line-clamp-2 block text-sm leading-tight">{item.title}</strong>
+        {item.detail && (
+          <span
+            className={cn(
+              "mt-0.5 block truncate text-xs",
+              promo ? "text-tag-ink/90" : "text-ink-soft",
+            )}
+          >
+            {item.detail}
+          </span>
+        )}
+      </p>
+    </div>
   )
 }

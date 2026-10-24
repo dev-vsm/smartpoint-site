@@ -171,7 +171,10 @@ enquanto houver outra disponível.
 }
 
 // siteContent/notices — a faixa de avisos do cabeçalho
-{ items: Array<{ text, icon?, tone?: 'info' | 'promo', href? }> }
+// Os de tom 'promo' viram o card laranja de oferta, primeiro dos mini cards acima da busca;
+// `detail` é a linha de apoio desse card. Ícones: entrega, cartao, pix, loja, relogio,
+// online, garantia, oferta.
+{ items: Array<{ text, detail?, icon?, tone?: 'info' | 'promo', href? }> }
 
 ```
 

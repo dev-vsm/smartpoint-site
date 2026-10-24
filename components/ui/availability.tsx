@@ -1,11 +1,14 @@
 import type { Availability } from "@/lib/catalog-rules"
 import { cn } from "@/lib/utils"
 
-/** Selo curto, no canto da foto do card. */
+/**
+ * Selo curto, no canto da foto do card. Cor cheia e contorno claro para não
+ * sumir sobre foto de fundo branco; nada de verde, que é do WhatsApp.
+ */
 const BADGE: Record<Availability, { label: string; style: string }> = {
-  in_stock: { label: "Pronta entrega", style: "bg-brand-soft text-brand-strong" },
-  on_order: { label: "Sob encomenda", style: "bg-tag-soft text-tag-strong" },
-  sold_out: { label: "Esgotado", style: "bg-ink/80 text-paper" },
+  in_stock: { label: "Pronta entrega", style: "bg-brand-strong text-paper" },
+  on_order: { label: "Sob encomenda", style: "bg-tag-strong text-paper" },
+  sold_out: { label: "Esgotado", style: "bg-ink/85 text-paper" },
 }
 
 /** Frase da página do produto, ao lado do selo, logo abaixo do preço. */
@@ -31,7 +34,20 @@ export function AvailabilityBadge({
 }) {
   const { label, style } = BADGE[availability]
   return (
-    <span className={cn("rounded-sm px-1.5 py-0.5 text-[11px] font-semibold", style, className)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-sm px-2 py-1 text-xs leading-none font-bold shadow-md ring-1 ring-paper/70",
+        style,
+        className,
+      )}
+    >
+      {availability === "in_stock" && (
+        // Ponto "ao vivo": diz que tem no estoque agora. Parado para quem pede menos movimento.
+        <span aria-hidden="true" className="relative flex h-2 w-2 shrink-0">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-paper/70 motion-reduce:hidden" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-paper" />
+        </span>
+      )}
       {label}
     </span>
   )

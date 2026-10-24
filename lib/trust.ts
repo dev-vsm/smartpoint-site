@@ -13,7 +13,7 @@ export interface TrustItem {
 }
 
 /** O link de pagamento online que a loja envia pelo WhatsApp. */
-const PAYMENT_LINK_PROVIDER = "Mercado Pago"
+export const PAYMENT_LINK_PROVIDER = "Mercado Pago"
 
 /** "em até 12x" / "em até 6x sem juros" — `undefined` quando é só à vista. */
 export function installmentsText(payment: StorePayment): string | undefined {

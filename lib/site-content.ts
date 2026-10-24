@@ -7,17 +7,36 @@ import { getStore } from "@/lib/store"
 import { defaultNotices } from "@/lib/trust"
 
 /** Ícones disponíveis para os avisos — o admin escolhe pelo nome. */
-export type NoticeIcon = "entrega" | "cartao" | "pix" | "loja" | "relogio" | "online" | "garantia"
+export type NoticeIcon =
+  | "entrega"
+  | "cartao"
+  | "pix"
+  | "loja"
+  | "relogio"
+  | "online"
+  | "garantia"
+  | "oferta"
 
 export interface SiteNotice {
   text: string
+  /** Linha de apoio, usada no card de oferta do topo ("Pedidos até as 17h"). */
+  detail?: string
   icon?: NoticeIcon
   /** `promo` pinta de laranja (oferta); `info` é o padrão, em ciano. */
   tone?: "info" | "promo"
   href?: string
 }
 
-const ICONS: NoticeIcon[] = ["entrega", "cartao", "pix", "loja", "relogio", "online", "garantia"]
+const ICONS: NoticeIcon[] = [
+  "entrega",
+  "cartao",
+  "pix",
+  "loja",
+  "relogio",
+  "online",
+  "garantia",
+  "oferta",
+]
 
 /**
  * Avisos da faixa do cabeçalho. Só o que a loja de fato faz — nada de promessa
@@ -35,6 +54,8 @@ async function readNotices(): Promise<SiteNotice[]> {
   const notices = items
     .map((item) => ({
       text: String(item?.text ?? "").trim(),
+      detail:
+        typeof item?.detail === "string" && item.detail.trim() ? item.detail.trim() : undefined,
       icon: ICONS.includes(item?.icon) ? (item.icon as NoticeIcon) : undefined,
       tone: item?.tone === "promo" ? ("promo" as const) : ("info" as const),
       href: typeof item?.href === "string" && item.href ? item.href : undefined,

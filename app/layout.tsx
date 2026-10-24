@@ -8,7 +8,7 @@ import { ConversionTracker } from "@/components/layout/conversion-tracker"
 import { Header } from "@/components/layout/header"
 import { RepairBannerVisibility } from "@/components/layout/repair-banner-visibility"
 import { siteUrl } from "@/lib/seo"
-import { getHomeContent } from "@/lib/site-content"
+import { getHomeContent, listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import "./globals.css"
 
@@ -52,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [store, home] = await Promise.all([getStore(), getHomeContent()])
+  const [store, home, notices] = await Promise.all([getStore(), getHomeContent(), listNotices()])
   return (
     <html lang="pt-BR" className={archivo.variable}>
       <body>
@@ -61,7 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           logoUrl={store.brand.logoUrl}
           whatsapp={store.whatsapp}
           hero={home.hero}
-          benefits={<StoreBanners store={store} />}
+          benefits={<StoreBanners store={store} notices={notices} />}
           instagram={<InstagramBand store={store} />}
         />
         <RepairBannerVisibility>

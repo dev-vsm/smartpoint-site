@@ -41,6 +41,18 @@
       transform: translateX(-50%);
     }
   }
+
+  /* Brilho que cruza o card de oferta de tempos em tempos: chama o olho sem piscar. */
+  --animate-shine: shine 5s ease-in-out infinite;
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%) skewX(-20deg);
+    }
+    25%,
+    100% {
+      transform: translateX(400%) skewX(-20deg);
+    }
+  }
 }
 
 @layer base {

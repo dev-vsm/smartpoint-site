@@ -145,6 +145,12 @@ const PATHS: Record<NoticeIcon, React.ReactNode> = {
       <path d="M8.5 7.5h3M10 7.5v5M8.5 11l1.5 1.5 1.5-1.5" />
     </>
   ),
+  oferta: (
+    <>
+      <path d="M10.5 2.5H17v6.5l-8 8-6.5-6.5z" />
+      <circle cx="13.5" cy="6" r="1" />
+    </>
+  ),
   garantia: (
     <>
       <path d="M10 2.5 4 4.5v5c0 3.6 2.6 6.4 6 8 3.4-1.6 6-4.4 6-8v-5z" />

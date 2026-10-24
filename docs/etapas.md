@@ -156,7 +156,7 @@ Peso ✅ · Lighthouse pendente (precisa de navegador).
 - [ ] Campos novos em `/loja`: `whatsapp`, `hours`, `social`, `mapsUrl`, `about`
 - [ ] Upload da marca em `/loja` (logo, ícone, og:image) para o Storage + cor da marca
 - [ ] Tela de conteúdo do site (`siteContent`): hero, banners, destaques, depoimentos (sem serviços)
-- [ ] Faixa de avisos (`siteContent/notices`): texto, ícone, tom (info/promo) e link
+- [ ] Faixa de avisos (`siteContent/notices`): texto, detalhe, ícone, tom (info/promo) e link
 - [ ] Bloqueio de publicação para produto sem foto ou sem descrição
 - [ ] (Opcional) Webhook de revalidação sob demanda ao publicar
 

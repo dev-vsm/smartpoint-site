@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { purchaseHighlights } from "@/lib/purchase-highlights"
+import { MAX_HIGHLIGHTS, purchaseHighlights } from "@/lib/purchase-highlights"
+import type { SiteNotice } from "@/lib/site-content"
 import { FALLBACK_STORE, type SiteStore } from "@/lib/store-rules"
 
 const store: SiteStore = {
@@ -14,26 +15,52 @@ const store: SiteStore = {
   },
 }
 
-describe("destaques de compra", () => {
-  it("agrupa o cadastro em pagamento, localização e link sem inventar juros ou garantia", () => {
+const freeDelivery: SiteNotice = {
+  text: "Entrega grátis acima de R$ 150",
+  detail: "Em toda Uberlândia",
+  icon: "entrega",
+  tone: "promo",
+}
+
+describe("mini cards do topo", () => {
+  it("monta os cards a partir do cadastro, sem inventar juros", () => {
     const items = purchaseHighlights(store)
-    expect(items.map((item) => item.id)).toEqual(["pagamento", "loja", "online"])
-    expect(items[0].title).toBe("até 12x")
-    expect(items[0].detail).toBe("No cartão de crédito. Aceitamos Pix, débito, dinheiro.")
-    expect(items[1].detail).toContain("Jardim Brasília")
+    expect(items.map((item) => item.id)).toEqual(["pagamento", "entrega", "loja", "online"])
+    expect(items[0].title).toBe("Até 12x no cartão")
+    expect(items[0].detail).toBe("Pix, débito e dinheiro")
+    expect(items[2]).toMatchObject({ detail: "Jardim Brasília · Uberlândia" })
     expect(JSON.stringify(items)).not.toContain("sem juros")
   })
-  it("expõe os limites de parcelamento e a garantia somente quando cadastrados", () => {
-    const items = purchaseHighlights({
+
+  it("só fala em sem juros quando a loja cadastrou", () => {
+    const [payment] = purchaseHighlights({
       ...store,
-      warranty: "90 dias",
-      payment: { ...store.payment, interestFreeInstallments: 6, minInstallmentCents: 5000 },
+      payment: { ...store.payment, interestFreeInstallments: 6 },
     })
-    expect(items[0].title).toBe("até 6x sem juros (até 12x no total)")
-    expect(items[0].detail).toContain("50,00")
-    expect(items.find((item) => item.id === "garantia")?.detail).toBe("90 dias")
+    expect(payment.title).toBe("Até 6x sem juros")
+    expect(payment.detail).toBe("ou até 12x · Pix, débito e dinheiro")
   })
-  it("não cria benefícios para dados ausentes", () => {
+
+  it("põe a oferta do admin primeiro e não repete o card de entrega", () => {
+    const items = purchaseHighlights(store, [
+      { text: "Entrega em toda Uberlândia", icon: "entrega", tone: "info" },
+      freeDelivery,
+    ])
+    expect(items[0]).toMatchObject({
+      tone: "promo",
+      title: "Entrega grátis acima de R$ 150",
+      detail: "Em toda Uberlândia",
+    })
+    expect(items.map((item) => item.id)).not.toContain("entrega")
+    expect(items.filter((item) => item.tone === "promo")).toHaveLength(1)
+  })
+
+  it("limita a quantidade de cards", () => {
+    const items = purchaseHighlights({ ...store, warranty: "90 dias" }, [freeDelivery])
+    expect(items).toHaveLength(MAX_HIGHLIGHTS)
+  })
+
+  it("não cria card para dado ausente", () => {
     expect(purchaseHighlights(FALLBACK_STORE)).toEqual([])
   })
 })
