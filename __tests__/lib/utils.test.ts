@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest"
-import { cn, formatPhone, formatPrice } from "@/lib/utils"
+import { cn, formatPhone, formatPrice, isSvgUrl } from "@/lib/utils"
 
 describe("utils", () => {
+  it("reconhece SVG do Storage mesmo com query na URL", () => {
+    expect(
+      isSvgUrl(
+        "https://firebasestorage.googleapis.com/v0/b/x.app/o/site%2Fbrand%2Flogo.svg?alt=media&token=abc",
+      ),
+    ).toBe(true)
+    expect(isSvgUrl("https://x.app/o/site%2Fbrand%2Flogo.png?alt=media")).toBe(false)
+    expect(isSvgUrl("/logo.SVG")).toBe(true)
+  })
+
   it("junta classes e descarta o que for falso", () => {
     expect(cn("a", false, undefined, "b")).toBe("a b")
   })

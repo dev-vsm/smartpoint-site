@@ -20,6 +20,9 @@ import { getHomeContent } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
+/** Mais cards do que isso não cabem numa linha nem na tela mais larga. */
+const FIT_ROW_MAX = 8
+
 // Vitrine em cache, revalidada a cada 5 minutos (design doc §5).
 export const revalidate = 300
 
@@ -31,8 +34,8 @@ export default async function Home() {
     getHomeContent(),
   ])
   // Os mais vendidos (contador do admin); sem venda registrada, os destaques marcados à mão.
-  const bestSellers = pickBestSellers(products)
-  const highlights = bestSellers.length > 0 ? bestSellers : pickHighlights(products)
+  const bestSellers = pickBestSellers(products, FIT_ROW_MAX)
+  const highlights = bestSellers.length > 0 ? bestSellers : pickHighlights(products, FIT_ROW_MAX)
   // A lista da home é a página 1 do catálogo: a paginação leva às seguintes em `/produtos`.
   const firstPage = paginate(products, 1, CATALOG_PAGE_SIZE)
 
@@ -47,20 +50,22 @@ export default async function Home() {
               id="destaques"
               title={bestSellers.length > 0 ? "Mais vendidos" : "Em destaque"}
             />
-            {/* Faixa que rola de lado só com CSS: sem JS na home. No celular ela
-                encosta nas bordas da tela para deixar claro que continua. */}
-            <ul className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2">
-              {highlights.map((product, index) => (
-                <li key={product.id} className="w-44 shrink-0 snap-start sm:w-52">
-                  <ProductCard
-                    product={product}
-                    whatsapp={store.whatsapp}
-                    sizes="(min-width: 640px) 208px, 176px"
-                    eager={index < ABOVE_THE_FOLD}
-                  />
-                </li>
-              ))}
-            </ul>
+            {/* Uma linha só, sem rolagem: mostra quantos cards couberem na largura
+                (`.fit-row` em globals.css, por container query — sem JS). */}
+            <div className="fit-row-wrap">
+              <ul className="fit-row">
+                {highlights.map((product, index) => (
+                  <li key={product.id}>
+                    <ProductCard
+                      product={product}
+                      whatsapp={store.whatsapp}
+                      sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 50vw"
+                      eager={index < ABOVE_THE_FOLD}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         )}
 

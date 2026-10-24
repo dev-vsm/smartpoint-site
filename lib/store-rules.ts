@@ -209,3 +209,9 @@ export function toSiteStore(data: Doc | undefined): SiteStore {
     brand: record(data.brand) as SiteStore["brand"],
   }
 }
+
+/** Cor da barra do navegador e do app instalado: a da marca, se for um hex válido. */
+export function brandColor(store: SiteStore): string {
+  const color = store.brand.color?.trim()
+  return color && /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(color) ? color : "#0e7490"
+}

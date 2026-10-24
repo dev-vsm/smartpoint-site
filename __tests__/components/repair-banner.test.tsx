@@ -65,7 +65,7 @@ describe("carrossel de assistência", () => {
   })
   it("pausa ao passar o mouse e ao focar no atendimento", () => {
     renderBanner()
-    const region = screen.getByRole("region", { name: "Serviços e ofertas de assistência técnica" })
+    const region = screen.getByRole("region", { name: "Destaques da loja" })
     fireEvent.mouseEnter(region)
     advance()
     expect(current()).toBe("Seu celular em boas mãos.")
@@ -87,7 +87,7 @@ describe("carrossel de assistência", () => {
   })
   it("permite teclado e gesto horizontal sem capturar o gesto vertical", () => {
     renderBanner()
-    const region = screen.getByRole("region", { name: "Serviços e ofertas de assistência técnica" })
+    const region = screen.getByRole("region", { name: "Destaques da loja" })
     fireEvent.keyDown(region, { key: "ArrowRight" })
     expect(current()).toBe("Tela quebrada? Vamos resolver.")
     fireEvent.touchStart(region, { touches: [{ clientX: 200, clientY: 20 }] })

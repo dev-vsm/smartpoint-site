@@ -7,19 +7,18 @@ import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import type { HomeHero } from "@/lib/home-content"
 
 /**
- * Benefícios; depois marca, busca e canais de atendimento. No celular a busca
- * ganha uma terceira linha, sem disputar espaço com a marca e os botões.
+ * Benefícios; depois o nome da loja, a busca e os canais de atendimento. No
+ * celular a busca ganha uma terceira linha, sem disputar espaço com nada. A logo
+ * não fica aqui: ela é um slide do carrossel de banners.
  */
 export function Header({
   storeName,
-  logoUrl,
   whatsapp,
   hero,
   benefits,
   instagram,
 }: {
   storeName: string
-  logoUrl?: string
   whatsapp?: string
   hero?: HomeHero
   benefits?: ReactNode
@@ -35,7 +34,7 @@ export function Header({
             className="flex h-11 min-w-0 flex-1 flex-col justify-center gap-0.5 md:w-44 md:flex-none md:shrink-0 lg:w-64"
           >
             <span className="flex h-6 max-w-full items-center">
-              <Brand name={storeName} logoUrl={logoUrl} className="text-base sm:text-xl" />
+              <Brand name={storeName} className="text-base sm:text-xl" />
             </span>
             <span
               className="block w-full truncate text-[10px] leading-tight text-ink-soft sm:text-xs"

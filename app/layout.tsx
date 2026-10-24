@@ -1,5 +1,5 @@
 import { Analytics } from "@vercel/analytics/next"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Archivo } from "next/font/google"
 import { InstagramBand } from "@/components/home/instagram-band"
 import { RepairBanner } from "@/components/home/repair-banner"
@@ -7,9 +7,11 @@ import { StoreBanners } from "@/components/home/store-banners"
 import { ConversionTracker } from "@/components/layout/conversion-tracker"
 import { Header } from "@/components/layout/header"
 import { RepairBannerVisibility } from "@/components/layout/repair-banner-visibility"
+import { bannerSlides } from "@/lib/repair-slides"
 import { siteUrl } from "@/lib/seo"
 import { getHomeContent, listNotices } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
+import { brandColor } from "@/lib/store-rules"
 import "./globals.css"
 
 // Uma família, eixo de largura variável: 400 no texto, 700 expandido nos títulos
@@ -47,8 +49,15 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(store.brand.ogImageUrl ? { images: [store.brand.ogImageUrl] } : {}),
     },
     twitter: { card: "summary_large_image", title, description },
-    ...(store.brand.iconUrl ? { icons: { icon: store.brand.iconUrl } } : {}),
+    // Ícones da aba e do app instalado: `app/icon.tsx`, `app/apple-icon.tsx` e `app/manifest.ts`.
+    applicationName: store.name,
+    appleWebApp: { capable: true, title: store.name, statusBarStyle: "default" },
   }
+}
+
+/** Cor da barra do navegador no celular e da janela do app instalado. */
+export async function generateViewport(): Promise<Viewport> {
+  return { themeColor: brandColor(await getStore()) }
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -58,14 +67,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <Header
           storeName={store.name}
-          logoUrl={store.brand.logoUrl}
           whatsapp={store.whatsapp}
           hero={home.hero}
           benefits={<StoreBanners store={store} notices={notices} />}
           instagram={<InstagramBand store={store} />}
         />
         <RepairBannerVisibility>
-          <RepairBanner whatsapp={store.whatsapp} />
+          <RepairBanner whatsapp={store.whatsapp} slides={bannerSlides(store)} />
         </RepairBannerVisibility>
         {children}
         <Analytics />

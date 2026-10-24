@@ -1,3 +1,5 @@
+import type { SiteStore } from "@/lib/store-rules"
+
 /** Campanhas aprovadas para assistência: sem preços ou prazos presumidos. */
 export interface RepairSlide {
   id: string
@@ -7,7 +9,10 @@ export interface RepairSlide {
   benefit?: string
   cta: string
   message: string
-  image: string
+  /** Foto de fundo do slide. */
+  image?: string
+  /** Logo da loja no lugar da foto (slide de apresentação). */
+  logo?: { url: string; alt: string }
 }
 
 export const REPAIR_SLIDES: RepairSlide[] = [
@@ -67,3 +72,31 @@ export const REPAIR_SLIDES: RepairSlide[] = [
     image: "/banners/carousel/entrega-uberlandia.png",
   },
 ]
+
+/**
+ * Slide de apresentação da loja, o primeiro do carrossel: a logo e o texto
+ * "Sobre" de `settings/store` (editados no admin em /loja). Sem logo, não há slide.
+ */
+export function storeSlide(store: SiteStore): RepairSlide | undefined {
+  const logoUrl = store.brand.logoUrl
+  if (!logoUrl) return undefined
+  const about = store.about?.replace(/\s+/g, " ").trim()
+  return {
+    id: "loja",
+    label: store.city ? `Acessórios para celular em ${store.city}` : "Acessórios para celular",
+    title: `Conheça a ${store.name}`,
+    description: about
+      ? about.charAt(0).toUpperCase() + about.slice(1)
+      : "Capinhas, películas, fones, carregadores e eletrônicos com preço na etiqueta.",
+    benefit: store.district ? `Loja física no ${store.district}` : undefined,
+    cta: "Falar com a loja",
+    message: "Olá! Vim pelo site e quero conhecer os produtos da loja.",
+    logo: { url: logoUrl, alt: store.name },
+  }
+}
+
+/** Carrossel completo: a loja primeiro, depois as campanhas. */
+export function bannerSlides(store: SiteStore): RepairSlide[] {
+  const intro = storeSlide(store)
+  return intro ? [intro, ...REPAIR_SLIDES] : REPAIR_SLIDES
+}

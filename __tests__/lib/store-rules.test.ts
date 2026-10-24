@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { FALLBACK_STORE, toSiteStore } from "@/lib/store-rules"
+import { brandColor, FALLBACK_STORE, toSiteStore } from "@/lib/store-rules"
 
 /** Formato real de `settings/store`, como o admin grava hoje. */
 const doc = {
@@ -123,5 +123,15 @@ describe("toSiteStore", () => {
     const store = toSiteStore({ ...doc, email: "  ", razaoSocial: "" })
     expect(store.email).toBeUndefined()
     expect(store.legalName).toBeUndefined()
+  })
+})
+
+describe("cor da marca", () => {
+  it("usa a cor cadastrada só quando é um hex válido", () => {
+    const withColor = (color?: string) => ({ ...FALLBACK_STORE, brand: { color } })
+    expect(brandColor(withColor("#ff6600"))).toBe("#ff6600")
+    expect(brandColor(withColor(" #F60 "))).toBe("#F60")
+    expect(brandColor(withColor("laranja"))).toBe("#0e7490")
+    expect(brandColor(FALLBACK_STORE)).toBe("#0e7490")
   })
 })

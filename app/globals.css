@@ -88,6 +88,72 @@
 
 @layer components {
   /*
+   * Faixa de uma linha só ("Mais vendidos"): cada card pede no mínimo 11.5rem e
+   * o vão é 0.75rem, então cabem n cards a partir de n·12.25rem − 0.75rem. No
+   * celular são sempre 2, como na grade de produtos. Quem não cabe some
+   * (display: none — nem ocupa espaço, nem recebe foco).
+   */
+  .fit-row-wrap {
+    container-type: inline-size;
+  }
+  .fit-row {
+    --fit-cols: 2;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(var(--fit-cols), minmax(0, 1fr));
+  }
+  .fit-row > :nth-child(n + 3) {
+    display: none;
+  }
+  @container (min-width: 36.0rem) {
+    .fit-row {
+      --fit-cols: 3;
+    }
+    .fit-row > :nth-child(-n + 3) {
+      display: block;
+    }
+  }
+  @container (min-width: 48.25rem) {
+    .fit-row {
+      --fit-cols: 4;
+    }
+    .fit-row > :nth-child(-n + 4) {
+      display: block;
+    }
+  }
+  @container (min-width: 60.5rem) {
+    .fit-row {
+      --fit-cols: 5;
+    }
+    .fit-row > :nth-child(-n + 5) {
+      display: block;
+    }
+  }
+  @container (min-width: 72.75rem) {
+    .fit-row {
+      --fit-cols: 6;
+    }
+    .fit-row > :nth-child(-n + 6) {
+      display: block;
+    }
+  }
+  @container (min-width: 85.0rem) {
+    .fit-row {
+      --fit-cols: 7;
+    }
+    .fit-row > :nth-child(-n + 7) {
+      display: block;
+    }
+  }
+  @container (min-width: 97.25rem) {
+    .fit-row {
+      --fit-cols: 8;
+    }
+    .fit-row > :nth-child(-n + 8) {
+      display: block;
+    }
+  }
+  /*
    * A etiqueta de preço é o elemento mais gráfico do site: chanfro no canto,
    * como as de papel presas no produto. É aqui que gastamos a ousadia.
    */

@@ -17,3 +17,15 @@ export function formatPhone(raw: string): string {
   const match = digits.match(/^(\d{2})(\d{4,5})(\d{4})$/)
   return match ? `(${match[1]}) ${match[2]}-${match[3]}` : raw
 }
+
+/**
+ * SVG pela extensão do caminho, ignorando a query: a URL do Storage termina em
+ * `?alt=media&token=…`, então o `next/image` não percebe sozinho que é SVG.
+ */
+export function isSvgUrl(url: string): boolean {
+  try {
+    return decodeURIComponent(new URL(url, "https://x").pathname).toLowerCase().endsWith(".svg")
+  } catch {
+    return false
+  }
+}

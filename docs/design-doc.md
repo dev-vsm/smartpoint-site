@@ -228,6 +228,9 @@ essas URLs no cabeçalho, no rodapé, no favicon (`metadata.icons`) e na imagem 
 compartilhamento. Duas consequências técnicas:
 
 - o domínio do Storage entra em `images.remotePatterns` do `next.config.ts`;
+- ícones da aba e do app instalado são gerados no servidor a partir de `brand.iconUrl` (ou,
+  sem ele, `brand.logoUrl` sobre branco): `app/icon.tsx` (32, 192, 512), `app/apple-icon.tsx`
+  (180, iPhone/iPad), `app/icon-maskable` (Android) e `app/manifest.ts`, com revalidação de 5 min;
 - enquanto não houver logo, o cabeçalho mostra a marca em **texto** ("SmartPoint") com a
   tipografia do tema — o site nunca fica quebrado esperando um arquivo.
 
