@@ -16,8 +16,9 @@ describe("slide da loja no carrossel", () => {
     const slides = bannerSlides(store)
     expect(slides[0]).toMatchObject({
       id: "loja",
-      title: "Conheça a smartpoint",
-      label: "Acessórios para celular em Uberlândia",
+      title: "Conheça a",
+      brandName: "smartpoint",
+      label: "Assistência e acessórios para celular em Uberlândia, com qualidade e garantia",
       description: "Vendemos acessórios para celular. Venha nos conhecer",
       benefit: "Loja física no Jardim Brasília",
       logo: { url: "https://cdn/logo.svg", alt: "smartpoint" },

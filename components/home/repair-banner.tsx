@@ -154,7 +154,19 @@ export function RepairBanner({
                 <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-brand-strong">
                   {slide.label}
                 </p>
-                <h2 className="mt-2 text-3xl leading-[1.08] lg:text-4xl">{slide.title}</h2>
+                <h2 className="mt-2 text-3xl leading-[1.08] lg:text-4xl">
+                  {slide.title}
+                  {slide.brandName && (
+                    // Mesmo desenho da marca no cabeçalho (`Brand` sem logo): ciano com ponto laranja.
+                    <>
+                      {" "}
+                      <span className="text-brand-strong">
+                        {slide.brandName}
+                        <span className="text-tag">.</span>
+                      </span>
+                    </>
+                  )}
+                </h2>
                 <p className="mt-2 max-w-lg text-sm leading-relaxed text-ink-soft">
                   {slide.description}
                 </p>

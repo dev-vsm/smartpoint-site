@@ -11,6 +11,8 @@ export interface RepairSlide {
   message: string
   /** Foto de fundo do slide. */
   image?: string
+  /** Nome da loja depois do título, no mesmo estilo da marca do cabeçalho. */
+  brandName?: string
   /** Logo da loja no lugar da foto (slide de apresentação). */
   logo?: { url: string; alt: string }
 }
@@ -83,8 +85,12 @@ export function storeSlide(store: SiteStore): RepairSlide | undefined {
   const about = store.about?.replace(/\s+/g, " ").trim()
   return {
     id: "loja",
-    label: store.city ? `Acessórios para celular em ${store.city}` : "Acessórios para celular",
-    title: `Conheça a ${store.name}`,
+    // Cidade e bairro saem de `settings/store.endereco` (cidade e bairro).
+    label: store.city
+      ? `Assistência e acessórios para celular em ${store.city}, com qualidade e garantia`
+      : "Assistência e acessórios para celular com qualidade e garantia",
+    title: "Conheça a",
+    brandName: store.name,
     description: about
       ? about.charAt(0).toUpperCase() + about.slice(1)
       : "Capinhas, películas, fones, carregadores e eletrônicos com preço na etiqueta.",
