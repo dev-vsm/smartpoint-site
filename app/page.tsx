@@ -8,7 +8,12 @@ import { JsonLd } from "@/components/seo/json-ld"
 import { ABOVE_THE_FOLD, ProductCard } from "@/components/ui/product-card"
 import { SectionHeading } from "@/components/ui/section"
 import { listProducts } from "@/lib/catalog"
-import { CATALOG_PAGE_SIZE, catalogHref, pickHighlights } from "@/lib/catalog-rules"
+import {
+  CATALOG_PAGE_SIZE,
+  catalogHref,
+  pickBestSellers,
+  pickHighlights,
+} from "@/lib/catalog-rules"
 import { paginate } from "@/lib/pagination"
 import { localBusinessJsonLd } from "@/lib/seo"
 import { getHomeContent } from "@/lib/site-content"
@@ -25,7 +30,9 @@ export default async function Home() {
     catalogSubmenu(),
     getHomeContent(),
   ])
-  const highlights = pickHighlights(products)
+  // Os mais vendidos (contador do admin); sem venda registrada, os destaques marcados à mão.
+  const bestSellers = pickBestSellers(products)
+  const highlights = bestSellers.length > 0 ? bestSellers : pickHighlights(products)
   // A lista da home é a página 1 do catálogo: a paginação leva às seguintes em `/produtos`.
   const firstPage = paginate(products, 1, CATALOG_PAGE_SIZE)
 
@@ -36,7 +43,10 @@ export default async function Home() {
         <h1 className="sr-only">{home.hero?.title ?? `${store.name} — Acessórios para celular`}</h1>
         {highlights.length > 0 && (
           <section aria-labelledby="destaques" className="mb-10">
-            <SectionHeading id="destaques" title="Em destaque" />
+            <SectionHeading
+              id="destaques"
+              title={bestSellers.length > 0 ? "Mais vendidos" : "Em destaque"}
+            />
             {/* Faixa que rola de lado só com CSS: sem JS na home. No celular ela
                 encosta nas bordas da tela para deixar claro que continua. */}
             <ul className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2">

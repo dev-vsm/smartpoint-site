@@ -130,6 +130,8 @@ site próprio, com o SEO e a conversa de venda dela.
   site?: {
     published: boolean;      // D4 — entra na vitrine
     highlight?: boolean;     // aparece nos destaques da home
+    // A faixa da home mostra os mais vendidos por `Products.totalSold` (já mantido pelo
+    // admin a cada venda); `highlight` vale como desempate e como reserva sem vendas.
     slug?: string;           // URL amigável; gerado a partir do nome se ausente
     seoTitle?: string;
     seoDescription?: string;

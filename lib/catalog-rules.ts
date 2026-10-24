@@ -22,6 +22,8 @@ export interface RawProduct {
   totalStock?: number
   priceRange?: { min: number; max: number }
   variantCount?: number
+  /** Unidades vendidas: o admin soma a cada venda e desconta nas trocas. */
+  totalSold?: number
   warranty?: string
   site?: {
     published?: boolean
@@ -51,6 +53,8 @@ export interface SiteProduct {
   /** Id da subcategoria — decide se a variação esgotada vira encomenda. */
   subcategoryId?: string
   highlight: boolean
+  /** Só ordena os mais vendidos; o número nunca aparece na tela. */
+  totalSold: number
   order: number
   warranty?: string
   seoTitle?: string
@@ -143,6 +147,7 @@ export function toSiteProduct(product: RawProduct): SiteProduct {
     subcategory: product.categorization?.subcategoryName?.trim() || undefined,
     subcategoryId: product.categorization?.subcategoryId?.trim() || undefined,
     highlight: product.site?.highlight === true,
+    totalSold: Math.max(0, Number(product.totalSold) || 0),
     order: product.site?.order ?? Number.MAX_SAFE_INTEGER,
     warranty: product.warranty,
     seoTitle: product.site?.seoTitle,
@@ -172,6 +177,24 @@ export function sortForShowcase(products: SiteProduct[]): SiteProduct[] {
 export function pickHighlights(products: SiteProduct[], limit = 12): SiteProduct[] {
   return products
     .filter((product) => product.highlight && product.availability !== "sold_out")
+    .slice(0, limit)
+}
+
+/**
+ * Mais vendidos, pelo contador `totalSold` do admin. Fica de fora o que nunca
+ * vendeu e o que está esgotado (não dá para levar). No empate, vale o destaque
+ * marcado no admin e depois a ordem da vitrine.
+ */
+export function pickBestSellers(products: SiteProduct[], limit = 12): SiteProduct[] {
+  return products
+    .filter((product) => product.totalSold > 0 && product.availability !== "sold_out")
+    .sort(
+      (a, b) =>
+        b.totalSold - a.totalSold ||
+        Number(b.highlight) - Number(a.highlight) ||
+        a.order - b.order ||
+        a.name.localeCompare(b.name, "pt-BR"),
+    )
     .slice(0, limit)
 }
 

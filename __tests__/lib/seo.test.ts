@@ -63,6 +63,7 @@ describe("dados estruturados", () => {
       hasVariants: false,
       availability: "sold_out" as const,
       highlight: false,
+      totalSold: 0,
       order: 0,
     }
     const data = productJsonLd(product, store)

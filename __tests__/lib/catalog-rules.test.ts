@@ -6,6 +6,7 @@ import {
   filterProducts,
   hasPrice,
   isPublished,
+  pickBestSellers,
   pickHighlights,
   productSlug,
   slugify,
@@ -144,6 +145,20 @@ describe("produto da vitrine", () => {
     expect(pickHighlights(list).map((item) => item.name)).toEqual(["Bateria", "Capa"])
     expect(pickHighlights(list, 1).map((item) => item.name)).toEqual(["Bateria"])
     expect(pickHighlights([toSiteProduct(raw())])).toEqual([])
+  })
+
+  it("ordena os mais vendidos pelo contador do admin, sem esgotado nem item sem venda", () => {
+    const list = [
+      toSiteProduct(raw({ id: "a", name: "Cabo", totalSold: 5 })),
+      toSiteProduct(raw({ id: "b", name: "Fone", totalSold: 30 })),
+      toSiteProduct(raw({ id: "c", name: "Capa", totalSold: 5, site: { highlight: true } })),
+      toSiteProduct(raw({ id: "d", name: "Película", totalSold: 99, totalStock: 0 })),
+      toSiteProduct(raw({ id: "e", name: "Suporte" })),
+      toSiteProduct(raw({ id: "f", name: "Bateria", totalSold: -2 })),
+    ]
+    expect(pickBestSellers(list).map((item) => item.name)).toEqual(["Fone", "Capa", "Cabo"])
+    expect(pickBestSellers(list, 1).map((item) => item.name)).toEqual(["Fone"])
+    expect(pickBestSellers([toSiteProduct(raw())])).toEqual([])
   })
 
   it("agrupa categorias por quantidade", () => {
