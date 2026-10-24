@@ -1,13 +1,15 @@
 import Link from "next/link"
+import { PageSizeSelect } from "@/components/catalog/page-size-select"
 import { CATALOG_PAGE_SIZES } from "@/lib/catalog-rules"
 import { type Page, pageWindow } from "@/lib/pagination"
 import { cn } from "@/lib/utils"
 
 /**
- * Paginação numerada, só servidor (zero JS): links de verdade, que funcionam
- * sem hidratar, abrem em nova aba e o Google segue. Traz junto a faixa exibida
- * ("1–24 de 456 produtos") e aparece sempre — com uma página só, os botões
- * ficam inertes, para a pessoa saber que viu tudo.
+ * Paginação numerada em uma linha: links de verdade, que funcionam sem
+ * hidratar, abrem em nova aba e o Google segue. A faixa exibida ("1–24 de 456
+ * produtos") fica antes de Anterior e o seletor de itens por página depois
+ * de Próxima — o único pedaço com JS. Aparece sempre: com uma página só, os
+ * botões ficam inertes, para a pessoa saber que viu tudo.
  *
  * No celular a janela de números encolhe (primeira, atual, última) e Anterior/
  * Próxima viram só a seta: cabe em 320px sem perder o alvo de 44px.
@@ -36,59 +38,42 @@ export function Pagination({
   const next = page < totalPages ? page + 1 : null
   const unit = totalItems === 1 ? noun[0] : noun[1]
 
-  // Duas linhas, centralizadas: o contador em cima, a navegação embaixo.
+  // Uma linha só: faixa exibida, Anterior, números, Próxima e itens por página.
+  // Em tela estreita, se não couber, quebra em vez de criar rolagem lateral.
   return (
-    <div className={cn("flex flex-col items-center gap-3", className)}>
-      <p className="text-sm text-ink-soft tabular-nums">
+    <nav
+      aria-label="Paginação"
+      className={cn("flex flex-wrap items-center justify-center gap-x-2 gap-y-3", className)}
+    >
+      <p className="px-1 text-sm text-ink-soft tabular-nums">
         <span className="font-semibold text-ink">
           {from}–{to}
         </span>{" "}
         de <span className="font-semibold text-ink">{totalItems}</span> {unit}
       </p>
-
+      <StepLink target={prev} href={href} label="Anterior" direction="prev" />
+      <PageNumbers
+        page={page}
+        totalPages={totalPages}
+        href={href}
+        siblings={0}
+        className="sm:hidden"
+      />
+      <PageNumbers
+        page={page}
+        totalPages={totalPages}
+        href={href}
+        siblings={1}
+        className="hidden sm:flex"
+      />
+      <StepLink target={next} href={href} label="Próxima" direction="next" />
       {perPage && pageSizeHref && (
-        <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-          <span className="text-ink-soft">Itens por página</span>
-          <nav aria-label="Itens por página" className="flex items-center gap-1">
-            {CATALOG_PAGE_SIZES.map((size) => (
-              <Link
-                key={size}
-                href={pageSizeHref(size)}
-                aria-current={size === perPage ? "true" : undefined}
-                aria-label={`${size} itens por página`}
-                className={cn(
-                  "inline-flex h-9 min-w-9 items-center justify-center rounded-sm px-2 font-semibold tabular-nums transition-colors",
-                  size === perPage
-                    ? "bg-brand text-brand-ink"
-                    : "text-ink-soft hover:bg-brand-soft hover:text-brand-strong",
-                )}
-              >
-                {size}
-              </Link>
-            ))}
-          </nav>
-        </div>
+        <PageSizeSelect
+          current={perPage}
+          options={CATALOG_PAGE_SIZES.map((size) => ({ size, href: pageSizeHref(size) }))}
+        />
       )}
-
-      <nav aria-label="Paginação" className="flex items-center gap-1 sm:gap-2">
-        <StepLink target={prev} href={href} label="Anterior" direction="prev" />
-        <PageNumbers
-          page={page}
-          totalPages={totalPages}
-          href={href}
-          siblings={0}
-          className="sm:hidden"
-        />
-        <PageNumbers
-          page={page}
-          totalPages={totalPages}
-          href={href}
-          siblings={1}
-          className="hidden sm:flex"
-        />
-        <StepLink target={next} href={href} label="Próxima" direction="next" />
-      </nav>
-    </div>
+    </nav>
   )
 }
 

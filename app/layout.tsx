@@ -1,7 +1,6 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
 import { Archivo } from "next/font/google"
-import { InstagramBand } from "@/components/home/instagram-band"
 import { RepairBanner } from "@/components/home/repair-banner"
 import { StoreBanners } from "@/components/home/store-banners"
 import { ConversionTracker } from "@/components/layout/conversion-tracker"
@@ -66,11 +65,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="pt-BR" className={archivo.variable}>
       <body>
         <Header
-          storeName={store.name}
-          whatsapp={store.whatsapp}
-          hero={home.hero}
-          benefits={<StoreBanners store={store} notices={notices} />}
-          instagram={<InstagramBand store={store} />}
+          benefits={<StoreBanners store={store} notices={notices} tagline={home.hero?.title} />}
         />
         <RepairBannerVisibility>
           <RepairBanner whatsapp={store.whatsapp} slides={bannerSlides(store)} />

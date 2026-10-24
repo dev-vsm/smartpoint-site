@@ -4,6 +4,7 @@ import { PageShell } from "@/components/layout/page-shell"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { JsonLd } from "@/components/seo/json-ld"
 import { SectionHeading } from "@/components/ui/section"
+import { SocialButton } from "@/components/ui/social-button"
 import { localBusinessJsonLd } from "@/lib/seo"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
@@ -72,15 +73,7 @@ export default async function ContactPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <WhatsAppCta number={store.whatsapp} className="w-auto" source="contato" />
               {store.social.map((link) => (
-                <a
-                  key={link.network}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center rounded-sm border border-line bg-paper px-4 text-sm font-semibold hover:border-brand-strong hover:bg-brand-soft"
-                >
-                  {link.label}
-                </a>
+                <SocialButton key={link.network} link={link} />
               ))}
             </div>
           </div>

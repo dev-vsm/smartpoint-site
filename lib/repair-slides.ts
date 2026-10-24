@@ -1,4 +1,4 @@
-import type { SiteStore } from "@/lib/store-rules"
+import type { SiteStore, SocialLink } from "@/lib/store-rules"
 
 /** Campanhas aprovadas para assistência: sem preços ou prazos presumidos. */
 export interface RepairSlide {
@@ -13,6 +13,8 @@ export interface RepairSlide {
   image?: string
   /** Nome da loja depois do título, no mesmo estilo da marca do cabeçalho. */
   brandName?: string
+  /** Redes sociais cadastradas, como botões ao lado do WhatsApp. */
+  social?: SocialLink[]
   /** Logo da loja no lugar da foto (slide de apresentação). */
   logo?: { url: string; alt: string }
 }
@@ -76,6 +78,20 @@ export const REPAIR_SLIDES: RepairSlide[] = [
 ]
 
 /**
+ * "Loja física no bairro Jardim Brasília, Uberlândia · 3-803". "No bairro" vale
+ * para qualquer nome — "no Brasil" ou "no Santa Mônica" não. Tudo do cadastro
+ * (`settings/store.endereco`): sem bairro nem cidade, não há frase.
+ */
+export function storePlace(store: SiteStore): string | undefined {
+  const where = [store.district && `no bairro ${store.district}`, store.city]
+    .filter(Boolean)
+    .join(", ")
+  if (!where) return undefined
+  const place = store.district ? `Loja física ${where}` : `Loja física em ${where}`
+  return store.complement ? `${place} · ${store.complement}` : place
+}
+
+/**
  * Slide de apresentação da loja, o primeiro do carrossel: a logo e o texto
  * "Sobre" de `settings/store` (editados no admin em /loja). Sem logo, não há slide.
  */
@@ -94,9 +110,10 @@ export function storeSlide(store: SiteStore): RepairSlide | undefined {
     description: about
       ? about.charAt(0).toUpperCase() + about.slice(1)
       : "Capinhas, películas, fones, carregadores e eletrônicos com preço na etiqueta.",
-    benefit: store.district ? `Loja física no ${store.district}` : undefined,
+    benefit: storePlace(store),
     cta: "Falar com a loja",
     message: "Olá! Vim pelo site e quero conhecer os produtos da loja.",
+    social: store.social.length > 0 ? store.social : undefined,
     logo: { url: logoUrl, alt: store.name },
   }
 }

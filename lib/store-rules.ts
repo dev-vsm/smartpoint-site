@@ -61,6 +61,8 @@ export interface SiteStore {
   /** Só a cidade ("Uberlândia") e o bairro, para frases como "entrega em toda Uberlândia". */
   city?: string
   district?: string
+  /** Complemento do endereço (sala, loja, bloco), como cadastrado. */
+  complement?: string
   postalCode?: string
   /** Derivado do link/embed cadastrado ou do endereço; ausente quando não há onde apontar. */
   map?: StoreMap
@@ -189,6 +191,7 @@ export function toSiteStore(data: Doc | undefined): SiteStore {
     cityLine,
     city: text(address.cidade),
     district: text(address.bairro),
+    complement: text(address.complemento),
     postalCode,
     map: buildStoreMap({
       mapsUrl: text(address.googleMapsUrl) ?? text(data.mapsUrl),

@@ -2,9 +2,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { Brand } from "@/components/layout/brand"
 import { OpenNow } from "@/components/layout/open-now"
+import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
+import { EmailButton, PhoneButton } from "@/components/ui/contact-buttons"
+import { SocialButton } from "@/components/ui/social-button"
 import { getStore } from "@/lib/store"
 import { formatPhone } from "@/lib/utils"
-import { buildWhatsAppUrl, normalizeWhatsAppNumber } from "@/lib/whatsapp"
+import { normalizeWhatsAppNumber } from "@/lib/whatsapp"
 
 /** Rotas do site — navegação, não dado da loja. O cabeçalho é só marca e busca. */
 const PAGES = [
@@ -38,33 +41,6 @@ export async function Footer() {
     store.phone && normalizeWhatsAppNumber(store.phone) !== normalizeWhatsAppNumber(store.whatsapp)
       ? store.phone
       : undefined
-  const contacts = [
-    {
-      label: "WhatsApp",
-      text: formatPhone(store.whatsapp),
-      href: buildWhatsAppUrl(store.whatsapp),
-      external: true,
-    },
-    phone && {
-      label: "Telefone",
-      text: formatPhone(phone),
-      href: `tel:+${normalizeWhatsAppNumber(phone)}`,
-      external: false,
-    },
-    store.email && {
-      label: "E-mail",
-      text: store.email,
-      href: `mailto:${store.email}`,
-      external: false,
-    },
-    ...store.social.map((link) => ({
-      label: link.label,
-      text: socialHandle(link.url),
-      href: link.url,
-      external: true,
-    })),
-  ].filter((contact) => !!contact)
-
   const hasAddress = Boolean(store.addressLine || store.cityLine)
 
   return (
@@ -130,18 +106,34 @@ export async function Footer() {
 
         <div>
           <h2 className="text-sm">Contato</h2>
-          <ul className="mt-2 space-y-1 text-sm">
-            {contacts.map((contact) => (
-              <li key={contact.label}>
-                <span className="text-ink-soft">{contact.label}: </span>
-                <a
-                  href={contact.href}
-                  {...(contact.external && { target: "_blank", rel: "noopener noreferrer" })}
-                  {...(contact.label === "WhatsApp" && { "data-wa-source": "rodape" })}
-                  className={linkStyle}
-                >
-                  {contact.text}
-                </a>
+          {/* Cada contato com a cara de onde leva: WhatsApp verde, Gmail, Instagram… */}
+          <ul className="mt-2 flex max-w-xs flex-col gap-2">
+            <li>
+              <WhatsAppCta
+                number={store.whatsapp}
+                label={formatPhone(store.whatsapp)}
+                ariaLabel={`Falar no WhatsApp: ${formatPhone(store.whatsapp)}`}
+                source="rodape"
+                className="w-full! justify-start px-3 text-xs sm:px-4 sm:text-sm"
+              />
+            </li>
+            {phone && (
+              <li>
+                <PhoneButton
+                  label={formatPhone(phone)}
+                  href={`tel:+${normalizeWhatsAppNumber(phone)}`}
+                  className="w-full"
+                />
+              </li>
+            )}
+            {store.email && (
+              <li>
+                <EmailButton email={store.email} className="w-full" />
+              </li>
+            )}
+            {store.social.map((link) => (
+              <li key={link.network}>
+                <SocialButton link={link} text={socialHandle(link.url)} className="w-full" />
               </li>
             ))}
           </ul>

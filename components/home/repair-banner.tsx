@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
+import { SocialButton } from "@/components/ui/social-button"
 import { REPAIR_SLIDES, type RepairSlide } from "@/lib/repair-slides"
 import { cn, isSvgUrl } from "@/lib/utils"
 
@@ -180,7 +181,7 @@ export function RepairBanner({
                     <span aria-hidden="true">✓</span> {slide.benefit}
                   </p>
                 )}
-                <div className="mt-4">
+                <div className="mt-4 flex flex-wrap items-center gap-2">
                   <WhatsAppCta
                     number={whatsapp}
                     message={slide.message}
@@ -188,6 +189,9 @@ export function RepairBanner({
                     source={`carrossel_${slide.id}`}
                     className="w-auto! max-w-full px-3 text-xs sm:px-4 sm:text-sm"
                   />
+                  {slide.social?.map((link) => (
+                    <SocialButton key={link.network} link={link} />
+                  ))}
                 </div>
               </div>
             </div>
