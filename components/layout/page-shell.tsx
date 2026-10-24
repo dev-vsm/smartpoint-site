@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * Miolo das páginas: as categorias numa coluna à esquerda e o conteúdo ao lado.
- * O menu flui com a página em vez de criar sua própria área de rolagem.
+ * O menu flui com a página em vez de criar sua própria área de rolagem. No
+ * celular ele some: a lista de categorias empurraria os produtos para baixo.
  */
 export function PageShell({
   submenu = [],
@@ -25,7 +26,7 @@ export function PageShell({
       )}
     >
       {hasNav && (
-        <aside className="border-b border-line lg:border-b-0 lg:py-8">
+        <aside className="hidden border-b border-line md:block lg:border-b-0 lg:py-8">
           <Suspense fallback={<SubmenuFallback items={submenu} />}>
             <SubmenuNav items={submenu} />
           </Suspense>
