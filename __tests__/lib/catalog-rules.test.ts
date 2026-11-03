@@ -11,15 +11,29 @@ import {
   productSlug,
   slugify,
   sortForShowcase,
+  specsLabel,
   toSiteProduct,
 } from "@/lib/catalog-rules"
 
 const raw = (overrides: Record<string, unknown> = {}) => ({
   id: "abc123def456",
   name: "Capa anti-impacto iPhone 15",
-  images: ["https://cdn/x.png"],
-  totalStock: 3,
-  priceRange: { min: 7990, max: 9990 },
+  media: [
+    {
+      id: "m1",
+      type: "image",
+      path: "products/abc123def456/m1.jpg",
+      width: 3024,
+      height: 4032,
+      contentType: "image/jpeg",
+      size: 1000,
+      createdAt: "2026-10-01T00:00:00.000Z",
+    },
+  ],
+  stock: 3,
+  price: 7990,
+  sku: "CAP-IPH15-PRE",
+  specs: [{ name: "Cor", value: "Preto" }],
   site: { published: true },
   ...overrides,
 })
@@ -50,32 +64,43 @@ describe("slug", () => {
 })
 
 describe("produto da vitrine", () => {
-  it("marca 'a partir de' só quando o preço varia", () => {
-    expect(toSiteProduct(raw()).hasVariants).toBe(true)
-    expect(toSiteProduct(raw({ priceRange: { min: 3500, max: 3500 } })).hasVariants).toBe(false)
-  })
-
-  it("ignora preço zero e usa o maior preço válido", () => {
-    const product = toSiteProduct(raw({ priceRange: { min: 0, max: 3490 } }))
-    expect(product.priceFromCents).toBe(3490)
-    expect(product.hasVariants).toBe(false)
+  it("documento único: preço, SKU e características vêm do próprio produto", () => {
+    const product = toSiteProduct(raw())
+    expect(product.priceCents).toBe(7990)
+    expect(product.sku).toBe("CAP-IPH15-PRE")
+    expect(product.specs).toEqual([{ name: "Cor", value: "Preto" }])
     expect(hasPrice(product)).toBe(true)
   })
 
-  it("produto sem preço nenhum fica fora da vitrine", () => {
-    expect(hasPrice(toSiteProduct(raw({ priceRange: { min: 0, max: 0 } })))).toBe(false)
+  it("característica sem nome ou sem valor é ignorada", () => {
+    const product = toSiteProduct(
+      raw({ specs: [{ name: "Cor", value: "" }, { name: " ", value: "x" }, null] }),
+    )
+    expect(product.specs).toEqual([])
+    expect(
+      specsLabel([
+        { name: "Cor", value: "Preto" },
+        { name: "Conector", value: "USB-C" },
+      ]),
+    ).toBe("Preto · USB-C")
+  })
+
+  it("produto sem preço (zero, nulo ou ausente) fica fora da vitrine", () => {
+    expect(hasPrice(toSiteProduct(raw({ price: 0 })))).toBe(false)
+    expect(hasPrice(toSiteProduct(raw({ price: null })))).toBe(false)
+    expect(hasPrice(toSiteProduct(raw({ price: undefined })))).toBe(false)
   })
 
   it("sem estoque continua visível, mas marcado como esgotado", () => {
     expect(toSiteProduct(raw()).availability).toBe("in_stock")
-    expect(toSiteProduct(raw({ totalStock: 0 })).availability).toBe("sold_out")
+    expect(toSiteProduct(raw({ stock: 0 })).availability).toBe("sold_out")
   })
 
   it("action figure sem estoque vira encomenda; com estoque, pronta entrega", () => {
-    const figure = (totalStock: number) =>
+    const figure = (stock: number) =>
       toSiteProduct(
         raw({
-          totalStock,
+          stock,
           categorization: {
             categoryName: "Presentes e Colecionáveis",
             subcategoryId: "presentes-e-colecionaveis--bonecos",
@@ -94,7 +119,7 @@ describe("produto da vitrine", () => {
         raw({
           id: "x",
           name: "Antes esgotado",
-          totalStock: 0,
+          stock: 0,
           site: { published: true, highlight: true, order: 0 },
         }),
       ),
@@ -103,7 +128,7 @@ describe("produto da vitrine", () => {
         raw({
           id: "f",
           name: "Figura",
-          totalStock: 0,
+          stock: 0,
           categorization: { subcategoryId: "presentes-e-colecionaveis--bonecos" },
         }),
       ),
@@ -152,7 +177,7 @@ describe("produto da vitrine", () => {
       toSiteProduct(raw({ id: "a", name: "Cabo", totalSold: 5 })),
       toSiteProduct(raw({ id: "b", name: "Fone", totalSold: 30 })),
       toSiteProduct(raw({ id: "c", name: "Capa", totalSold: 5, site: { highlight: true } })),
-      toSiteProduct(raw({ id: "d", name: "Película", totalSold: 99, totalStock: 0 })),
+      toSiteProduct(raw({ id: "d", name: "Película", totalSold: 99, stock: 0 })),
       toSiteProduct(raw({ id: "e", name: "Suporte" })),
       toSiteProduct(raw({ id: "f", name: "Bateria", totalSold: -2 })),
     ]
@@ -236,5 +261,23 @@ describe("catalogHref", () => {
 
   it("codifica acento e espaço", () => {
     expect(catalogHref({ category: "películas" })).toBe("/produtos?categoria=pel%C3%ADculas")
+  })
+})
+
+describe("fotos do produto", () => {
+  it("capa = media[0], com alt do nome e imagem de compartilhamento", () => {
+    const product = toSiteProduct(raw(), "b")
+    expect(product.media).toHaveLength(1)
+    expect(product.cover?.alt).toBe("Capa anti-impacto iPhone 15")
+    expect(product.share?.url).toContain(
+      encodeURIComponent("products/abc123def456/m1_1200x900.webp"),
+    )
+  })
+
+  it("ignora o campo antigo `images`: sem media é produto sem foto", () => {
+    const product = toSiteProduct(raw({ media: undefined, images: ["https://cdn/x.png"] }), "b")
+    expect(product.media).toEqual([])
+    expect(product.cover).toBeUndefined()
+    expect(product.share).toBeUndefined()
   })
 })

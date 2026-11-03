@@ -7,7 +7,7 @@ import { PageShell } from "@/components/layout/page-shell"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ProductCard } from "@/components/ui/product-card"
 import { SectionHeading } from "@/components/ui/section"
-import { getProductBySlug, listProducts, listRelated, listVariants } from "@/lib/catalog"
+import { getProductBySlug, listProducts, listRelated } from "@/lib/catalog"
 import { catalogHref } from "@/lib/catalog-rules"
 import { absolute, breadcrumbJsonLd, productJsonLd } from "@/lib/seo"
 import { getStore } from "@/lib/store"
@@ -34,7 +34,11 @@ export async function generateMetadata({
       product.seoDescription ??
       product.description?.slice(0, 160) ??
       `${product.name} na SmartPoint.`,
-    openGraph: { images: product.image ? [product.image] : undefined },
+    openGraph: {
+      images: product.share
+        ? [{ ...product.share, alt: product.cover?.alt ?? product.name }]
+        : undefined,
+    },
   }
 }
 
@@ -43,9 +47,8 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
   const product = await getProductBySlug(slug)
   if (!product) notFound()
 
-  const [store, variants, related, submenu] = await Promise.all([
+  const [store, related, submenu] = await Promise.all([
     getStore(),
-    listVariants(product.id),
     listRelated(product),
     catalogSubmenu(),
   ])
@@ -89,7 +92,6 @@ export default async function ProductPage({ params }: PageProps<"/produtos/[slug
 
         <ProductDetail
           product={product}
-          variants={variants}
           whatsapp={store.whatsapp}
           url={absolute(`/produtos/${product.slug}`)}
           trust={trustItems(store, { warranty: product.warranty })}

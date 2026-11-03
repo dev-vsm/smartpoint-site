@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
-    "check": "biome check . && tsc --noEmit && vitest run"
+    "check": "biome check . && tsc --noEmit && vitest run",
+    "images:local": "node scripts/optimize-local-images.mjs",
+    "images:cache": "node scripts/storage-cache-control.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

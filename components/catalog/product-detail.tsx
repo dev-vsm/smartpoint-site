@@ -1,28 +1,27 @@
 "use client"
 
-import Image from "next/image"
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { OpenNow } from "@/components/layout/open-now"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { AvailabilityLine, CTA_LABEL } from "@/components/ui/availability"
 import { PriceTag } from "@/components/ui/price-tag"
+import { ProductPhoto } from "@/components/ui/product-photo"
 import { TrustList } from "@/components/ui/trust-list"
-import type { ProductVariant } from "@/lib/catalog"
-import { availabilityOf, type SiteProduct } from "@/lib/catalog-rules"
+import { type SiteProduct, specsLabel } from "@/lib/catalog-rules"
 import type { HoursSlot } from "@/lib/hours"
 import { productMessage } from "@/lib/messages"
 import type { TrustItem } from "@/lib/trust"
 import { cn } from "@/lib/utils"
 
 /**
- * Detalhe do produto: foto grande, preço, disponibilidade e a escolha da
- * variação — que muda o preço, o botão e a mensagem que abre no WhatsApp.
- * Logo abaixo do botão, o que trava a compra: horário, retirada, entrega,
- * pagamento e garantia. No celular, preço e botão ficam presos no rodapé.
+ * Detalhe do produto: foto grande, preço, disponibilidade e as características
+ * cadastradas no admin (cor, conector…). Cada produto é um item só — a mesma
+ * capinha em outra cor é outro produto. Logo abaixo do botão, o que trava a
+ * compra: horário, retirada, entrega, pagamento e garantia. No celular, preço e
+ * botão ficam presos no rodapé.
  */
 export function ProductDetail({
   product,
-  variants,
   whatsapp,
   url,
   trust,
@@ -30,7 +29,6 @@ export function ProductDetail({
   installments,
 }: {
   product: SiteProduct
-  variants: ProductVariant[]
   whatsapp: string
   url: string
   trust: TrustItem[]
@@ -38,35 +36,16 @@ export function ProductDetail({
   /** "em até 12x", quando a loja parcela no cartão. */
   installments?: string
 }) {
-  const options = useMemo(
-    () =>
-      variants.map((variant) => ({
-        ...variant,
-        availability: availabilityOf(variant.stock, product.subcategoryId),
-      })),
-    [variants, product.subcategoryId],
-  )
-  // Variação esgotada só fica clicável quando todas estão: aí o cliente ainda
-  // escolhe qual quer que chegue.
-  const someAvailable = options.some((option) => option.availability !== "sold_out")
-  const [selectedId, setSelectedId] = useState(
-    () => (options.find((option) => option.availability !== "sold_out") ?? options[0])?.id,
-  )
   const [photo, setPhoto] = useState(0)
+  const gallery = product.media
+  const current = gallery[photo] ?? gallery[0]
 
-  const selected = options.find((option) => option.id === selectedId)
-  const gallery = useMemo(() => {
-    const images = [...(selected?.images ?? []), ...product.images]
-    return [...new Set(images)].slice(0, 6)
-  }, [product.images, selected])
-
-  const price = selected?.priceCents ?? product.priceFromCents
-  const label = selected ? describe(selected) : undefined
-  const availability = selected?.availability ?? product.availability
+  const price = product.priceCents
+  const availability = product.availability
   const cta = CTA_LABEL[availability]
   const message = productMessage({
     name: product.name,
-    variant: label,
+    variant: specsLabel(product.specs) || undefined,
     priceCents: price,
     url,
     availability,
@@ -76,15 +55,14 @@ export function ProductDetail({
     <div className="grid gap-8 lg:grid-cols-2">
       <div>
         <div className="relative aspect-square overflow-hidden rounded-md bg-paper ring-1 ring-line">
-          {gallery[photo] ? (
-            <Image
-              src={gallery[photo]}
-              alt={product.name}
-              fill
-              preload
+          {current ? (
+            <ProductPhoto
+              key={current.id}
+              image={current}
+              eager
               sizes="(min-width: 1024px) 45vw, 100vw"
               className={cn(
-                "object-contain p-6",
+                "absolute inset-0 h-full w-full object-contain p-6",
                 availability === "sold_out" && "opacity-60 grayscale",
               )}
             />
@@ -96,9 +74,9 @@ export function ProductDetail({
         </div>
 
         {gallery.length > 1 && (
-          <ul className="mt-3 flex gap-2">
+          <ul className="mt-3 flex flex-wrap gap-2">
             {gallery.map((image, index) => (
-              <li key={image}>
+              <li key={image.id}>
                 <button
                   type="button"
                   aria-label={`Foto ${index + 1}`}
@@ -109,7 +87,12 @@ export function ProductDetail({
                     index === photo ? "ring-brand-strong" : "ring-line hover:ring-brand-strong",
                   )}
                 >
-                  <Image src={image} alt="" fill sizes="64px" className="object-contain p-1" />
+                  <ProductPhoto
+                    image={image}
+                    alt=""
+                    sizes="64px"
+                    className="absolute inset-0 h-full w-full object-contain p-1"
+                  />
                 </button>
               </li>
             ))}
@@ -131,38 +114,15 @@ export function ProductDetail({
           <AvailabilityLine availability={availability} />
         </div>
 
-        {options.length > 1 && (
-          <fieldset className="mt-6">
-            <legend className="text-sm font-semibold">Escolha a variação</legend>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {options.map((option) => {
-                const soldOut = option.availability === "sold_out"
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    aria-pressed={option.id === selectedId}
-                    disabled={soldOut && someAvailable}
-                    onClick={() => {
-                      setSelectedId(option.id)
-                      setPhoto(0)
-                    }}
-                    className={cn(
-                      "min-h-11 rounded-sm border px-3 text-sm font-semibold transition-colors",
-                      option.id === selectedId
-                        ? "border-brand-strong bg-brand text-brand-ink"
-                        : "border-line bg-paper hover:border-brand-strong hover:bg-brand-soft",
-                      soldOut && "line-through decoration-1 opacity-60",
-                      "disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:bg-paper",
-                    )}
-                  >
-                    {describe(option)}
-                    {soldOut && <span className="sr-only"> (esgotado)</span>}
-                  </button>
-                )
-              })}
-            </div>
-          </fieldset>
+        {product.specs.length > 0 && (
+          <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+            {product.specs.map((spec) => (
+              <div key={spec.name} className="contents">
+                <dt className="text-ink-soft">{spec.name}</dt>
+                <dd className="font-semibold">{spec.value}</dd>
+              </div>
+            ))}
+          </dl>
         )}
 
         <div className="mt-6 space-y-3">
@@ -205,10 +165,4 @@ export function ProductDetail({
       </div>
     </div>
   )
-}
-
-/** "Preto · 128 GB" — os atributos que o admin cadastrou, na ordem. */
-function describe(variant: ProductVariant): string {
-  const values = Object.values(variant.attributes).filter(Boolean)
-  return values.length ? values.join(" · ") : (variant.sku ?? "Padrão")
 }

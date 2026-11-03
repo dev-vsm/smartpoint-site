@@ -71,12 +71,13 @@ export function productJsonLd(product: SiteProduct, store: SiteStore) {
     "@type": "Product",
     name: product.name,
     ...(product.description ? { description: product.description } : {}),
-    ...(product.images.length ? { image: product.images } : {}),
+    // Originais: sempre existem (a variante pode ainda não ter sido gerada).
+    ...(product.media.length ? { image: product.media.map((item) => item.original) } : {}),
     ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
     ...(product.category ? { category: product.category } : {}),
     offers: {
       "@type": "Offer",
-      price: (product.priceFromCents / 100).toFixed(2),
+      price: (product.priceCents / 100).toFixed(2),
       priceCurrency: "BRL",
       availability: SCHEMA_AVAILABILITY[product.availability],
       url: absolute(`/produtos/${product.slug}`),

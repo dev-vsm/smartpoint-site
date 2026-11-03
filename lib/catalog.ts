@@ -12,15 +12,6 @@ import {
 } from "@/lib/catalog-rules"
 import { firestore } from "@/lib/firebase-admin"
 
-export interface ProductVariant {
-  id: string
-  sku?: string
-  attributes: Record<string, string>
-  priceCents: number
-  stock: number
-  images: string[]
-}
-
 /**
  * Leitura do catálogo publicado. Uma consulta por `site.published` e o resto
  * filtrado em memória — evita índice composto no Firestore para um catálogo
@@ -34,7 +25,7 @@ async function readPublishedProducts(): Promise<SiteProduct[]> {
   const products = snapshot.docs
     .map((doc) => ({ id: doc.id, ...doc.data() }) as RawProduct)
     .filter(isPublished)
-    .map(toSiteProduct)
+    .map((product) => toSiteProduct(product))
     .filter(hasPrice)
 
   return sortForShowcase(products)
@@ -52,9 +43,10 @@ async function readPublishedProducts(): Promise<SiteProduct[]> {
  * `cacheComponents`, ele vira a diretiva `"use cache"` com `cacheLife`.
  */
 // A versão na chave muda quando o formato de `SiteProduct` muda: o cache de
-// dados sobrevive a deploys e o código novo não pode ler o objeto antigo.
+// dados sobrevive a deploys e o código novo não pode ler o objeto antigo
+// (v4: documento único — preço, estoque e características no produto).
 export const listProducts = cache(
-  unstable_cache(readPublishedProducts, ["catalog:published-products:v2"], {
+  unstable_cache(readPublishedProducts, ["catalog:published-products:v4"], {
     revalidate: 300,
     tags: ["products"],
   }),
@@ -67,29 +59,6 @@ export async function listCategories() {
 export async function getProductBySlug(slug: string): Promise<SiteProduct | null> {
   const products = await listProducts()
   return products.find((product) => product.slug === slug) ?? null
-}
-
-/** Variações de um produto — só a página de detalhe precisa disso. */
-export async function listVariants(productId: string): Promise<ProductVariant[]> {
-  const db = firestore()
-  if (!db) return []
-
-  const snapshot = await db.collection("productVariants").where("productId", "==", productId).get()
-  return (
-    snapshot.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }) as Record<string, unknown> & { id: string })
-      // Variação sem preço não é oferecida: não dá para vender "R$ 0,00".
-      .filter((variant) => variant.isActive !== false && Number(variant.price ?? 0) > 0)
-      .map((variant) => ({
-        id: variant.id,
-        sku: variant.sku as string | undefined,
-        attributes: (variant.attributes as Record<string, string>) ?? {},
-        priceCents: Number(variant.price ?? 0),
-        stock: Number(variant.stock ?? 0),
-        images: ((variant.images as string[]) ?? []).filter(Boolean),
-      }))
-      .sort((a, b) => a.priceCents - b.priceCents)
-  )
 }
 
 /** Relacionados: mesma categoria, sem repetir o próprio produto. */

@@ -45,7 +45,7 @@ pnpm check       # lint + typecheck + testes
 
 | Dado | Origem | Observação |
 |---|---|---|
-| Produtos | `Products` + `productVariants` | Só aparece com `isActive !== false` **e** `site.published === true` |
+| Produtos | `Products` (documento único: preço, estoque, SKU e características no produto; `productVariants` não existe mais) | Só aparece com `isActive !== false` **e** `site.published === true` |
 | Loja (endereço, telefone, WhatsApp, horário, redes) | `settings/store` | Mesmo documento que o admin edita em `/loja` |
 | Marca (logo, ícone, og:image, cor) | `settings/store.brand` | URLs no Storage; **nunca** arquivo de logo no repositório |
 | Conteúdo editorial (hero, banners, destaques) | `siteContent/*` | Tela nova no admin; sem serviços |

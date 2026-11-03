@@ -1,10 +1,11 @@
-import Image from "next/image"
 import Link from "next/link"
 import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
 import { AvailabilityBadge, CTA_LABEL } from "@/components/ui/availability"
 import { PriceTag } from "@/components/ui/price-tag"
+import { ProductPhoto } from "@/components/ui/product-photo"
 import type { Availability } from "@/lib/catalog-rules"
 import { productMessage } from "@/lib/messages"
+import type { ProductImage } from "@/lib/product-media"
 import { absolute } from "@/lib/seo"
 import { cn } from "@/lib/utils"
 
@@ -14,9 +15,9 @@ export const ABOVE_THE_FOLD = 4
 export interface ProductCardData {
   slug: string
   name: string
-  image?: string
-  priceFromCents: number
-  hasVariants: boolean
+  /** Capa do produto (`media[0]`). */
+  cover?: ProductImage
+  priceCents: number
   category?: string
   availability: Availability
 }
@@ -44,8 +45,7 @@ export function ProductCard({
 }) {
   const message = productMessage({
     name: product.name,
-    // Com variação o preço da etiqueta é "a partir de": não promete valor na mensagem.
-    priceCents: product.hasVariants ? undefined : product.priceFromCents,
+    priceCents: product.priceCents,
     url: absolute(`/produtos/${product.slug}`),
     availability: product.availability,
   })
@@ -55,14 +55,15 @@ export function ProductCard({
     <article className="flex h-full flex-col overflow-hidden rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
       <Link href={`/produtos/${product.slug}`} className="group block grow">
         <div className="relative aspect-square overflow-hidden rounded-t-md bg-paper">
-          {product.image ? (
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
+          {product.cover ? (
+            <ProductPhoto
+              image={product.cover}
               sizes={sizes}
-              loading={eager ? "eager" : undefined}
-              className={cn("object-contain p-3", soldOut && "opacity-50 grayscale")}
+              eager={eager}
+              className={cn(
+                "absolute inset-0 h-full w-full object-contain p-3",
+                soldOut && "opacity-50 grayscale",
+              )}
             />
           ) : (
             <span className="flex h-full items-center justify-center text-sm text-ink-soft">
@@ -82,8 +83,7 @@ export function ProductCard({
               </p>
             )}
             <PriceTag
-              cents={product.priceFromCents}
-              from={product.hasVariants}
+              cents={product.priceCents}
               size="sm"
               align="right"
               className="ml-auto shrink-0 flex-col items-end whitespace-nowrap sm:flex-row sm:items-baseline"

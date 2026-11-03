@@ -1,3 +1,11 @@
+import {
+  type ProductImage,
+  parseMedia,
+  productCover,
+  productImage,
+  shareImage,
+} from "@/lib/product-media"
+
 /**
  * Regras puras do catálogo: o que aparece na vitrine, como vira URL e como o
  * preço é apresentado. Sem Firebase aqui — é o que permite testar.
@@ -17,11 +25,18 @@ export interface RawProduct {
     subcategoryName?: string
   }
   brand?: string
-  images?: string[]
+  /** Fotos do produto, em ordem (`MediaItem[]`); validado em `parseMedia`. */
+  media?: unknown
   isActive?: boolean
-  totalStock?: number
-  priceRange?: { min: number; max: number }
-  variantCount?: number
+  /**
+   * Produto é documento único no admin (sem `productVariants`): preço (centavos),
+   * estoque, SKU e características ficam no próprio documento.
+   */
+  price?: number
+  stock?: number
+  sku?: string | null
+  /** Características (`Cor: Preto`); validado em `parseSpecs`. */
+  specs?: unknown
   /** Unidades vendidas: o admin soma a cada venda e desconta nas trocas. */
   totalSold?: number
   warranty?: string
@@ -42,11 +57,16 @@ export interface SiteProduct {
   description?: string
   category?: string
   brand?: string
-  images: string[]
-  image?: string
-  priceFromCents: number
-  priceToCents: number
-  hasVariants: boolean
+  /** Todas as fotos, na ordem do admin, com as URLs já montadas. */
+  media: ProductImage[]
+  /** Capa: `media[0]`. Sem ela, o card mostra "sem foto". */
+  cover?: ProductImage
+  /** Imagem de compartilhamento (Open Graph), derivada da capa. */
+  share?: { url: string; width: number; height: number }
+  priceCents: number
+  sku?: string
+  /** Características cadastradas no admin, na ordem (`Cor: Preto`). */
+  specs: ProductSpec[]
   availability: Availability
   /** Subcategoria da classificação atual (`categorization.subcategoryName`). */
   subcategory?: string
@@ -59,6 +79,27 @@ export interface SiteProduct {
   warranty?: string
   seoTitle?: string
   seoDescription?: string
+}
+
+/** Característica do produto (nome/valor), como o admin grava em `specs`. */
+export interface ProductSpec {
+  name: string
+  value: string
+}
+
+/** Lê `specs` do documento, ignorando linha sem nome ou sem valor. */
+export function parseSpecs(value: unknown): ProductSpec[] {
+  if (!Array.isArray(value)) return []
+  return value.flatMap((item) => {
+    const name = typeof item?.name === "string" ? item.name.trim() : ""
+    const spec = typeof item?.value === "string" ? item.value.trim() : ""
+    return name && spec ? [{ name, value: spec }] : []
+  })
+}
+
+/** "Preto · USB-C": os valores das características, na ordem (vazio sem nenhuma). */
+export function specsLabel(specs: readonly ProductSpec[]): string {
+  return specs.map((spec) => spec.value).join(" · ")
 }
 
 /**
@@ -90,7 +131,7 @@ export function isPublished(product: RawProduct): boolean {
  * "R$ 0,00" quebra a confiança mais do que a ausência do produto.
  */
 export function hasPrice(product: SiteProduct): boolean {
-  return product.priceFromCents > 0
+  return product.priceCents > 0
 }
 
 export function slugify(value: string): string {
@@ -119,29 +160,29 @@ function productCategory(product: RawProduct): string | undefined {
   return product.categorization?.categoryName?.trim() || product.category?.trim() || undefined
 }
 
-export function toSiteProduct(product: RawProduct): SiteProduct {
-  const images = (product.images ?? []).filter(Boolean)
-  // Preço zero é lixo de cadastro, não promoção: a vitrine ignora e usa o maior
-  // preço válido. Produto sem nenhum preço positivo não entra (ver `hasPrice`).
-  const rawMin = product.priceRange?.min ?? 0
-  const rawMax = product.priceRange?.max ?? rawMin
-  const min = rawMin > 0 ? rawMin : rawMax
-  const max = rawMax > 0 ? rawMax : min
+export function toSiteProduct(product: RawProduct, bucket?: string): SiteProduct {
+  const name = product.name ?? "Produto"
+  const rawMedia = parseMedia(product.media)
+  const media = rawMedia.map((item) => productImage(item, name, bucket))
+  const cover = productCover(rawMedia)
+  // Preço zero (ou inválido) é lixo de cadastro, não promoção: o produto não entra (ver `hasPrice`).
+  const price = Number(product.price)
+  const sku = typeof product.sku === "string" ? product.sku.trim() : ""
   return {
     id: product.id,
     slug: productSlug(product),
-    name: product.name ?? "Produto",
+    name,
     description: product.description,
     category: productCategory(product),
     brand: product.brand,
-    images,
-    image: images[0],
-    priceFromCents: min,
-    priceToCents: max,
-    // "a partir de" só quando os preços realmente variam.
-    hasVariants: max > min,
+    media,
+    cover: productCover(media),
+    share: cover ? shareImage(cover, bucket) : undefined,
+    priceCents: Number.isFinite(price) && price > 0 ? Math.round(price) : 0,
+    ...(sku ? { sku } : {}),
+    specs: parseSpecs(product.specs),
     availability: availabilityOf(
-      product.totalStock ?? 0,
+      Number(product.stock) || 0,
       product.categorization?.subcategoryId?.trim(),
     ),
     subcategory: product.categorization?.subcategoryName?.trim() || undefined,
@@ -220,7 +261,8 @@ function normalize(value: string): string {
 
 /**
  * Filtro da vitrine: categoria exata e busca por termos (todos precisam
- * aparecer no nome, na categoria, na subcategoria ou na marca, em qualquer ordem).
+ * aparecer no nome, na categoria, na subcategoria, na marca ou nas
+ * características, em qualquer ordem).
  */
 export function filterProducts(
   products: SiteProduct[],
@@ -233,7 +275,13 @@ export function filterProducts(
     if (category && product.category !== category) return false
     if (!terms.length) return true
     const haystack = normalize(
-      [product.name, product.category, product.subcategory, product.brand]
+      [
+        product.name,
+        product.category,
+        product.subcategory,
+        product.brand,
+        specsLabel(product.specs),
+      ]
         .filter(Boolean)
         .join(" "),
     )

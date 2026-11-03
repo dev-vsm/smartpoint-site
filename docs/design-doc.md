@@ -11,8 +11,8 @@ Status: **aprovado nas decisões, pendente de dados** (ver §14)
 ## 1. Contexto e objetivo
 
 A SmartPoint é uma loja de acessórios de celular com assistência técnica, operada hoje pelo
-**SmartPoint Admin** (Next.js + Firebase), onde já vivem o catálogo (`Products` /
-`productVariants`), as ordens de serviço e as vendas.
+**SmartPoint Admin** (Next.js + Firebase), onde já vivem o catálogo (`Products`, um documento por
+produto), as ordens de serviço e as vendas.
 
 O que falta é presença pública: hoje não existe um endereço na internet para onde mandar o
 cliente, nem para ser encontrado por quem procura "película iPhone 15" ou "troca de tela"
@@ -86,7 +86,7 @@ site próprio, com o SEO e a conversa de venda dela.
                     ┌───────────────────────────┐
                     │  Firebase (projeto do      │
                     │  admin, somente leitura)   │
-                    │  Products · productVariants│
+                    │  Products                  │
                     │  siteContent               │
                     └───────────────────────────┘
                                  ▲
@@ -123,9 +123,13 @@ site próprio, com o SEO e a conversa de venda dela.
 // Products/{id} — o que o site consome
 {
   name, description, category, brand,
-  images: string[],
+  media: MediaItem[],        // fotos em ordem; capa = media[0]
   isActive: boolean,
-  totalStock: number,
+  // Documento único (desde 30/10/2026, admin `docs/features/simple-products.md`):
+  price: number,             // centavos
+  stock: number,
+  sku?: string,
+  specs?: { name, value }[], // características (Cor: Preto) — mostradas no detalhe
   // NOVO, escrito pelo admin:
   site?: {
     published: boolean;      // D4 — entra na vitrine
@@ -138,14 +142,13 @@ site próprio, com o SEO e a conversa de venda dela.
     order?: number;          // ordenação manual na vitrine
   }
 }
-
-// productVariants/{id} — variação (cor, capacidade)
-{ productId, attributes, price, stock, images, sku, isActive }
 ```
 
+Não há mais `productVariants`: a mesma capinha em outra cor é outro produto, e a cor é
+característica.
+
 **Regra de exibição:** produto aparece quando `isActive !== false` **e**
-`site.published === true`. O preço mostrado é o menor preço entre as variantes ativas
-("a partir de" quando houver mais de um valor).
+`site.published === true` e tem `price > 0`. O preço mostrado é o do produto.
 
 **Categoria:** vem de `categorization` (`categoryName`, `subcategoryId`, `subcategoryName`,
 ids de `catalog_categories`); o campo antigo `category` só vale sem ela.
@@ -154,12 +157,10 @@ ids de `catalog_categories`); o campo antigo `category` só vale sem ela.
 
 | Situação | Quando | Na vitrine |
 |---|---|---|
-| Pronta entrega | `totalStock > 0` | Selo "Pronta entrega", botão "Quero esse" |
+| Pronta entrega | `stock > 0` | Selo "Pronta entrega", botão "Quero esse" |
 | Sob encomenda | sem estoque **e** subcategoria em `ON_ORDER_SUBCATEGORIES` (hoje só bonecos e action figures) | Selo laranja, botão "Encomendar" |
 | Esgotado | sem estoque, qualquer outra subcategoria | Continua visível, foto esmaecida, botão "Avise-me", **sempre no fim da lista** e nunca em destaque |
 
-A mesma regra vale por variação na página do produto: variação esgotada fica desativada
-enquanto houver outra disponível.
 
 ### 6.2 Conteúdo editorial (nova coleção)
 
