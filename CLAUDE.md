@@ -13,6 +13,9 @@ de propor mudanças de escopo.**
 - **Diferencie pergunta de ordem:** só altere código quando for pedido explicitamente.
 - **Responda no idioma da pergunta** (o projeto é em português).
 - Mantenha os commits pequenos e focados. Não troque o gerenciador de pacotes.
+- **Variáveis de ambiente:** toda variável nova, renomeada, removida ou com uso alterado atualiza
+  a tabela "Variáveis de ambiente" do `README.md` (NOME, VALOR_EXEMPLO, DESCRICAO) no mesmo
+  commit. Valor de exemplo nunca é segredo real.
 - Este é o **Next.js 16**: consulte `node_modules/next/dist/docs/` antes de usar API que você
   acha que conhece (ver `AGENTS.md`).
 

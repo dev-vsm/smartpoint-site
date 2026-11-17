@@ -91,68 +91,32 @@
 
 @layer components {
   /*
-   * Faixa de uma linha só ("Mais vendidos"): cada card pede no mínimo 11.5rem e
-   * o vão é 0.75rem, então cabem n cards a partir de n·12.25rem − 0.75rem. No
-   * celular são sempre 2, como na grade de produtos. Quem não cabe some
-   * (display: none — nem ocupa espaço, nem recebe foco).
+   * Faixa de uma linha só ("Mais vendidos"): as mesmas colunas da grade de produtos
+   * (2 no celular, 3 a partir de 640px, 4 a partir de 1024px), para o card ter a mesma
+   * largura nas duas seções. Quem não cabe na linha some (display: none — nem ocupa
+   * espaço, nem recebe foco).
    */
-  .fit-row-wrap {
-    container-type: inline-size;
-  }
   .fit-row {
-    --fit-cols: 2;
     display: grid;
     gap: 0.75rem;
-    grid-template-columns: repeat(var(--fit-cols), minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .fit-row > :nth-child(n + 3) {
     display: none;
   }
-  @container (min-width: 36.0rem) {
+  @media (min-width: 40rem) {
     .fit-row {
-      --fit-cols: 3;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-    .fit-row > :nth-child(-n + 3) {
+    .fit-row > :nth-child(3) {
       display: block;
     }
   }
-  @container (min-width: 48.25rem) {
+  @media (min-width: 64rem) {
     .fit-row {
-      --fit-cols: 4;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
-    .fit-row > :nth-child(-n + 4) {
-      display: block;
-    }
-  }
-  @container (min-width: 60.5rem) {
-    .fit-row {
-      --fit-cols: 5;
-    }
-    .fit-row > :nth-child(-n + 5) {
-      display: block;
-    }
-  }
-  @container (min-width: 72.75rem) {
-    .fit-row {
-      --fit-cols: 6;
-    }
-    .fit-row > :nth-child(-n + 6) {
-      display: block;
-    }
-  }
-  @container (min-width: 85.0rem) {
-    .fit-row {
-      --fit-cols: 7;
-    }
-    .fit-row > :nth-child(-n + 7) {
-      display: block;
-    }
-  }
-  @container (min-width: 97.25rem) {
-    .fit-row {
-      --fit-cols: 8;
-    }
-    .fit-row > :nth-child(-n + 8) {
+    .fit-row > :nth-child(4) {
       display: block;
     }
   }
@@ -230,6 +194,53 @@
     color: var(--color-brand-strong);
     stroke: none;
     filter: none;
+  }
+}
+
+/*
+ * Card estreito (celular, tablet e a grade de 4 colunas em 1024px): selo do prazo e preço
+ * compactos para dividirem a mesma linha. O selo quebra em duas linhas curtas ("RECEBA /
+ * HOJE") e a linha estica os dois na mesma altura. Fora de `@layer` para vencer o tamanho
+ * de fonte utilitário do preço (`text-sm`).
+ */
+.product-card {
+  container-type: inline-size;
+}
+@container (max-width: 15.5rem) {
+  .product-card .product-card__offer {
+    column-gap: 0.25rem;
+  }
+  .product-card .promise-tag {
+    gap: 0.2rem;
+    font-size: 0.625rem;
+    line-height: 1.05;
+    padding: 0.25rem 0.75rem 0.25rem 0.5rem;
+  }
+  .product-card .promise-tag__text {
+    max-width: 5.5em;
+    white-space: normal;
+  }
+  .product-card .promise-tag__bolt {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  .product-card .price-tag {
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.375rem 0.25rem 0.75rem;
+  }
+}
+/* O mais estreito de todos (celular de 360–390px): o raio sai e o preço encolhe mais um pouco. */
+@container (max-width: 11rem) {
+  .product-card .product-card__offer {
+    column-gap: 0.125rem;
+  }
+  .product-card .promise-tag__bolt {
+    display: none;
+  }
+  .product-card .price-tag {
+    font-size: 0.75rem;
   }
 }
 

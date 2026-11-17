@@ -87,7 +87,7 @@ export function DeliveryPromiseBadge({
       )}
     >
       <BoltIcon />
-      <span className="relative">
+      <span className="promise-tag__text relative">
         {promise ? promiseBadgeText(promise, delivers) : "Pronta entrega"}
       </span>
     </span>

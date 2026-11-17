@@ -56,7 +56,7 @@ export async function ProductCard({
   const proof = proofBadge({ totalSold: product.totalSold ?? 0 })
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
+    <article className="product-card flex h-full flex-col overflow-hidden rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
       <Link href={`/produtos/${product.slug}`} className="group flex grow flex-col">
         <div className="relative aspect-square overflow-hidden rounded-t-md bg-paper">
           {product.cover ? (
@@ -76,10 +76,11 @@ export async function ProductCard({
           )}
         </div>
         <div className="flex grow flex-col pt-2 pb-3">
-          <div className="mb-2 flex flex-wrap items-stretch justify-between gap-x-2 gap-y-1">
+          <div className="product-card__offer mb-2 flex flex-wrap items-stretch justify-between gap-x-2 gap-y-1">
             {/* No lugar da categoria: a vantagem que decide o clique, ao lado do preço e com a
                 mesma altura dele (a linha estica os dois); colado à borda esquerda como o preço à direita.
-                No card estreito do celular, o preço desce para a linha de baixo, ainda colado à direita. */}
+                No card estreito, os dois ficam compactos para caber na mesma linha (`.product-card` em
+                globals.css); só um preço muito longo ainda desce para a linha de baixo. */}
             {product.availability === "in_stock" ? (
               <DeliveryPromiseBadge edge className="whitespace-nowrap" />
             ) : (

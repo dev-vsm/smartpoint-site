@@ -20,8 +20,8 @@ import { getHomeContent } from "@/lib/site-content"
 import { getStore } from "@/lib/store"
 import { catalogSubmenu } from "@/lib/submenu"
 
-/** Mais cards do que isso não cabem numa linha nem na tela mais larga. */
-const FIT_ROW_MAX = 8
+/** Cards da faixa "Mais vendidos": uma linha da grade de produtos (até 4 colunas). */
+const FIT_ROW_MAX = 4
 
 // Vitrine em cache, revalidada a cada 5 minutos (design doc §5).
 export const revalidate = 300
@@ -50,21 +50,15 @@ export default async function Home() {
               id="destaques"
               title={bestSellers.length > 0 ? "Mais vendidos" : "Em destaque"}
             />
-            {/* Uma linha só, sem rolagem: mostra quantos cards couberem na largura
-                (`.fit-row` em globals.css, por container query — sem JS). */}
-            <div className="fit-row-wrap">
-              <ul className="fit-row">
-                {highlights.map((product, index) => (
-                  <li key={product.id}>
-                    <ProductCard
-                      product={product}
-                      sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 50vw"
-                      eager={index < ABOVE_THE_FOLD}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Uma linha só, sem rolagem, com as colunas da grade de produtos
+                (`.fit-row` em globals.css): o card tem a mesma largura nas duas seções. */}
+            <ul className="fit-row">
+              {highlights.map((product, index) => (
+                <li key={product.id}>
+                  <ProductCard product={product} eager={index < ABOVE_THE_FOLD} />
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 
