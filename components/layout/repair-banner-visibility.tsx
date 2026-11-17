@@ -7,7 +7,12 @@ import type { ReactNode } from "react"
  * Mantém a oferta nas páginas institucionais e no catálogo. Some no detalhe do produto e no
  * fluxo de compra (carrinho e página do pedido), onde só atrapalharia o fechamento.
  */
-const HIDDEN = [/^\/produtos\/[^/]+\/?$/, /^\/carrinho\/?$/, /^\/pedido(\/|$)/]
+const HIDDEN = [
+  /^\/produtos\/[^/]+\/?$/,
+  /^\/carrinho\/?$/,
+  /^\/pedido(\/|$)/,
+  /^\/acompanhar(\/|$)/,
+]
 
 export function RepairBannerVisibility({ children }: { children: ReactNode }) {
   const pathname = usePathname()

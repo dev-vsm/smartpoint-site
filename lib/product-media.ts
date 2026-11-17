@@ -54,19 +54,8 @@ export const RESIZE_BOXES = [
 
 const OG_BOX = { w: 1200, h: 900 }
 
-/**
- * Bucket do ambiente (staging e produção são diferentes). Lido só no servidor:
- * as URLs saem prontas em `SiteProduct.media`.
- */
-export function storageBucket(): string {
-  const bucket = process.env.FIREBASE_STORAGE_BUCKET?.trim()
-  if (bucket) return bucket
-  const projectId = process.env.FIREBASE_PROJECT_ID?.trim()
-  return projectId ? `${projectId}.firebasestorage.app` : ""
-}
-
-/** URL pública, sem token: as regras do Storage liberam a leitura de `products/**`. */
-export function storageUrl(path: string, bucket = storageBucket()): string {
+/** URL pública, sem token, no bucket que o admin informa com o catálogo. */
+export function storageUrl(path: string, bucket = ""): string {
   return `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media`
 }
 

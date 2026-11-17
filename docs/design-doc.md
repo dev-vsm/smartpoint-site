@@ -335,7 +335,7 @@ O que já está definido:
 | Item | Definição |
 |---|---|
 | Ambientes | `production` → `capinhasudi.com.br` (Firebase `acesso-rpido`) · `preview` por branch (Firebase `smartpoint-admin-staging`) |
-| Variáveis | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_WHATSAPP`; checkout (D15): `ADMIN_API_URL` (URL do admin) e `SITE_CHECKOUT_SECRET` (mesmo valor no admin); avaliações do Google na página do produto (opcional): `GOOGLE_PLACES_API_KEY` (Places API) e `GOOGLE_PLACE_ID` |
+| Variáveis | Só `ADMIN_API_URL` (URL do admin) e `SITE_CHECKOUT_SECRET` (mesmo valor no admin): catálogo, loja, conteúdo, avaliações, frete, pedidos e acompanhamento vêm do admin (`/api/site/*`). O Firebase e as chaves do Google ficam só no admin. Tabela completa no `README.md` |
 | Gerenciador | pnpm |
 | Qualidade | Biome (lint/format) + `tsc --noEmit` + Vitest nos utilitários |
 | CI | GitHub Actions rodando lint, typecheck, testes e build a cada PR |

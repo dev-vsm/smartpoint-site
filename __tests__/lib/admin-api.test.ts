@@ -2,7 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 vi.mock("server-only", () => ({}))
 
-import { checkoutEnabled, createSiteOrder, getSiteOrder, quoteSiteDelivery } from "@/lib/admin-api"
+import {
+  AdminFeedError,
+  checkoutEnabled,
+  createSiteOrder,
+  getSiteOrder,
+  quoteSiteDelivery,
+  readAdminFeed,
+} from "@/lib/admin-api"
 
 const fetchMock = vi.fn()
 beforeEach(() => {
@@ -74,5 +81,34 @@ describe("ponte com o admin", () => {
       code: "SITE_CHECKOUT_DISABLED",
     })
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("dados do site vindos do admin", () => {
+  it("lê com o segredo e devolve o JSON", async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ bucket: "b", products: [] })))
+    expect(await readAdminFeed("/api/site/catalog")).toEqual({ bucket: "b", products: [] })
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toBe("https://admin.example/api/site/catalog")
+    expect(init.headers).toMatchObject({ authorization: "Bearer segredo" })
+  })
+
+  it("sem configuração devolve null (valores padrão, sem chamar ninguém)", async () => {
+    vi.stubEnv("ADMIN_API_URL", "")
+    expect(await readAdminFeed("/api/site/catalog")).toBeNull()
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("configurado e com falha, lança: o cache não guarda catálogo vazio", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ code: "SITE_UNAUTHORIZED" }), { status: 401 }),
+    )
+    await expect(readAdminFeed("/api/site/catalog")).rejects.toBeInstanceOf(AdminFeedError)
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined)
+    fetchMock.mockRejectedValueOnce(new TypeError("offline"))
+    await expect(readAdminFeed("/api/site/content")).rejects.toThrow(
+      "admin /api/site/content: NETWORK_ERROR",
+    )
+    error.mockRestore()
   })
 })

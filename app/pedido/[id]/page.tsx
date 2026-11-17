@@ -98,6 +98,14 @@ export default async function OrderPage({ params }: PageProps<"/pedido/[id]">) {
                 {order.lastAttemptRejected ? "Tentar pagar de novo" : "Pagar agora"}
               </ButtonLink>
             )}
+            {order.trackingToken && order.status !== "cancelled" && (
+              <Link
+                href={`/acompanhar/${order.trackingToken}`}
+                className="inline-flex min-h-11 items-center font-semibold text-brand-strong underline"
+              >
+                Acompanhar pedido
+              </Link>
+            )}
             {order.status === "cancelled" && (
               <Link
                 href="/carrinho"

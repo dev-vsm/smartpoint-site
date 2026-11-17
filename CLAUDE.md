@@ -36,8 +36,11 @@ pnpm check       # lint + typecheck + testes
 
 ## Arquitetura
 
-- **Next.js 16 (App Router)** + **Tailwind 4** + **Firebase (só leitura)** + deploy na Vercel.
-- **O site não escreve no Firestore.** O catálogo é lido no servidor. As rotas de API são
+- **Next.js 16 (App Router)** + **Tailwind 4** + deploy na Vercel. **Sem Firebase nem Google:**
+  todos os dados vêm do admin (`lib/admin-api.ts`, `ADMIN_API_URL` + `SITE_CHECKOUT_SECRET`).
+- **O site não lê nem escreve no Firestore.** Catálogo, loja, conteúdo e avaliações vêm do admin
+  (`GET /api/site/catalog`, `/content`, `/reviews`), lidos no servidor com cache de 5 min
+  (`unstable_cache`) e ISR; falha do admin lança (`AdminFeedError`) para não guardar catálogo vazio. As rotas de API são
   `POST /api/checkout` e `POST /api/delivery-quote` (prévia do frete) (decisão D15): ela repassa a compra ao **admin**
   (`/api/site/checkout`, segredo `SITE_CHECKOUT_SECRET`), que cria o pedido, reserva o estoque
   e gera o link do **Checkout Pro do Mercado Pago**. Preço, estoque e taxa de entrega são
@@ -45,8 +48,9 @@ pnpm check       # lint + typecheck + testes
 - **Carrinho no navegador** (`lib/cart-store.ts`, `localStorage`); `/pedido/[id]` é a volta do
   Mercado Pago e consulta o estado no admin. Sem `ADMIN_API_URL` + `SITE_CHECKOUT_SECRET`, a
   compra online some e o carrinho manda o pedido pelo WhatsApp.
-- **Leitura via Admin SDK em componentes de servidor**, com ISR (`revalidate`). Credencial
-  só em variável de ambiente — nunca `NEXT_PUBLIC_*`, nunca no cliente.
+- **Acompanhamento do pedido:** `/acompanhar/[token]` (link assinado pelo admin; token inválido =
+  404), sem dado pessoal na página, sem cache, `noindex` e `Referrer-Policy: no-referrer`.
+- O segredo fica só em variável de ambiente do servidor — nunca `NEXT_PUBLIC_*`, nunca no cliente.
 - Pastas: `app/` (rotas), `components/ui` (base), `components/layout` (cabeçalho, rodapé),
   `lib/` (dados e utilitários), `__tests__/` espelhando `lib/`.
 
@@ -54,14 +58,15 @@ pnpm check       # lint + typecheck + testes
 
 | Dado | Origem | Observação |
 |---|---|---|
-| Produtos | `Products` (documento único: preço, estoque, SKU e características no produto; `productVariants` não existe mais) | Só aparece com `isActive !== false` **e** `site.published === true` |
-| Loja (endereço, telefone, WhatsApp, horário, redes) | `settings/store` | Mesmo documento que o admin edita em `/loja` |
+| Produtos | Admin → `Products` (documento único: preço, estoque, SKU e características no produto; `productVariants` não existe mais) | Só aparece com `isActive !== false` **e** `site.published === true` |
+| Loja (endereço, telefone, WhatsApp, horário, redes) | Admin → `settings/store` (campos públicos) | Mesmo documento que o admin edita em `/loja` |
 | Marca (logo, ícone, og:image, cor) | `settings/store.brand` | URLs no Storage; **nunca** arquivo de logo no repositório |
 | Conteúdo editorial (hero, banners, destaques) | `siteContent/*` | Tela nova no admin; sem serviços |
 | Avisos do cabeçalho (entrega, pagamento, promoção) | `siteContent/notices` | Faixa no topo; `tone: promo` pinta de laranja |
 | Retirada e faixas de frete por km | `settings/store.delivery` | Admin em `/loja/site`. O frete vem sempre do admin (`POST /api/delivery-quote` → Google Maps, rota de carro); `lib/delivery.ts` só lê as faixas |
-| Avaliações da loja (página do produto) | Google Places API (`lib/google-reviews.ts`) | Nota e comentários reais do perfil da loja no Google; `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID` (só servidor), cache de 1 dia. Sem elas, a seção some. Nunca avaliação inventada |
+| Avaliações da loja (página do produto) | Admin → Google Places API (`GET /api/site/reviews`) | Nota e comentários reais do perfil da loja no Google; chave e id ficam no admin; cache de 1 dia no site. Sem configuração, a seção some. Nunca avaliação inventada |
 | Pedidos do site | Admin (`/api/site/checkout`) | Nunca gravados pelo site; ver `docs/features/site-checkout.md` no admin |
+| Acompanhamento do pedido | Admin (`GET /api/site/tracking/<token>`) | Etapas, itens e primeiro nome; token assinado pelo admin |
 
 Nada de endereço, telefone, horário ou logo escritos no código — apenas fallbacks mínimos
 para quando o documento não existir.

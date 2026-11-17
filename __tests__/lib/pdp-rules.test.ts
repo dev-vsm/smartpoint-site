@@ -4,7 +4,7 @@ vi.mock("server-only", () => ({}))
 vi.mock("next/cache", () => ({ unstable_cache: (fn: unknown) => fn }))
 
 import { compatibilityOf, pickComplements, type SiteProduct } from "@/lib/catalog-rules"
-import { fetchStoreReviews, toStoreReviews } from "@/lib/google-reviews"
+import { toStoreReviews } from "@/lib/google-reviews"
 
 const product = (overrides: Partial<SiteProduct>): SiteProduct => ({
   id: "p",
@@ -87,26 +87,26 @@ describe("compre junto", () => {
   })
 })
 
-describe("avaliações do Google", () => {
-  const place = {
-    rating: 4.86,
-    userRatingCount: 132,
-    googleMapsUri: "https://maps.google.com/?cid=1",
-    reviews: [
-      {
-        rating: 5,
-        text: { text: "Atendimento ótimo!" },
-        relativePublishTimeDescription: "há 2 semanas",
-        authorAttribution: { displayName: "Ana", uri: "https://g/ana" },
-      },
-      { rating: 2, text: { text: "Demorou" }, authorAttribution: { displayName: "Bia" } },
-      { rating: 5, text: { text: "  " }, authorAttribution: { displayName: "Caio" } },
-      { rating: 4, text: { text: "Bom preço" }, authorAttribution: {} },
-    ],
-  }
-
-  it("mostra a nota, o total e só comentários bons e com texto", () => {
-    expect(toStoreReviews(place)).toEqual({
+describe("avaliações do Google (vindas do admin)", () => {
+  it("aceita a nota, o total e os comentários com texto; links só https", () => {
+    expect(
+      toStoreReviews({
+        rating: 4.9,
+        count: 132,
+        url: "https://maps.google.com/?cid=1",
+        reviews: [
+          {
+            author: "Ana",
+            authorUrl: "https://g/ana",
+            rating: 5,
+            text: " Ótimo! ",
+            when: "há 2 semanas",
+          },
+          { author: "Bia", authorUrl: "javascript:alert(1)", rating: 4, text: "Bom", when: "" },
+          { author: "Caio", rating: 5, text: "  ", when: "" },
+        ],
+      }),
+    ).toEqual({
       rating: 4.9,
       count: 132,
       url: "https://maps.google.com/?cid=1",
@@ -115,38 +115,18 @@ describe("avaliações do Google", () => {
           author: "Ana",
           authorUrl: "https://g/ana",
           rating: 5,
-          text: "Atendimento ótimo!",
+          text: "Ótimo!",
           when: "há 2 semanas",
         },
-        { author: "Cliente do Google", rating: 4, text: "Bom preço", when: "" },
+        { author: "Bia", rating: 4, text: "Bom", when: "" },
       ],
     })
-    expect(toStoreReviews({ rating: 0, userRatingCount: 0 })).toBeNull()
   })
 
-  it("sem chave ou ID não chama o Google; erro do Google esconde a seção", async () => {
-    const fetcher = vi.fn()
-    expect(await fetchStoreReviews({}, fetcher as never)).toBeNull()
-    expect(fetcher).not.toHaveBeenCalled()
-
-    const env = { GOOGLE_PLACES_API_KEY: "chave", GOOGLE_PLACE_ID: "ChIJ123" }
-    fetcher.mockResolvedValueOnce(new Response(JSON.stringify(place)))
-    expect(await fetchStoreReviews(env, fetcher as never)).toMatchObject({
-      rating: 4.9,
-      count: 132,
-    })
-    const [url, init] = fetcher.mock.calls[0]
-    expect(url).toBe("https://places.googleapis.com/v1/places/ChIJ123?languageCode=pt-BR")
-    expect(init.headers).toMatchObject({
-      "X-Goog-Api-Key": "chave",
-      "X-Goog-FieldMask": "rating,userRatingCount,googleMapsUri,reviews",
-    })
-
-    const error = vi.spyOn(console, "error").mockImplementation(() => undefined)
-    fetcher.mockResolvedValueOnce(new Response("{}", { status: 403 }))
-    expect(await fetchStoreReviews(env, fetcher as never)).toBeNull()
-    fetcher.mockRejectedValueOnce(new TypeError("offline"))
-    expect(await fetchStoreReviews(env, fetcher as never)).toBeNull()
-    error.mockRestore()
+  it("sem nota, nota fora de 1–5 ou sem dados: esconde a seção", () => {
+    expect(toStoreReviews(null)).toBeNull()
+    expect(toStoreReviews({ rating: 0, count: 10 })).toBeNull()
+    expect(toStoreReviews({ rating: 7, count: 10 })).toBeNull()
+    expect(toStoreReviews({ rating: 4.5, count: 0 })).toBeNull()
   })
 })

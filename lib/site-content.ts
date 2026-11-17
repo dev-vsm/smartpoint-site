@@ -1,7 +1,6 @@
 import "server-only"
-import { unstable_cache } from "next/cache"
 import { cache } from "react"
-import { firestore } from "@/lib/firebase-admin"
+import { getAdminContent } from "@/lib/admin-content"
 import { type HomeContent, toHomeContent } from "@/lib/home-content"
 import { getStore } from "@/lib/store"
 import { defaultNotices } from "@/lib/trust"
@@ -44,21 +43,19 @@ const ICONS: NoticeIcon[] = [
  * documento, os avisos saem de `settings/store` (entrega, cartão, link de pagamento).
  */
 async function readNotices(): Promise<SiteNotice[]> {
-  const db = firestore()
-  if (!db) return defaultNotices(await getStore())
-
-  const snapshot = await db.collection("siteContent").doc("notices").get()
-  const items = snapshot.data()?.items
+  const items = (await getAdminContent()).notices
   if (!Array.isArray(items)) return defaultNotices(await getStore())
 
+  // Formato conferido campo a campo (o admin já manda só estes campos).
   const notices = items
+    .filter((item): item is Record<string, unknown> => item !== null && typeof item === "object")
     .map((item) => ({
-      text: String(item?.text ?? "").trim(),
+      text: typeof item.text === "string" ? item.text.trim() : "",
       detail:
-        typeof item?.detail === "string" && item.detail.trim() ? item.detail.trim() : undefined,
-      icon: ICONS.includes(item?.icon) ? (item.icon as NoticeIcon) : undefined,
-      tone: item?.tone === "promo" ? ("promo" as const) : ("info" as const),
-      href: typeof item?.href === "string" && item.href ? item.href : undefined,
+        typeof item.detail === "string" && item.detail.trim() ? item.detail.trim() : undefined,
+      icon: ICONS.includes(item.icon as NoticeIcon) ? (item.icon as NoticeIcon) : undefined,
+      tone: item.tone === "promo" ? ("promo" as const) : ("info" as const),
+      href: typeof item.href === "string" && item.href ? item.href : undefined,
     }))
     .filter((item) => item.text.length > 0)
 
@@ -66,26 +63,11 @@ async function readNotices(): Promise<SiteNotice[]> {
   return items.length === 0 ? [] : notices
 }
 
-/** Cache entre requisições, como a loja e o catálogo (ver `lib/store.ts`). */
-export const listNotices = cache(
-  unstable_cache(readNotices, ["site-content:notices"], {
-    revalidate: 300,
-    tags: ["site-content"],
-  }),
-)
+/** O cache entre requisições é o de `getAdminContent`; aqui só o dedupe da renderização. */
+export const listNotices = cache(readNotices)
 
 export type { HomeContent }
 
-async function readHomeContent(): Promise<HomeContent> {
-  const db = firestore()
-  if (!db) return toHomeContent(undefined)
-  const snapshot = await db.collection("siteContent").doc("home").get()
-  return toHomeContent(snapshot.data())
-}
-
 export const getHomeContent = cache(
-  unstable_cache(readHomeContent, ["site-content:home"], {
-    revalidate: 300,
-    tags: ["site-content"],
-  }),
+  async (): Promise<HomeContent> => toHomeContent((await getAdminContent()).home ?? undefined),
 )

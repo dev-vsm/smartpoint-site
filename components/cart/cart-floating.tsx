@@ -9,8 +9,8 @@ import { cartCount, cartSubtotal } from "@/lib/cart"
 import { cartActions, cartDrawer, useCart, useCartDrawer } from "@/lib/cart-store"
 import { cn, formatPrice } from "@/lib/utils"
 
-/** No carrinho e na página do pedido o drawer seria redundante. */
-const HIDDEN = [/^\/carrinho\/?$/, /^\/pedido(\/|$)/]
+/** No carrinho, na página do pedido e no acompanhamento o drawer seria redundante. */
+const HIDDEN = [/^\/carrinho\/?$/, /^\/pedido(\/|$)/, /^\/acompanhar(\/|$)/]
 
 /**
  * Carrinho flutuante no canto direito: o botão mostra quantos itens há e abre um drawer

@@ -1,10 +1,10 @@
 import "server-only"
 
 /**
- * Ponte servidor a servidor com o admin para o checkout do Mercado Pago. O site não grava
- * pedido nenhum: o admin cria o pedido, reserva o estoque e gera o link de pagamento
- * (`/api/site/checkout`, ver docs/features/site-checkout.md no admin). O segredo vive só em
- * variável de ambiente do servidor.
+ * Ponte servidor a servidor com o admin, a única fonte de dados do site: catálogo, loja,
+ * conteúdo e avaliações (`/api/site/catalog`, `/content`, `/reviews`) e o checkout do Mercado
+ * Pago (`/api/site/checkout`). O site não tem credencial do Firebase nem do Google: só
+ * `ADMIN_API_URL` e o segredo `SITE_CHECKOUT_SECRET`, que vivem só no servidor.
  */
 
 /** O que o admin devolve sobre um pedido do site (`SiteOrderView`). */
@@ -22,7 +22,37 @@ export interface SiteOrder {
   payUrl?: string
   expiresAt: number
   customerFirstName: string
+  /** Token do link de acompanhamento (`/acompanhar/<token>`); ausente em pedido antigo. */
+  trackingToken?: string
 }
+
+export type TrackingStage =
+  | "created"
+  | "awaiting_payment"
+  | "paid"
+  | "separated"
+  | "shipped"
+  | "delivered"
+
+/** O que o cliente vê pelo link de acompanhamento (sem endereço, contato ou id do pedido). */
+export interface OrderTracking {
+  displayId: string
+  customerFirstName: string
+  fulfillment: "pickup" | "delivery"
+  cancelled: boolean
+  steps: Array<{
+    stage: TrackingStage
+    label: string
+    done: boolean
+    current: boolean
+    at?: number
+  }>
+  items: Array<{ name: string; quantity: number }>
+  total: number
+}
+
+/** Formato do token do link (`id.assinatura`, base64url); o admin confere a assinatura. */
+export const TRACKING_TOKEN_PATTERN = /^[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}$/
 
 export type AdminResult<T> =
   | { ok: true; data: T }
@@ -73,6 +103,26 @@ async function call<T>(path: string, init: RequestInit = {}): Promise<AdminResul
   }
 }
 
+/** Falha do admin ao entregar dados públicos: não vira catálogo vazio guardado no cache. */
+export class AdminFeedError extends Error {
+  constructor(path: string, detail: string) {
+    super(`admin ${path}: ${detail}`)
+    this.name = "AdminFeedError"
+  }
+}
+
+/**
+ * Lê dados públicos do admin. Sem configuração (clone novo, CI), devolve `null` e a página usa
+ * os valores padrão. Configurado mas sem resposta, **lança**: o cache não guarda um catálogo
+ * vazio e o ISR mantém a última página boa no ar.
+ */
+export async function readAdminFeed<T>(path: string): Promise<T | null> {
+  if (!checkoutEnabled()) return null
+  const result = await call<T>(path)
+  if (!result.ok) throw new AdminFeedError(path, result.code ?? String(result.status))
+  return result.data
+}
+
 /** Cria o pedido. Repetir com o mesmo `orderId` devolve o mesmo pedido (não cobra duas vezes). */
 export function createSiteOrder(orderId: string, payload: unknown) {
   return call<SiteOrder>("/api/site/checkout", {
@@ -103,4 +153,9 @@ export function quoteSiteDelivery(address: unknown) {
 
 export function getSiteOrder(orderId: string) {
   return call<SiteOrder>(`/api/site/checkout/${encodeURIComponent(orderId)}`)
+}
+
+/** Acompanhamento pelo link do cliente. Token inválido ou desconhecido: 404. */
+export function getOrderTracking(token: string) {
+  return call<OrderTracking>(`/api/site/tracking/${encodeURIComponent(token)}`)
 }

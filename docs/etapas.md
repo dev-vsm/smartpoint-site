@@ -194,7 +194,9 @@ Peso ✅ · Lighthouse pendente (precisa de navegador).
 - [ ] Firewall da Vercel: limite de requisições em `/api/checkout` e `/api/delivery-quote`
 - [x] Página do produto para conversão: frete calculado na página, parcela, "Receba hoje", "+N vendidos", compatibilidade ("Não sabe o modelo?"), "Compre junto" (mesmo modelo, outra categoria), galeria com arrastar/zoom/contador, loja física, características em tabela e nos dados estruturados, eventos do funil
 - [x] Carrinho que passa confiança: prazo de entrega/retirada nas opções, "Pagamento seguro pelo Mercado Pago" (empresa de pagamentos do Mercado Livre; a loja não vê o cartão), formas de pagamento, "Depois de pagar", loja física com CNPJ e nota do Google, ajuda pelo WhatsApp antes de pagar, etapas, total fixo no celular, garantia/compatibilidade por item, CEP do frete reaproveitado
-- [ ] Avaliações do Google na página do produto: `GOOGLE_PLACES_API_KEY` (Places API) e `GOOGLE_PLACE_ID` na Vercel
+- [ ] Avaliações do Google na página do produto: `GOOGLE_PLACES_API_KEY` (Places API) e `GOOGLE_PLACE_ID` **no admin** (o site lê por `/api/site/reviews`)
+- [ ] Site sem Firebase: na Vercel do site, só `ADMIN_API_URL` + `SITE_CHECKOUT_SECRET`; apagar `FIREBASE_*`, `GOOGLE_PLACES_*` e `NEXT_PUBLIC_SITE_URL` (publicar o admin antes do site)
+- [ ] Acompanhamento do pedido: `/acompanhar/[token]` (link assinado pelo admin); opcional `SITE_TRACKING_SECRET` no admin
 - [ ] Revisar modelo/compatibilidade dos produtos (mesmo nome para capinha e película do mesmo celular) para o "Compre junto" aparecer
 - [ ] Agendador mensal chamando `POST /api/site/checkout/retention` no admin; publicar o índice novo (`pnpm firebase:indexes`)
 

@@ -5,7 +5,17 @@ const header = (key: string) => securityHeaders.find((item) => item.key === key)
 
 describe("cabeçalhos de segurança", () => {
   it("valem para todas as rotas", async () => {
-    expect(await nextConfig.headers?.()).toEqual([{ source: "/:path*", headers: securityHeaders }])
+    const rules = await nextConfig.headers?.()
+    expect(rules?.[0]).toEqual({ source: "/:path*", headers: securityHeaders })
+    // Link de acompanhamento: o token não vaza em Referer, cache nem busca.
+    expect(rules?.[1]).toEqual({
+      source: "/acompanhar/:path*",
+      headers: [
+        { key: "Referrer-Policy", value: "no-referrer" },
+        { key: "Cache-Control", value: "private, no-store" },
+        { key: "X-Robots-Tag", value: "noindex, nofollow" },
+      ],
+    })
     expect(nextConfig.poweredByHeader).toBe(false)
   })
 

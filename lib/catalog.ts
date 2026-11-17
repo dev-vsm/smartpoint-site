@@ -1,6 +1,7 @@
 import "server-only"
 import { unstable_cache } from "next/cache"
 import { cache } from "react"
+import { readAdminFeed } from "@/lib/admin-api"
 import {
   collectCategories,
   hasPrice,
@@ -12,20 +13,26 @@ import {
   sortForShowcase,
   toSiteProduct,
 } from "@/lib/catalog-rules"
-import { firestore } from "@/lib/firebase-admin"
+
+interface PublishedDocs {
+  /** Bucket do Storage do ambiente do admin: as URLs das fotos saem dele. */
+  bucket: string
+  products: RawProduct[]
+}
 
 /**
- * Leitura do catálogo publicado. Uma consulta por `site.published` e o resto
- * filtrado em memória — evita índice composto no Firestore para um catálogo
- * desta ordem de grandeza (centenas de itens). Devolve só os campos usados
- * (`pickRawProduct`), para caber no cache de dados.
+ * Catálogo publicado, lido do admin (`GET /api/site/catalog`, que já filtra os produtos do
+ * site e manda só os campos públicos). `pickRawProduct` e `isPublished` conferem de novo aqui:
+ * o site nunca confia no formato de fora.
  */
-async function readPublishedDocs(): Promise<RawProduct[]> {
-  const db = firestore()
-  if (!db) return []
-
-  const snapshot = await db.collection("Products").where("site.published", "==", true).get()
-  return snapshot.docs.map((doc) => pickRawProduct(doc.id, doc.data())).filter(isPublished)
+async function readPublishedDocs(): Promise<PublishedDocs> {
+  const feed = await readAdminFeed<{ bucket?: string; products?: Array<Record<string, unknown>> }>(
+    "/api/site/catalog",
+  )
+  const products = (feed?.products ?? [])
+    .map((doc) => pickRawProduct(String(doc.id ?? ""), doc))
+    .filter((product) => product.id && isPublished(product))
+  return { bucket: String(feed?.bucket ?? ""), products }
 }
 
 /**
@@ -33,7 +40,7 @@ async function readPublishedDocs(): Promise<RawProduct[]> {
  * - `unstable_cache` guarda os documentos entre requisições por 5 minutos (a mesma
  *   janela do ISR). Sem ele, `/produtos` — que renderiza por requisição por
  *   causa de `?pagina=` e `?q=` — e cada página de produto no build leriam o
- *   Firestore inteiro. O item tem limite de 2 MB: por isso guarda os campos crus,
+ *   catálogo inteiro do admin. O item tem limite de 2 MB: por isso guarda os campos crus,
  *   não o `SiteProduct` (as URLs de foto do `srcset` o deixavam com mais de 2 MB).
  * - `cache` do React dedupa dentro de uma renderização e monta o `SiteProduct`
  *   uma vez: a página e o menu de categorias pedem o catálogo, mas a leitura e a
@@ -44,15 +51,14 @@ async function readPublishedDocs(): Promise<RawProduct[]> {
  */
 // A versão na chave muda quando o formato guardado muda: o cache de dados
 // sobrevive a deploys e o código novo não pode ler o objeto antigo.
-const readCachedDocs = unstable_cache(readPublishedDocs, ["catalog:published-docs:v1"], {
+const readCachedDocs = unstable_cache(readPublishedDocs, ["catalog:published-docs:v2"], {
   revalidate: 300,
   tags: ["products"],
 })
 
 export const listProducts = cache(async (): Promise<SiteProduct[]> => {
-  const products = (await readCachedDocs())
-    .map((product) => toSiteProduct(product))
-    .filter(hasPrice)
+  const { bucket, products: docs } = await readCachedDocs()
+  const products = docs.map((product) => toSiteProduct(product, bucket)).filter(hasPrice)
   return sortForShowcase(products)
 })
 

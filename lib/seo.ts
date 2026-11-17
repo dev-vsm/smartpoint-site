@@ -2,10 +2,15 @@ import type { Availability, SiteProduct } from "@/lib/catalog-rules"
 import { parseDays } from "@/lib/hours"
 import type { SiteStore } from "@/lib/store"
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://capinhasudi.com.br").replace(
-  /\/$/,
-  "",
-)
+/**
+ * Endereço público do site: o domínio de produção que a própria Vercel informa
+ * (`NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL`, variável de sistema, sem configurar nada);
+ * fora da Vercel, o domínio da loja.
+ */
+const vercelDomain = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL?.trim()
+export const siteUrl = (
+  vercelDomain ? `https://${vercelDomain}` : "https://capinhasudi.com.br"
+).replace(/\/$/, "")
 
 export const absolute = (path: string) => `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`
 
