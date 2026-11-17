@@ -25,28 +25,24 @@ const PRODUCTS: ProductCardData[] = [
     slug: "capa-iphone-15",
     name: "Capa anti-impacto iPhone 15",
     priceCents: 7990,
-    category: "Capinhas",
     availability: "in_stock",
   },
   {
     slug: "pelicula-3d",
     name: "Película 3D de vidro com aplicação",
     priceCents: 3500,
-    category: "Películas",
     availability: "in_stock",
   },
   {
     slug: "fone-bluetooth",
     name: "Fone Bluetooth com estojo de carga",
     priceCents: 12900,
-    category: "Áudio",
     availability: "on_order",
   },
   {
     slug: "carregador-turbo",
     name: "Carregador turbo 20W USB-C",
     priceCents: 8900,
-    category: "Carregadores",
     availability: "sold_out",
   },
 ]
@@ -144,7 +140,7 @@ export default function Styleguide() {
             <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               {PRODUCTS.map((product) => (
                 <li key={product.slug}>
-                  <ProductCard product={product} whatsapp={WHATSAPP} />
+                  <ProductCard product={product} />
                 </li>
               ))}
             </ul>

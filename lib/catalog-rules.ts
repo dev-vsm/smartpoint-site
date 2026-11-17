@@ -64,6 +64,8 @@ export interface SiteProduct {
   /** Imagem de compartilhamento (Open Graph), derivada da capa. */
   share?: { url: string; width: number; height: number }
   priceCents: number
+  /** Estoque, só para limitar a quantidade no carrinho — não aparece na vitrine (quase tudo tem pouco). */
+  stock: number
   sku?: string
   /** Características cadastradas no admin, na ordem (`Cor: Preto`). */
   specs: ProductSpec[]
@@ -73,7 +75,7 @@ export interface SiteProduct {
   /** Id da subcategoria — decide se a variação esgotada vira encomenda. */
   subcategoryId?: string
   highlight: boolean
-  /** Só ordena os mais vendidos; o número nunca aparece na tela. */
+  /** Ordena os mais vendidos e, a partir de 10, vira "+50 vendidos" no card (arredondado para baixo). */
   totalSold: number
   order: number
   warranty?: string
@@ -122,6 +124,51 @@ export function availabilityOf(stock: number, subcategoryId?: string): Availabil
 }
 
 /** Aparece na vitrine quando está ativo no estoque **e** marcado para o site. */
+/**
+ * Só os campos do documento que o site usa, como dados simples. É o que vai para o cache de
+ * dados do Next (limite de 2 MB por item): o documento inteiro traz custo, fornecedor e
+ * datas, e o `SiteProduct` pronto repete URLs longas de foto em cada `srcset`.
+ */
+export function pickRawProduct(id: string, data: Record<string, unknown>): RawProduct {
+  const raw = data as Omit<RawProduct, "id">
+  const site = raw.site
+  return JSON.parse(
+    JSON.stringify({
+      id,
+      name: raw.name,
+      description: raw.description,
+      category: raw.category,
+      categorization: raw.categorization,
+      brand: raw.brand,
+      media: Array.isArray(raw.media)
+        ? raw.media.map((item: Record<string, unknown>) => ({
+            id: item?.id,
+            type: item?.type,
+            path: item?.path,
+            width: item?.width,
+            height: item?.height,
+            alt: item?.alt,
+          }))
+        : undefined,
+      isActive: raw.isActive,
+      price: raw.price,
+      stock: raw.stock,
+      sku: raw.sku,
+      specs: raw.specs,
+      totalSold: raw.totalSold,
+      warranty: raw.warranty,
+      site: site && {
+        published: site.published,
+        highlight: site.highlight,
+        slug: site.slug,
+        seoTitle: site.seoTitle,
+        seoDescription: site.seoDescription,
+        order: site.order,
+      },
+    }),
+  ) as RawProduct
+}
+
 export function isPublished(product: RawProduct): boolean {
   return product.isActive !== false && product.site?.published === true
 }
@@ -179,6 +226,7 @@ export function toSiteProduct(product: RawProduct, bucket?: string): SiteProduct
     cover: productCover(media),
     share: cover ? shareImage(cover, bucket) : undefined,
     priceCents: Number.isFinite(price) && price > 0 ? Math.round(price) : 0,
+    stock: Math.max(0, Math.trunc(Number(product.stock) || 0)),
     ...(sku ? { sku } : {}),
     specs: parseSpecs(product.specs),
     availability: availabilityOf(
@@ -315,4 +363,72 @@ export function catalogHref({
   if (perPage !== CATALOG_PAGE_SIZE) params.set("porPagina", String(perPage))
   if (page > 1) params.set("pagina", String(page))
   return params.size ? `/produtos?${params}` : "/produtos"
+}
+
+/** Até 2 características curtas, sem repetir o nome do produto ("Uchiha Madara" já está no título). */
+const MAX_CHIPS = 2
+const plain = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+
+export function cardChips(specs: readonly ProductSpec[], name: string): string[] {
+  const title = plain(name)
+  const seen = new Set<string>()
+  return specs
+    .map((spec) => spec.value.trim())
+    .filter((value) => {
+      const key = plain(value)
+      if (!key || seen.has(key) || title.includes(key)) return false
+      seen.add(key)
+      return true
+    })
+    .slice(0, MAX_CHIPS)
+}
+
+/** Características que dizem em qual celular o produto serve (capinha, película, carregador). */
+const COMPAT_SPECS = new Set(["modelo", "compatibilidade"])
+
+/** "Galaxy S24", quando o produto tem a característica de modelo/compatibilidade. */
+export function compatibilityOf(product: Pick<SiteProduct, "specs">): string | undefined {
+  return product.specs.find((spec) => COMPAT_SPECS.has(plain(spec.name)))?.value.trim() || undefined
+}
+
+/**
+ * "Compre junto": complementos, não concorrentes — produtos de pronta entrega de **outra**
+ * categoria que servem no **mesmo** modelo (película do S24 para a capinha do S24). Os mais
+ * vendidos primeiro. Sem modelo no produto, não há como saber o que combina: lista vazia.
+ */
+export function pickComplements(
+  product: SiteProduct,
+  catalog: readonly SiteProduct[],
+  limit = 2,
+): SiteProduct[] {
+  const model = compatibilityOf(product)
+  if (!model) return []
+  const key = plain(model)
+  const kind = product.subcategoryId ?? product.category
+  return catalog
+    .filter(
+      (item) =>
+        item.id !== product.id &&
+        item.availability === "in_stock" &&
+        item.stock > 0 &&
+        (item.subcategoryId ?? item.category) !== kind &&
+        plain(compatibilityOf(item) ?? "") === key,
+    )
+    .sort((a, b) => b.totalSold - a.totalSold)
+    .slice(0, limit)
+}
+
+/** Nota do item no carrinho: garantia e compatibilidade, o que tranquiliza na hora de pagar. */
+export function cartNote(
+  product: Pick<SiteProduct, "specs" | "warranty">,
+  storeWarranty?: string,
+): string | undefined {
+  const warranty = product.warranty ?? storeWarranty
+  const model = compatibilityOf(product)
+  return [warranty && `Garantia de ${warranty}`, model].filter(Boolean).join(" · ") || undefined
 }

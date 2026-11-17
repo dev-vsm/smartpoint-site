@@ -1,11 +1,15 @@
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata, Viewport } from "next"
 import { Archivo } from "next/font/google"
+import { CartFloating } from "@/components/cart/cart-floating"
 import { RepairBanner } from "@/components/home/repair-banner"
 import { StoreBanners } from "@/components/home/store-banners"
 import { ConversionTracker } from "@/components/layout/conversion-tracker"
 import { Header } from "@/components/layout/header"
 import { RepairBannerVisibility } from "@/components/layout/repair-banner-visibility"
+import { StoreClockProvider } from "@/components/ui/delivery-promise"
+import { checkoutEnabled } from "@/lib/admin-api"
+import { deliversAnywhere } from "@/lib/delivery"
 import { bannerSlides } from "@/lib/repair-slides"
 import { siteUrl } from "@/lib/seo"
 import { getHomeContent, listNotices } from "@/lib/site-content"
@@ -70,7 +74,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <RepairBannerVisibility>
           <RepairBanner whatsapp={store.whatsapp} slides={bannerSlides(store)} />
         </RepairBannerVisibility>
-        {children}
+        {/* Prazo de entrega/retirada ("Receba hoje") dos cards e da página do produto. Sem a
+            compra online, a entrega é combinada pelo WhatsApp e continua valendo. */}
+        <StoreClockProvider
+          hours={store.hours}
+          delivers={!checkoutEnabled() || deliversAnywhere(store.delivery)}
+        >
+          {children}
+        </StoreClockProvider>
+        {/* Compra online ligada: carrinho flutuante no canto direito. */}
+        {checkoutEnabled() && <CartFloating />}
         <Analytics />
         <ConversionTracker />
       </body>

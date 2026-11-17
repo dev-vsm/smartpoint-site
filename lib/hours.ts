@@ -118,3 +118,102 @@ export function storeNow(date: Date, timeZone = "America/Sao_Paulo") {
     minutes: Number(get("hour")) * 60 + Number(get("minute")),
   }
 }
+
+/** Antecedência do corte da entrega em relação ao fechamento: a entrega sai até 1 h antes. */
+export const DELIVERY_CUTOFF_MINUTES = 60
+
+/**
+ * Quando o cliente recebe um produto de pronta entrega, pelo horário da loja:
+ * - `today`: dentro do dia e antes do corte da entrega (fechamento − 1 h) — entrega e retirada hoje;
+ * - `pickup_today`: passou do corte (ou a loja não entrega) mas a loja ainda abre/está aberta hoje;
+ * - `next`: hoje não dá mais; o próximo dia de funcionamento.
+ * `null` sem horário cadastrado: melhor não prometer nada.
+ */
+export type DeliveryPromise =
+  | { kind: "today"; orderUntil: string; pickupUntil: string }
+  | { kind: "pickup_today"; pickupUntil: string }
+  | { kind: "next"; inDays: number; day: Weekday; opens: string }
+
+function clock(total: number): string {
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`
+}
+
+export function deliveryPromise(
+  hours: HoursSlot[],
+  now: { day: Weekday; minutes: number },
+  { delivers }: { delivers: boolean },
+): DeliveryPromise | null {
+  const slots = hours.flatMap((slot) => {
+    const opens = minutes(slot.opens)
+    const closes = minutes(slot.closes)
+    if (opens === undefined || closes === undefined || closes <= opens) return []
+    return parseDays(slot.days).map((day) => ({ day, opens, closes }))
+  })
+  if (!slots.length) return null
+
+  const today = slots.filter((slot) => slot.day === now.day)
+  const lastClose = Math.max(...today.map((slot) => slot.closes))
+  if (today.length && now.minutes < lastClose) {
+    const cutoff = lastClose - DELIVERY_CUTOFF_MINUTES
+    if (delivers && now.minutes < cutoff) {
+      return { kind: "today", orderUntil: clock(cutoff), pickupUntil: clock(lastClose) }
+    }
+    return { kind: "pickup_today", pickupUntil: clock(lastClose) }
+  }
+
+  for (let inDays = 1; inDays <= 7; inDays++) {
+    const day = ((now.day + inDays) % 7) as Weekday
+    const first = slots.filter((slot) => slot.day === day).sort((a, b) => a.opens - b.opens)[0]
+    if (first) return { kind: "next", inDays, day, opens: clock(first.opens) }
+  }
+  return null
+}
+
+/** "20:00" → "20h"; "19:30" → "19h30". */
+export function shortTime(time: string): string {
+  const [hour, minute] = time.split(":")
+  return `${Number(hour)}h${minute === "00" ? "" : minute}`
+}
+
+/** "amanhã", "segunda"… para o próximo dia de funcionamento. */
+export function dayWord(inDays: number, day: Weekday): string {
+  return inDays === 1 ? "amanhã" : DAY_NAMES[day]
+}
+
+/** Selo curto do card: a promessa mais forte que ainda é verdade. */
+export function promiseBadgeText(promise: DeliveryPromise, delivers: boolean): string {
+  if (promise.kind === "today") return "Receba hoje"
+  if (promise.kind === "pickup_today") return `Retire hoje até ${shortTime(promise.pickupUntil)}`
+  return `${delivers ? "Receba" : "Retire"} ${dayWord(promise.inDays, promise.day)}`
+}
+
+/** Frase da página do produto: o prazo de cada forma de receber. */
+export function promiseDetailText(promise: DeliveryPromise, delivers: boolean): string {
+  const when = promise.kind === "next" ? dayWord(promise.inDays, promise.day) : "hoje"
+  if (promise.kind === "today") {
+    return delivers
+      ? `Peça até ${shortTime(promise.orderUntil)} e receba hoje · ou retire na loja até ${shortTime(promise.pickupUntil)}`
+      : `Retire hoje na loja até ${shortTime(promise.pickupUntil)}`
+  }
+  if (promise.kind === "pickup_today") {
+    return `Retire hoje na loja até ${shortTime(promise.pickupUntil)}${delivers ? " · a entrega sai no próximo dia de funcionamento" : ""}`
+  }
+  return delivers
+    ? `Receba ${when} · ou retire na loja ${when} a partir das ${shortTime(promise.opens)}`
+    : `Retire na loja ${when} a partir das ${shortTime(promise.opens)}`
+}
+
+/** Opção "Retirar na loja" do carrinho: quando dá para retirar. */
+export function pickupOptionText(promise: DeliveryPromise): string {
+  if (promise.kind === "next") {
+    return `Retire ${dayWord(promise.inDays, promise.day)} a partir das ${shortTime(promise.opens)}`
+  }
+  return `Retire hoje até ${shortTime(promise.pickupUntil)}`
+}
+
+/** Opção "Entrega" do carrinho: quando chega, se pagar agora. */
+export function deliveryOptionText(promise: DeliveryPromise): string {
+  if (promise.kind === "today") return `Receba hoje se pagar até ${shortTime(promise.orderUntil)}`
+  if (promise.kind === "next") return `Receba ${dayWord(promise.inDays, promise.day)}`
+  return "Entrega no próximo dia de funcionamento"
+}

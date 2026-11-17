@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/section"
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-dvh items-center">
+    <main className="py-12 sm:py-20">
       <Container className="max-w-xl">
         <p className="display text-6xl text-tag-strong">404</p>
         <h1 className="mt-3 text-2xl">Essa página não existe</h1>

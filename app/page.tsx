@@ -58,7 +58,6 @@ export default async function Home() {
                   <li key={product.id}>
                     <ProductCard
                       product={product}
-                      whatsapp={store.whatsapp}
                       sizes="(min-width: 1024px) 200px, (min-width: 640px) 25vw, 50vw"
                       eager={index < ABOVE_THE_FOLD}
                     />
@@ -77,7 +76,7 @@ export default async function Home() {
               products.length > CATALOG_PAGE_SIZE && (
                 <Link
                   href="/produtos"
-                  className="text-sm font-semibold text-brand-strong hover:underline"
+                  className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-strong hover:underline"
                 >
                   Ver todos ({products.length})
                 </Link>
@@ -94,11 +93,7 @@ export default async function Home() {
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {firstPage.items.map((product, index) => (
                   <li key={product.id}>
-                    <ProductCard
-                      product={product}
-                      whatsapp={store.whatsapp}
-                      eager={index < ABOVE_THE_FOLD}
-                    />
+                    <ProductCard product={product} eager={index < ABOVE_THE_FOLD} />
                   </li>
                 ))}
               </ul>

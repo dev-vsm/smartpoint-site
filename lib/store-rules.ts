@@ -1,3 +1,4 @@
+import { DEFAULT_DELIVERY, type StoreDelivery, toDelivery } from "@/lib/delivery"
 import type { HoursSlot } from "@/lib/hours"
 import { buildStoreMap, type StoreMap } from "@/lib/maps"
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp"
@@ -71,6 +72,8 @@ export interface SiteStore {
   social: SocialLink[]
   hours: HoursSlot[]
   payment: StorePayment
+  /** Retirada e regiões de entrega das compras pelo site (checkout do Mercado Pago). */
+  delivery: StoreDelivery
   /** Fotos da loja (fachada, balcão) — o que prova que ela existe. */
   photos: StorePhoto[]
   /** Garantia padrão da loja; a do produto, quando houver, vale mais. */
@@ -106,6 +109,7 @@ export const FALLBACK_STORE: SiteStore = {
   hours: [],
   payment: { methods: [], maxInstallments: 1, interestFreeInstallments: 1, minInstallmentCents: 0 },
   photos: [],
+  delivery: DEFAULT_DELIVERY,
   brand: {},
 }
 
@@ -208,6 +212,7 @@ export function toSiteStore(data: Doc | undefined): SiteStore {
     hours: toHours(data.hours),
     payment: toPayment(data.payment),
     photos: toPhotos(data.photos),
+    delivery: toDelivery(data.delivery),
     warranty: text(data.warranty) ?? text(data.garantia),
     brand: record(data.brand) as SiteStore["brand"],
   }

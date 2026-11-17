@@ -73,7 +73,7 @@ export async function Footer() {
                 src={store.map.embedUrl}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="mt-2 h-36 w-full max-w-xs rounded-md ring-1 ring-line"
+                className="mt-2 h-40 w-full rounded-md ring-1 ring-line sm:h-36 sm:max-w-xs"
               />
             )}
             {hasAddress && (

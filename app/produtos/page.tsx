@@ -94,11 +94,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
             <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {result.items.map((product, index) => (
                 <li key={product.id}>
-                  <ProductCard
-                    product={product}
-                    whatsapp={store.whatsapp}
-                    eager={index < ABOVE_THE_FOLD}
-                  />
+                  <ProductCard product={product} eager={index < ABOVE_THE_FOLD} />
                 </li>
               ))}
             </ul>

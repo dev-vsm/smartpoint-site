@@ -90,3 +90,45 @@ export function defaultNotices(store: SiteStore): SiteNotice[] {
   ]
   return notices.filter((notice): notice is SiteNotice => Boolean(notice))
 }
+
+/**
+ * Parcela do card: "ou 3x de R$ 19,97 sem juros". Usa as parcelas sem juros da loja,
+ * respeitando a parcela mínima; sem parcelamento sem juros, só "em até 6x" (sem valor, porque
+ * os juros não são da loja). `null` quando o produto não parcela.
+ */
+export type InstallmentOffer =
+  | { count: number; interestFree: true; valueCents: number }
+  | { count: number; interestFree: false }
+
+export function installmentOffer(
+  priceCents: number,
+  payment: StorePayment,
+): InstallmentOffer | null {
+  if (!payment.methods.includes("credit") || payment.maxInstallments < 2) return null
+  const fits = (count: number) =>
+    payment.minInstallmentCents > 0
+      ? Math.min(count, Math.floor(priceCents / payment.minInstallmentCents))
+      : count
+  if (payment.interestFreeInstallments >= 2) {
+    const count = fits(payment.interestFreeInstallments)
+    // Arredonda para cima: a parcela mostrada nunca é menor que a cobrada.
+    if (count >= 2) return { count, interestFree: true, valueCents: Math.ceil(priceCents / count) }
+    return null
+  }
+  const count = fits(payment.maxInstallments)
+  return count >= 2 ? { count, interestFree: false } : null
+}
+
+/**
+ * Selo de prova do card: volume de vendas ("+50 vendidos", arredondado para baixo), a partir
+ * de 10 — abaixo disso "3 vendidos" atrapalha mais do que ajuda. Sem selo de escassez de
+ * propósito: a loja trabalha com estoque baixo em quase tudo, então "Últimas unidades"
+ * apareceria na maioria dos cards e soaria falso.
+ */
+export const SOLD_MIN = 10
+
+export function proofBadge(product: { totalSold: number }): { text: string } | null {
+  if (product.totalSold < SOLD_MIN) return null
+  const step = product.totalSold >= 100 ? 100 : 10
+  return { text: `+${Math.floor(product.totalSold / step) * step} vendidos` }
+}

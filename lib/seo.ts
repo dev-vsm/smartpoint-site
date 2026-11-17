@@ -75,6 +75,17 @@ export function productJsonLd(product: SiteProduct, store: SiteStore) {
     ...(product.media.length ? { image: product.media.map((item) => item.original) } : {}),
     ...(product.brand ? { brand: { "@type": "Brand", name: product.brand } } : {}),
     ...(product.category ? { category: product.category } : {}),
+    ...(product.sku ? { sku: product.sku } : {}),
+    // Características (cor, conector, modelo) como propriedades: o Google entende o que é o produto.
+    ...(product.specs.length
+      ? {
+          additionalProperty: product.specs.map((spec) => ({
+            "@type": "PropertyValue",
+            name: spec.name,
+            value: spec.value,
+          })),
+        }
+      : {}),
     offers: {
       "@type": "Offer",
       price: (product.priceCents / 100).toFixed(2),

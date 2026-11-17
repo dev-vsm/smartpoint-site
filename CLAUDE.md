@@ -34,8 +34,14 @@ pnpm check       # lint + typecheck + testes
 ## Arquitetura
 
 - **Next.js 16 (App Router)** + **Tailwind 4** + **Firebase (só leitura)** + deploy na Vercel.
-- **O site não escreve em lugar nenhum.** Sem rota de API na v1: o catálogo é lido no
-  servidor e todo CTA leva ao WhatsApp.
+- **O site não escreve no Firestore.** O catálogo é lido no servidor. As rotas de API são
+  `POST /api/checkout` e `POST /api/delivery-quote` (prévia do frete) (decisão D15): ela repassa a compra ao **admin**
+  (`/api/site/checkout`, segredo `SITE_CHECKOUT_SECRET`), que cria o pedido, reserva o estoque
+  e gera o link do **Checkout Pro do Mercado Pago**. Preço, estoque e taxa de entrega são
+  sempre conferidos lá; o site só mostra a prévia. Encomenda e esgotado seguem no WhatsApp.
+- **Carrinho no navegador** (`lib/cart-store.ts`, `localStorage`); `/pedido/[id]` é a volta do
+  Mercado Pago e consulta o estado no admin. Sem `ADMIN_API_URL` + `SITE_CHECKOUT_SECRET`, a
+  compra online some e o carrinho manda o pedido pelo WhatsApp.
 - **Leitura via Admin SDK em componentes de servidor**, com ISR (`revalidate`). Credencial
   só em variável de ambiente — nunca `NEXT_PUBLIC_*`, nunca no cliente.
 - Pastas: `app/` (rotas), `components/ui` (base), `components/layout` (cabeçalho, rodapé),
@@ -50,6 +56,9 @@ pnpm check       # lint + typecheck + testes
 | Marca (logo, ícone, og:image, cor) | `settings/store.brand` | URLs no Storage; **nunca** arquivo de logo no repositório |
 | Conteúdo editorial (hero, banners, destaques) | `siteContent/*` | Tela nova no admin; sem serviços |
 | Avisos do cabeçalho (entrega, pagamento, promoção) | `siteContent/notices` | Faixa no topo; `tone: promo` pinta de laranja |
+| Retirada e faixas de frete por km | `settings/store.delivery` | Admin em `/loja/site`. O frete vem sempre do admin (`POST /api/delivery-quote` → Google Maps, rota de carro); `lib/delivery.ts` só lê as faixas |
+| Avaliações da loja (página do produto) | Google Places API (`lib/google-reviews.ts`) | Nota e comentários reais do perfil da loja no Google; `GOOGLE_PLACES_API_KEY` + `GOOGLE_PLACE_ID` (só servidor), cache de 1 dia. Sem elas, a seção some. Nunca avaliação inventada |
+| Pedidos do site | Admin (`/api/site/checkout`) | Nunca gravados pelo site; ver `docs/features/site-checkout.md` no admin |
 
 Nada de endereço, telefone, horário ou logo escritos no código — apenas fallbacks mínimos
 para quando o documento não existir.
@@ -64,6 +73,8 @@ para quando o documento não existir.
 - Componentes de servidor por padrão; `'use client'` só com interação real.
 - Imagens sempre pelo `next/image`, com `sizes` correto; `priority` só no LCP.
 - Acessibilidade: contraste AA, foco visível, `alt` em toda imagem, navegação por teclado.
+- **Checkout:** dinheiro sempre conferido no admin; erro do admin chega como `{ code, error }`
+  e vira texto para o cliente em `checkoutErrorMessage` (`lib/checkout.ts`).
 - Commits convencionais: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`.
 
 ## Orçamento de performance

@@ -8,6 +8,7 @@ import {
   isPublished,
   pickBestSellers,
   pickHighlights,
+  pickRawProduct,
   productSlug,
   slugify,
   sortForShowcase,
@@ -279,5 +280,55 @@ describe("fotos do produto", () => {
     expect(product.media).toEqual([])
     expect(product.cover).toBeUndefined()
     expect(product.share).toBeUndefined()
+  })
+})
+
+describe("pickRawProduct", () => {
+  it("guarda só os campos que o site usa, como dados simples (o cache tem limite de 2 MB)", () => {
+    const picked = pickRawProduct("p1", {
+      name: "Capa",
+      price: 4990,
+      stock: 3,
+      cost: 1500,
+      supplier: "Fornecedor X",
+      updatedAt: new Date("2026-11-16T12:00:00Z"),
+      media: [
+        {
+          id: "m1",
+          type: "image",
+          path: "products/p1/m1.jpg",
+          width: 800,
+          height: 800,
+          size: 9,
+          contentType: "image/jpeg",
+          createdAt: "x",
+          alt: "Frente",
+        },
+      ],
+      site: { published: true, slug: "capa", internal: "não" },
+    })
+    expect(picked).toEqual({
+      id: "p1",
+      name: "Capa",
+      price: 4990,
+      stock: 3,
+      media: [
+        {
+          id: "m1",
+          type: "image",
+          path: "products/p1/m1.jpg",
+          width: 800,
+          height: 800,
+          alt: "Frente",
+        },
+      ],
+      site: { published: true, slug: "capa" },
+    })
+    expect(toSiteProduct(picked, "bucket")).toMatchObject({
+      slug: "capa",
+      priceCents: 4990,
+      stock: 3,
+    })
+    expect(pickRawProduct("p2", {})).toEqual({ id: "p2" })
   })
 })

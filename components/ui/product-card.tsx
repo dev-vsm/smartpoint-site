@@ -1,12 +1,13 @@
 import Link from "next/link"
-import { WhatsAppCta } from "@/components/layout/whatsapp-cta"
-import { AvailabilityBadge, CTA_LABEL } from "@/components/ui/availability"
+import { AvailabilityTag } from "@/components/ui/availability"
+import { DeliveryPromiseBadge } from "@/components/ui/delivery-promise"
+import { Installment, SoldPill } from "@/components/ui/offer-pills"
 import { PriceTag } from "@/components/ui/price-tag"
 import { ProductPhoto } from "@/components/ui/product-photo"
-import type { Availability } from "@/lib/catalog-rules"
-import { productMessage } from "@/lib/messages"
+import { type Availability, cardChips, type ProductSpec } from "@/lib/catalog-rules"
 import type { ProductImage } from "@/lib/product-media"
-import { absolute } from "@/lib/seo"
+import { getStore } from "@/lib/store"
+import { installmentOffer, proofBadge } from "@/lib/trust"
 import { cn } from "@/lib/utils"
 
 /** Cards da primeira linha da grade no desktop: os que aparecem sem rolar. */
@@ -18,23 +19,28 @@ export interface ProductCardData {
   /** Capa do produto (`media[0]`). */
   cover?: ProductImage
   priceCents: number
-  category?: string
   availability: Availability
+  /** Características (`Cor: Preto`, `Conector: USB-C`): viram a linha de compatibilidade. */
+  specs?: ProductSpec[]
+  /** Vendidos: vira "+50 vendidos" a partir de 10. */
+  totalSold?: number
 }
 
 /**
- * Card da vitrine: foto em cima, com o selo de disponibilidade no canto superior
- * direito; no corpo, o preço à direita e o nome; no rodapé, o atalho para o WhatsApp já falando deste produto.
- * O link do card e o do rodapé são irmãos — âncora dentro de âncora não existe.
+ * Card da vitrine: foto em cima; no corpo, o prazo à esquerda ("Receba hoje", para pronta
+ * entrega; "Sob encomenda"/"Esgotado" discretos) e o preço à direita, o nome, a parcela
+ * (cartão + "3x de R$ 19,97" + pílula "sem juros") e, preso ao fim do card, os chips de
+ * características à esquerda e, a partir de 10 vendas, "+50 vendidos" sempre no canto inferior
+ * direito. Sem selo de escassez (ver `proofBadge`). O card inteiro é um link para a página
+ * do produto — sem "Adicionar" nem WhatsApp aqui, de propósito: a compra e a conversa
+ * começam na página do produto, onde estão fotos, descrição e compatibilidade.
  */
-export function ProductCard({
+export async function ProductCard({
   product,
-  whatsapp,
   sizes = "(min-width: 1024px) 22vw, (min-width: 640px) 30vw, 45vw",
   eager = false,
 }: {
   product: ProductCardData
-  whatsapp: string
   /** Largura da foto; muda quando o card não está na grade (ex.: faixa de destaques). */
   sizes?: string
   /**
@@ -43,17 +49,15 @@ export function ProductCard({
    */
   eager?: boolean
 }) {
-  const message = productMessage({
-    name: product.name,
-    priceCents: product.priceCents,
-    url: absolute(`/produtos/${product.slug}`),
-    availability: product.availability,
-  })
   const soldOut = product.availability === "sold_out"
+  const { payment } = await getStore()
+  const installment = soldOut ? null : installmentOffer(product.priceCents, payment)
+  const chips = cardChips(product.specs ?? [], product.name)
+  const proof = proofBadge({ totalSold: product.totalSold ?? 0 })
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-md bg-paper ring-1 ring-line transition-colors hover:ring-brand-strong">
-      <Link href={`/produtos/${product.slug}`} className="group block grow">
+      <Link href={`/produtos/${product.slug}`} className="group flex grow flex-col">
         <div className="relative aspect-square overflow-hidden rounded-t-md bg-paper">
           {product.cover ? (
             <ProductPhoto
@@ -70,17 +74,16 @@ export function ProductCard({
               sem foto
             </span>
           )}
-          <AvailabilityBadge
-            availability={product.availability}
-            className="absolute top-2 right-2"
-          />
         </div>
-        <div className="pt-2 pb-3">
-          <div className="mb-2 flex items-center justify-between gap-2 pl-3">
-            {product.category && (
-              <p className="min-w-0 wrap-break-word text-xs text-brand-strong">
-                {product.category}
-              </p>
+        <div className="flex grow flex-col pt-2 pb-3">
+          <div className="mb-2 flex flex-wrap items-stretch justify-between gap-x-2 gap-y-1">
+            {/* No lugar da categoria: a vantagem que decide o clique, ao lado do preço e com a
+                mesma altura dele (a linha estica os dois); colado à borda esquerda como o preço à direita.
+                No card estreito do celular, o preço desce para a linha de baixo, ainda colado à direita. */}
+            {product.availability === "in_stock" ? (
+              <DeliveryPromiseBadge edge className="whitespace-nowrap" />
+            ) : (
+              <AvailabilityTag availability={product.availability} className="self-center pl-3" />
             )}
             <PriceTag
               cents={product.priceCents}
@@ -89,24 +92,34 @@ export function ProductCard({
               className="ml-auto shrink-0 flex-col items-end whitespace-nowrap sm:flex-row sm:items-baseline"
             />
           </div>
-          <div className="px-3">
+          <div className="flex grow flex-col px-3">
             <p className="mt-0.5 line-clamp-2 text-sm font-semibold group-hover:text-brand-strong group-hover:underline">
               {product.name}
             </p>
+            {installment && <Installment offer={installment} />}
+            {/* Rodapé preso ao fim do card: características à esquerda, selo de prova sempre no
+                canto inferior direito, qualquer que seja o tamanho do nome ou dos chips. */}
+            {(chips.length > 0 || proof) && (
+              <div className="mt-auto flex flex-wrap items-end gap-x-2 gap-y-1 pt-2">
+                <ul
+                  className="flex min-w-24 flex-1 flex-wrap gap-1 overflow-hidden"
+                  aria-label="Características"
+                >
+                  {chips.map((chip) => (
+                    <li
+                      key={chip}
+                      className="max-w-full truncate rounded-sm bg-shelf px-1.5 py-0.5 text-[11px] leading-tight font-medium text-ink-soft ring-1 ring-line"
+                    >
+                      {chip}
+                    </li>
+                  ))}
+                </ul>
+                {proof && <SoldPill text={proof.text} className="ml-auto" />}
+              </div>
+            )}
           </div>
         </div>
       </Link>
-
-      {/* O botão é o rodapé: encosta nas bordas e o card recorta os cantos. */}
-      <WhatsAppCta
-        number={whatsapp}
-        message={message}
-        label={CTA_LABEL[product.availability].short}
-        ariaLabel={`${CTA_LABEL[product.availability].short}: ${product.name}, pelo WhatsApp`}
-        source="card"
-        product={product.slug}
-        className="min-h-10! w-full! rounded-none!"
-      />
     </article>
   )
 }

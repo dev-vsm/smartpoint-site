@@ -114,7 +114,7 @@ pronto para servir de base ao site da assistência.
 
 - [x] `/sobre` — usa `store.about`, com texto padrão enquanto não for cadastrado (sem consertos)
 - [x] `/contato` — endereço, horário, mapa preguiçoso e canais, tudo de `settings/store`
-- [x] `/privacidade` — sem cookie, sem envio, sem armazenamento (é o que o site faz)
+- [x] `/privacidade` — sem cookie de rastreamento; desde a Etapa 10 explica os dados da compra (pedido no admin, carrinho no navegador, pagamento no MP)
 - [x] 404 e boundary de erro com a identidade do site
 
 **Pronto quando:** todo link do cabeçalho e do rodapé leva a uma página pronta. ✅
@@ -178,10 +178,34 @@ Peso ✅ · Lighthouse pendente (precisa de navegador).
 
 ---
 
+## Etapa 10 — Checkout com Mercado Pago (D15, 16/11/2026)
+
+- [x] Carrinho no navegador: botão no produto com pronta entrega, atalho no cabeçalho, `/carrinho`
+- [x] Retirada grátis ou entrega com frete por faixa de km (rota de carro no Google Maps, calculada no admin) — faixas em `/loja/site`, com simulador
+- [x] `POST /api/checkout` → admin `POST /api/site/checkout` (segredo) → link do Checkout Pro
+- [x] `/pedido/[id]`: volta do MP, atualiza sozinha até o pagamento, esvazia o carrinho quando pago
+- [x] Admin: pedido `source: 'site'`, reserva de estoque, prazo de 30 min, aviso `site_order` quando pago
+- [ ] Configurar `ADMIN_API_URL` e `SITE_CHECKOUT_SECRET` na Vercel; `SITE_CHECKOUT_SECRET` e `SITE_PUBLIC_URL` no admin
+- [ ] `GOOGLE_MAPS_API_KEY` no admin (Geocoding API + Routes API, chave restrita e com cota diária)
+- [ ] Cadastrar as faixas de entrega em `/loja/site` e conferir com o simulador
+- [ ] Testar ponta a ponta com as credenciais de teste do Mercado Pago (Pix e cartão)
+- [ ] (Opcional) Agendador chamando `POST /api/site/checkout/expire` no admin
+- [x] Segurança e LGPD: Next 16.4.6, cabeçalhos de segurança, `/privacidade` completa, prazo de guarda de 5 anos com anonimização no admin, log sem endereço
+- [ ] Firewall da Vercel: limite de requisições em `/api/checkout` e `/api/delivery-quote`
+- [x] Página do produto para conversão: frete calculado na página, parcela, "Receba hoje", "+N vendidos", compatibilidade ("Não sabe o modelo?"), "Compre junto" (mesmo modelo, outra categoria), galeria com arrastar/zoom/contador, loja física, características em tabela e nos dados estruturados, eventos do funil
+- [x] Carrinho que passa confiança: prazo de entrega/retirada nas opções, "Pagamento seguro pelo Mercado Pago" (empresa de pagamentos do Mercado Livre; a loja não vê o cartão), formas de pagamento, "Depois de pagar", loja física com CNPJ e nota do Google, ajuda pelo WhatsApp antes de pagar, etapas, total fixo no celular, garantia/compatibilidade por item, CEP do frete reaproveitado
+- [ ] Avaliações do Google na página do produto: `GOOGLE_PLACES_API_KEY` (Places API) e `GOOGLE_PLACE_ID` na Vercel
+- [ ] Revisar modelo/compatibilidade dos produtos (mesmo nome para capinha e película do mesmo celular) para o "Compre junto" aparecer
+- [ ] Agendador mensal chamando `POST /api/site/checkout/retention` no admin; publicar o índice novo (`pnpm firebase:indexes`)
+
+**Pronto quando:** uma compra paga no site vira pedido concluído no admin, com estoque baixado e aviso ao operador.
+
+---
+
 ## Fase 2 (depois do lançamento)
 
 - [ ] Consulta pública do status da OS
 - [ ] Persistência dos orçamentos como lead no admin (hoje o histórico é a conversa)
 - [ ] FAQ e blog (SEO de cauda longa)
-- [ ] Checkout online com MercadoPago
+- [x] Checkout online com MercadoPago (Etapa 10)
 - [ ] Avaliações de clientes

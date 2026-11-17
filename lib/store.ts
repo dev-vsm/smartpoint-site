@@ -21,5 +21,5 @@ async function readStore(): Promise<SiteStore> {
  */
 export const getStore = cache(
   // Versão na chave: muda junto com o formato de `SiteStore` (ver `lib/catalog.ts`).
-  unstable_cache(readStore, ["store:settings:v2"], { revalidate: 300, tags: ["store"] }),
+  unstable_cache(readStore, ["store:settings:v3"], { revalidate: 300, tags: ["store"] }),
 )

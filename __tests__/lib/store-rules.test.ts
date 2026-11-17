@@ -45,6 +45,14 @@ const doc = {
 }
 
 describe("toSiteStore", () => {
+  it("lê retirada e faixas de entrega (padrão: só retirada)", () => {
+    expect(toSiteStore({}).delivery).toEqual({ pickup: true, ranges: [] })
+    expect(
+      toSiteStore({ delivery: { pickup: false, ranges: [{ id: "a", upToKm: 6, fee: 800 }] } })
+        .delivery,
+    ).toEqual({ pickup: false, ranges: [{ upToKm: 6, fee: 800 }] })
+  })
+
   it("sem documento, usa o mínimo", () => {
     expect(toSiteStore(undefined)).toBe(FALLBACK_STORE)
   })

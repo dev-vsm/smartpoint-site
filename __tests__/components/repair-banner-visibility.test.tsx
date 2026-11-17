@@ -16,7 +16,13 @@ describe("visibilidade do banner de assistência", () => {
     )
     expect(screen.queryByText("Assistência")).not.toBeNull()
   })
-  it.each(["/produtos/capinha", "/produtos/capinha/"])("não aparece em %s", (pathname) => {
+  it.each([
+    "/produtos/capinha",
+    "/produtos/capinha/",
+    "/carrinho",
+    "/carrinho/",
+    "/pedido/abcdefghij0123456789",
+  ])("não aparece em %s", (pathname) => {
     route.pathname = pathname
     render(
       <RepairBannerVisibility>

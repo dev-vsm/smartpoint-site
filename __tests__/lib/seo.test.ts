@@ -15,6 +15,7 @@ const store: SiteStore = {
   ],
   payment: { methods: [], maxInstallments: 1, interestFreeInstallments: 1, minInstallmentCents: 0 },
   photos: [],
+  delivery: { pickup: true, ranges: [] },
   brand: {},
 }
 
@@ -59,6 +60,7 @@ describe("dados estruturados", () => {
       name: "Capa",
       media: [],
       priceCents: 7990,
+      stock: 0,
       specs: [],
       availability: "sold_out" as const,
       highlight: false,

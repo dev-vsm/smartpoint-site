@@ -43,7 +43,7 @@ site próprio, com o SEO e a conversa de venda dela.
 
 ### Fora da v1 (não-objetivos)
 - **Consertos e orçamento de reparo** — saíram para um site separado (D14).
-- Carrinho, checkout e pagamento online.
+- ~~Carrinho, checkout e pagamento online.~~ Entrou em 16/11/2026 (D15).
 - Consulta pública do status da OS.
 - Blog e FAQ (previstos para a v2, já com o SEO preparado).
 - Login de cliente, lista de desejos, avaliações.
@@ -66,6 +66,7 @@ site próprio, com o SEO e a conversa de venda dela.
 | D9 | Identidade visual | **Nova, a partir de referências** | O site fala com o cliente final, não com o operador do admin | Reaproveitar a identidade do admin |
 | D10 | Analytics | **Vercel Analytics** | Uma linha de código, sem cookies e sem banner de consentimento | GA4 e Meta Pixel (entram se houver campanha paga) |
 | D11 | Deploy | **Vercel** + domínio próprio | Padrão do ecossistema Next; preview por branch | — |
+| D15 | Checkout online (16/11/2026) | **Carrinho + Checkout Pro do Mercado Pago, pedido criado pelo admin** | O admin já tem o checkout v2 (pedido, reserva de estoque, link do MP, webhook, métricas): o site chama `POST /api/site/checkout` do admin com um segredo e redireciona para o MP. Uma regra só de pedido e estoque; o frete sai da distância da rota de carro da loja ao endereço (Google Maps, no admin) e das faixas de km de `settings/store.delivery`; sem frete calculado, a entrega não fecha online | Site gravando direto no Firestore (duplicaria as regras de pedido), Checkout Bricks embutido (SDK pesado no site) |
 | D14 | Consertos | **Site separado** | Público, vocabulário e SEO diferentes: quem procura "troca de tela" não é quem procura "capinha iPhone 15". Cada site converte na sua linguagem e a vitrine fica de um assunto só | Manter serviços aqui (dilui o foco da vitrine e do domínio `capinhasudi.com.br`) |
 
 > **Consequência de D14:** saíram do repositório as rotas `/servicos` e
@@ -313,18 +314,28 @@ O que já está definido:
 
 - Service account apenas em variável de ambiente do servidor; nunca no cliente nem no git.
 - Nenhuma escrita pública no Firestore; regras de segurança permanecem como estão.
-- O site não recebe nada: sem formulário, sem route handler, sem superfície de abuso
+- Antes de D15 o site não recebia nada. Agora `POST /api/checkout` recebe a compra e só a repassa ao admin, que valida tudo; a rota não grava nada
   (sem spam, sem rate limit a manter).
+- `POST /api/delivery-quote` é pública e cada endereço novo custa uma consulta ao Google Maps (no
+  admin, com cache de 90 dias). Proteção: só chega ao Google endereço com CEP de Uberlândia, rua e
+  número; a chave do Google fica restrita à Geocoding e à Routes API, com cota diária no Google Cloud.
 - JSON-LD escapa `<` como `\u003c`: texto vindo do banco não pode fechar o `<script>`.
+- Cabeçalhos de segurança em `next.config.ts` (`securityHeaders`, testados): CSP só com o que o site
+  usa (site, Firebase Storage, ViaCEP, iframe do Google Maps; `'unsafe-inline'` porque as páginas são
+  estáticas, sem nonce), `frame-ancestors 'none'`/`X-Frame-Options: DENY`, `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy`; sem `X-Powered-By`. HSTS vem da Vercel.
+  **Origem nova (script, imagem, iframe, API) exige mudar a CSP.**
+- Limite de requisições nas rotas públicas que custam (pedido reserva estoque; prévia do frete consulta
+  o Google): regra no Firewall da Vercel, não no código.
 - Sem cookies de rastreamento na v1 (Vercel Analytics não usa) → sem banner de consentimento.
-- Política de privacidade simples no rodapé: o site não coleta nem envia dado nenhum.
+- Política de privacidade simples no rodapé. Política em `/privacidade` (LGPD art. 9º: controlador, dados, bases legais, compartilhamento e transferência internacional, prazo de 5 anos, direitos e canal). Desde D15 o site envia ao admin os dados da compra (nome, WhatsApp, e-mail, endereço), descritos em `/privacidade`; o endereço de entrega vai ao Google Maps só para medir a distância (o cache do admin guarda o hash, não o texto).
 
 ## 12. Operação
 
 | Item | Definição |
 |---|---|
 | Ambientes | `production` → `capinhasudi.com.br` (Firebase `acesso-rpido`) · `preview` por branch (Firebase `smartpoint-admin-staging`) |
-| Variáveis | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_WHATSAPP` |
+| Variáveis | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_WHATSAPP`; checkout (D15): `ADMIN_API_URL` (URL do admin) e `SITE_CHECKOUT_SECRET` (mesmo valor no admin); avaliações do Google na página do produto (opcional): `GOOGLE_PLACES_API_KEY` (Places API) e `GOOGLE_PLACE_ID` |
 | Gerenciador | pnpm |
 | Qualidade | Biome (lint/format) + `tsc --noEmit` + Vitest nos utilitários |
 | CI | GitHub Actions rodando lint, typecheck, testes e build a cada PR |

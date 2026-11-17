@@ -3,3 +3,7 @@ allowBuilds:
   protobufjs: true
   sharp: false
   unrs-resolver: false
+# Correções de segurança em dependências indiretas (pnpm audit), compatíveis com a faixa original.
+overrides:
+  source-map-js: ^1.2.2
+  fast-xml-parser: ^5.12.0
